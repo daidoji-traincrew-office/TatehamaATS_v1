@@ -1,24 +1,28 @@
 namespace TatehamaATS_v1.Network
 {
     using System.Runtime.CompilerServices;
+    using Microsoft.AspNetCore.Connections;
+
     using Microsoft.AspNetCore.SignalR.Client;
 
     public class Network
     {
+        public static HubConnection connection;
         public static async Task Connect()
         {
-            var client = new HubConnectionBuilder()
+            connection = new HubConnectionBuilder()
                 .WithUrl("http://localhost:5154/hub/train")
                 .WithAutomaticReconnect()
                 .Build();
-            client.On<String, String>("RecieveMessage", (user, message) =>
+
+            connection.On<String, String>("RecieveMessage", (user, message) =>
             {
                 Console.WriteLine("Hello");
             });
 
             try
             {
-                await client.StartAsync();
+                await connection.StartAsync();
                 Console.WriteLine("Connected");
             }
             catch (Exception ex)
@@ -27,15 +31,15 @@ namespace TatehamaATS_v1.Network
             }
             finally
             {
-                await client.StopAsync();
-                await client.DisposeAsync();
+                await connection.StopAsync();
+                await connection.DisposeAsync();
                 Console.WriteLine("Cpnnection Closed");
             }
         }
 
-        public async Task SendData_to_Server()
+        public async Task SendData_to_Server(DataFromServer sendData)
         {
-            throw new NotImplementedException();
+            await connection.SendAsync("SendData_ATS", sendData); 
         }
     }
 }
