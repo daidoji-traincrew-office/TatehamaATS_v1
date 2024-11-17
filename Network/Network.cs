@@ -13,7 +13,7 @@ namespace TatehamaATS_v1.Network
     {
         public static HubConnection connection;
         /// <summary>
-        /// ŒÌá”­¶
+        /// æ•…éšœç™ºç”Ÿ
         /// </summary>
         internal event Action<ATSCommonException> AddExceptionAction;
 
@@ -23,12 +23,12 @@ namespace TatehamaATS_v1.Network
         }
 
         /// <summary>
-        /// WebSocketÚ‘±s
+        /// WebSocketæ¥ç¶šè©¦è¡Œ
         /// </summary>
         /// <returns></returns>
         internal async Task TryConnect()
         {
-            //Todo:’ÊM‚Å‚«‚Ä‚È‚¢–³ŒÀ‚ÉŒJ‚è•Ô‚·‚æ‚¤‚É‚µ‚½‚¢
+            //Todo:é€šä¿¡ã§ãã¦ãªã„æ™‚ç„¡é™ã«ç¹°ã‚Šè¿”ã™ã‚ˆã†ã«ã—ãŸã„
             while (true)
             {
                 try
@@ -41,7 +41,7 @@ namespace TatehamaATS_v1.Network
                 }
                 catch (Exception ex)
                 {
-                    var e = new SocketException(3, "’ÊM•”‚È‚ñ‚©‚ ‚Á‚½", ex);
+                    var e = new SocketException(3, "é€šä¿¡éƒ¨ãªã‚“ã‹ã‚ã£ãŸ", ex);
                     AddExceptionAction.Invoke(e);
                 }
                 break;
@@ -67,7 +67,7 @@ namespace TatehamaATS_v1.Network
             }
             catch (Exception ex)
             {
-                throw new SocketConnectException(3, "’ÊM•”Ú‘±‚É‚È‚ñ‚©‚ ‚Á‚½", ex);
+                throw new SocketConnectException(3, "é€šä¿¡éƒ¨æ¥ç¶šæ™‚ã«ãªã‚“ã‹ã‚ã£ãŸ", ex);
             }
             finally
             {
