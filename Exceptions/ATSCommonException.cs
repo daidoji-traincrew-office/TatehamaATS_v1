@@ -12,7 +12,9 @@ namespace TatehamaATS_v1.Exceptions
         /// <summary>列番等再設定</summary>
         RetsubanReset,
         /// <summary>停車検知・TC接続リセット</summary>
-        StopDetection_ConnectionReset,
+        StopDetection_RelayReset,
+        /// <summary>停車検知・信号接続リセット</summary>
+        StopDetection_NetworkReset,
         /// <summary>停車検知</summary>
         StopDetection,
         /// <summary>停車検知・マスコン非常</summary>

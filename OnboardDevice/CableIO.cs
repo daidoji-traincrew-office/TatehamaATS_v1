@@ -51,6 +51,16 @@ namespace TatehamaATS_v1.OnboardDevice
         /// </summary>
         internal event Action<bool> isATSBrakeApplyChenge;
 
+        /// <summary>
+        /// ATS正常変化
+        /// </summary>
+        internal event Action<bool> isTransferChenge;
+
+        /// <summary>
+        /// ATS動作変化
+        /// </summary>
+        internal event Action<bool> isNetworkChenge;
+
         internal CableIO()
         {
             InspectionRecord = new InspectionRecord();
@@ -63,11 +73,12 @@ namespace TatehamaATS_v1.OnboardDevice
             Relay.ConnectionStatusChanged += RelayStatesChenged;
             Network = new Network();
             Network.AddExceptionAction += AddException;
+            Network.ConnectionStatusChanged += NetworkStatesChenged;
             Network.Connect();
         }
 
         /// <summary>
-        /// TC状態変更司令線
+        /// TC状態変更指令線
         /// </summary>
         /// <param name="TcData"></param>
         private void RelayUpdatad(TrainCrewStateData TcData)
@@ -78,32 +89,59 @@ namespace TatehamaATS_v1.OnboardDevice
         }
 
         /// <summary>
-        /// 故障状況変更司令線
+        /// 故障状況変更指令線
         /// </summary>
         /// <param name="exceptionCodes"></param>
         private void ExceptionCodesChenge(List<string> exceptionCodes)
         {
             isATSReadyChenge?.Invoke(exceptionCodes.Count == 0);
             ControlLED.ExceptionCodes = exceptionCodes;
+            isTransferChenge?.Invoke(ContainsPartialMatch(exceptionCodes, "3D"));
+            isNetworkChenge?.Invoke(ContainsPartialMatch(exceptionCodes, "3E"));
+
         }
 
         /// <summary>
-        /// TC接続状態変化
+        /// List内の文字列に対し、一部一致で検索を行う
+        /// </summary>
+        /// <param name="list">検索対象のリスト</param>
+        /// <param name="keyword">検索する文字列</param>
+        /// <returns>存在する場合はtrue、存在しない場合はfalse</returns>
+        static bool ContainsPartialMatch(List<string> list, string keyword)
+        {
+            foreach (string item in list)
+            {
+                if (item.Contains(keyword))
+                {
+                    return true; // 一部一致する文字列が見つかった場合
+                }
+            }
+            return false; // 一部一致する文字列がなかった場合
+        }
+
+
+        /// <summary>
+        /// TC接続状態変化指令線
         /// </summary>
         /// <param name="connectionState"></param>
         private void RelayStatesChenged(ConnectionState connectionState)
         {
-            if (connectionState == ConnectionState.Connected)
-            {
-                InspectionRecord.RelayReset = true;
-
-            }
-            else
-            {
-
-            }
+            InspectionRecord.RelayState = connectionState == ConnectionState.Connected;
         }
 
+        /// <summary>
+        /// 信号接続状態変化指令線
+        /// </summary>
+        /// <param name="connectionState"></param>
+        private void NetworkStatesChenged(bool connectionState)
+        {
+            InspectionRecord.RelayState = connectionState;
+        }
+
+        /// <summary>
+        /// 継電部非常状態変化指令線
+        /// </summary>
+        /// <param name="brake"></param>
         private void RelayEmBrakeStateChenge(bool brake)
         {
             RelayEmBrakeState = brake;
@@ -111,7 +149,7 @@ namespace TatehamaATS_v1.OnboardDevice
         }
 
         /// <summary>
-        /// LEDWin表示指示
+        /// LEDWin表示指示指令線
         /// </summary>
         internal void LEDWinChenge()
         {
@@ -119,18 +157,20 @@ namespace TatehamaATS_v1.OnboardDevice
             {
                 ControlLED.LEDHide();
                 Relay.EMSet(new EmergencyLightData() { Name = "浜園2号踏切", State = true });
-                Relay.SignalSet(new SignalData() { Name = "江ノ原検車区下り場内5LE", phase = Phase.R });
+                Relay.SignalSet(new SignalData() { Name = "大道寺入換32L", phase = Phase.R });
+                Relay.SignalSet(new SignalData() { Name = "大道寺下り出発5L", phase = Phase.R });
             }
             else
             {
                 ControlLED.LEDShow();
                 Relay.EMSet(new EmergencyLightData() { Name = "浜園2号踏切", State = false });
-                Relay.SignalSet(new SignalData() { Name = "江ノ原検車区下り場内5LE", phase = Phase.None });
+                Relay.SignalSet(new SignalData() { Name = "大道寺入換32L", phase = Phase.G });
+                Relay.SignalSet(new SignalData() { Name = "大道寺下り出発5L", phase = Phase.None });
             }
         }
 
         /// <summary>
-        /// 継電部
+        /// 継電部動作開始指令線
         /// </summary>
         public async void StartRelay()
         {
@@ -140,7 +180,7 @@ namespace TatehamaATS_v1.OnboardDevice
         }
 
         /// <summary>
-        /// 故障発生時に検査記録部へ送信
+        /// 故障発生送信指令線
         /// </summary>
         /// <param name="exception"></param>
         internal void AddException(ATSCommonException exception)
@@ -150,7 +190,7 @@ namespace TatehamaATS_v1.OnboardDevice
         }
 
         /// <summary>
-        /// サーバーからデータきた
+        /// 信号制御情報指令線
         /// </summary>
         /// <param name="dataFromServer"></param>
         internal void ServerDataUpdate(DataFromServer dataFromServer)
@@ -163,9 +203,12 @@ namespace TatehamaATS_v1.OnboardDevice
             }
         }
 
-        internal void ServerDisconnect()
+        /// <summary>
+        /// ATS電源切指令線
+        /// </summary>
+        internal void ATSOffing()
         {
-            //Todo:切断処理
+            Network.Close();
         }
     }
 }

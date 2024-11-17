@@ -31,7 +31,7 @@
         }
         public override ResetConditions ResetCondition()
         {
-            return ResetConditions.StopDetection_ConnectionReset;
+            return ResetConditions.StopDetection_RelayReset;
         }
         public override OutputBrake ToBrake()
         {

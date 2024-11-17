@@ -13,44 +13,26 @@ namespace TatehamaATS_v1.Network
     {
         public static HubConnection connection;
         public static bool connected = false;
+
         /// <summary>
         /// 故障発生
         /// </summary>
         internal event Action<ATSCommonException> AddExceptionAction;
 
+        /// <summary>
+        /// 接続状態変化
+        /// </summary>
+        internal event Action<bool> ConnectionStatusChanged;
+
         public Network()
         {
-
         }
-
-        /// <summary>
-        /// WebSocket接続試行
-        /// </summary>
-        /// <returns></returns>
-        // internal async Task TryConnect()
-        // {
-        //     //Todo:通信できてない時無限に繰り返すようにしたい
-        //     while (true)
-        //     {
-        //         try
-        //         {
-        //             await Connect();
-        //         }
-        //         catch (ATSCommonException ex)
-        //         {
-        //             AddExceptionAction.Invoke(ex);
-        //         }
-        //         catch (Exception ex)
-        //         {
-        //             var e = new SocketException(3, "通信部なんかあった", ex);
-        //             AddExceptionAction.Invoke(e);
-        //         }
-        //         break;
-        //     }
-        // }
 
         public async Task Connect()
         {
+            AddExceptionAction?.Invoke(new SocketConnectException(3, "通信部接続失敗"));
+            ConnectionStatusChanged?.Invoke(connected);
+
             connection = new HubConnectionBuilder()
                 .WithUrl("http://localhost:5154/hub/train")
                 .WithAutomaticReconnect()
@@ -68,25 +50,28 @@ namespace TatehamaATS_v1.Network
                     await connection.StartAsync();
                     Console.WriteLine("Connected");
                     connected = true;
+                    ConnectionStatusChanged?.Invoke(connected);
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine("connection Error!!");
-                    // throw new SocketConnectException(3, "通信部接続時になんかあった", ex);
-                    await Task.Delay(3000);
+                    var e = new SocketConnectException(3, "通信部接続失敗", ex);
+                    AddExceptionAction.Invoke(e);
                 }
             }
 
             connection.Reconnecting += exception =>
             {
                 connected = false;
+                ConnectionStatusChanged?.Invoke(connected);
                 Console.WriteLine("reconnecting");
                 return Task.CompletedTask;
             };
 
-            connection.Reconnected +=  exeption =>
+            connection.Reconnected += exeption =>
             {
                 connected = true;
+                ConnectionStatusChanged?.Invoke(connected);
                 Console.WriteLine("Connected");
                 return Task.CompletedTask;
             };
