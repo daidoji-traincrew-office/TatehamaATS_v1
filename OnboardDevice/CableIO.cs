@@ -63,7 +63,7 @@ namespace TatehamaATS_v1.OnboardDevice
             Relay.ConnectionStatusChanged += RelayStatesChenged;
             Network = new Network();
             Network.AddExceptionAction += AddException;
-            Network.TryConnect();
+            Network.Connect();
         }
 
         /// <summary>
