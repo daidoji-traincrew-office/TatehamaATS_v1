@@ -26,29 +26,29 @@ namespace TatehamaATS_v1.Network
         /// WebSocket接続試行
         /// </summary>
         /// <returns></returns>
-        internal async Task TryConnect()
-        {
-            //Todo:通信できてない時無限に繰り返すようにしたい
-            while (true)
-            {
-                try
-                {
-                    await Connect();
-                }
-                catch (ATSCommonException ex)
-                {
-                    AddExceptionAction.Invoke(ex);
-                }
-                catch (Exception ex)
-                {
-                    var e = new SocketException(3, "通信部なんかあった", ex);
-                    AddExceptionAction.Invoke(e);
-                }
-                break;
-            }
-        }
+        // internal async Task TryConnect()
+        // {
+        //     //Todo:通信できてない時無限に繰り返すようにしたい
+        //     while (true)
+        //     {
+        //         try
+        //         {
+        //             await Connect();
+        //         }
+        //         catch (ATSCommonException ex)
+        //         {
+        //             AddExceptionAction.Invoke(ex);
+        //         }
+        //         catch (Exception ex)
+        //         {
+        //             var e = new SocketException(3, "通信部なんかあった", ex);
+        //             AddExceptionAction.Invoke(e);
+        //         }
+        //         break;
+        //     }
+        // }
 
-        private async Task Connect()
+        public async Task Connect()
         {
             connection = new HubConnectionBuilder()
                 .WithUrl("http://localhost:5154/hub/train")
@@ -60,26 +60,40 @@ namespace TatehamaATS_v1.Network
                 throw new NotImplementedException();
             });
 
-            try
+            bool connected = false;
+            while (!connected)
             {
-                await connection.StartAsync();
-                Console.WriteLine("Connected");
+                try
+                {
+                    await connection.StartAsync();
+                    Console.WriteLine("Connected");
+                    connected = true;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("connection Error!!");
+                    // throw new SocketConnectException(3, "通信部接続時になんかあった", ex);
+                    await Task.Delay(3000);
+                }
             }
-            catch (Exception ex)
+
+            connection.Reconnecting += exception =>
             {
-                throw new SocketConnectException(3, "通信部接続時になんかあった", ex);
-            }
-            finally
-            {
-                await connection.StopAsync();
-                await connection.DisposeAsync();
-                Console.WriteLine("Cpnnection Closed");
-            }
+                Console.WriteLine("再接続中");
+                return Task.CompletedTask;
+            };
+            await Task.Delay(Timeout.Infinite);
         }
 
         public async Task SendData_to_Server(DataToServer sendData)
         {
             await connection.SendAsync("SendData_ATS", sendData);
+        }
+
+        public async Task Close()
+        {
+            await connection.StopAsync();
+            await connection.DisposeAsync();
         }
     }
 }
