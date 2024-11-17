@@ -12,6 +12,7 @@ namespace TatehamaATS_v1.Network
     public class Network
     {
         public static HubConnection connection;
+        public static bool connected = false;
         /// <summary>
         /// 故障発生
         /// </summary>
@@ -60,7 +61,6 @@ namespace TatehamaATS_v1.Network
                 throw new NotImplementedException();
             });
 
-            bool connected = false;
             while (!connected)
             {
                 try
