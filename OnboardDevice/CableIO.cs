@@ -2,6 +2,7 @@
 
 namespace TatehamaATS_v1.OnboardDevice
 {
+    using TatehamaATS_v1.Network;
     public class CableIO
     {
         /// <summary>
@@ -19,12 +20,15 @@ namespace TatehamaATS_v1.OnboardDevice
         /// </summary>
         private ControlLED ControlLED = new ControlLED();
 
+        /// <summary>
+        /// 通信部
+        /// </summary>
+        Network Network;
 
         /// <summary>
         /// ゲーム内時間
         /// </summary>
         static TimeSpan TC_Time;
-
 
         /// <summary>
         /// 検査記録部非常線
@@ -56,6 +60,9 @@ namespace TatehamaATS_v1.OnboardDevice
             Relay.AddExceptionAction += AddException;
             Relay.TrainCrewDataUpdated += RelayUpdatad;
             Relay.ConnectionStatusChanged += RelayStatesChenged;
+            Network = new Network();
+            Network.AddExceptionAction += AddException;
+            Network.TryConnect();
         }
 
         /// <summary>
