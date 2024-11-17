@@ -2,6 +2,7 @@
 
 namespace TatehamaATS_v1.OnboardDevice
 {
+    using System.Diagnostics;
     using TatehamaATS_v1.Network;
     public class CableIO
     {
@@ -162,7 +163,11 @@ namespace TatehamaATS_v1.OnboardDevice
             {
                 Relay.EMSet(item);
             }
+        }
 
+        internal void ServerDisconnect()
+        {
+            //Todo:切断処理
         }
     }
 }
