@@ -32,13 +32,41 @@ namespace TatehamaATS_v1
             this.FromTC = fromTC;
         }
 
-        /// <summary>
-        /// 表示内容を変更する
-        /// </summary>
-        public void SetLED(string L1, string L2)
+        public ATSDisplayData(string L1, string L2, AtsState L3, bool fromTC = false)
         {
             this.L1 = L1;
             this.L2 = L2;
+            this.L3 = DecodeAtsState(L3);
+            this.FromTC = fromTC;
+        }
+
+        /// <summary>
+        /// AtsStateのビットフラグをデコードして、状態名のリストを返す
+        /// </summary>
+        /// <param name="state">ビット演算されたAtsState値</param>
+        /// <returns>状態名のリスト</returns>
+        static List<string> DecodeAtsState(AtsState state)
+        {
+            List<string> result = new List<string>();
+            foreach (AtsState value in Enum.GetValues(typeof(AtsState)))
+            {
+                // ビットが立っているか確認
+                if (state.HasFlag(value))
+                {
+                    result.Add(value.ToString());
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 表示内容を変更する
+        /// </summary>
+        public void SetLED(string L1, string L2, AtsState L3)
+        {
+            this.L1 = L1;
+            this.L2 = L2;
+            this.L3 = DecodeAtsState(L3);
         }
 
         /// <summary>
