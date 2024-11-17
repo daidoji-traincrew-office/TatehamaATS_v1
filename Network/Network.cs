@@ -15,9 +15,9 @@ namespace TatehamaATS_v1.Network
                 .WithAutomaticReconnect()
                 .Build();
 
-            connection.On<String, String>("RecieveMessage", (user, message) =>
+            connection.On<DataFromServer>("ReceiveData_ATS", DataFromServer =>
             {
-                Console.WriteLine("Hello");
+                throw new NotImplementedException();
             });
 
             try
@@ -37,7 +37,7 @@ namespace TatehamaATS_v1.Network
             }
         }
 
-        public async Task SendData_to_Server(DataFromServer sendData)
+        public async Task SendData_to_Server(DataToServer sendData)
         {
             await connection.SendAsync("SendData_ATS", sendData); 
         }
