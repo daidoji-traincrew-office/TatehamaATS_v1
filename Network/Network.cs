@@ -20,11 +20,6 @@ namespace TatehamaATS_v1.Network
             {
                 await client.StartAsync();
                 Console.WriteLine("Connected");
-                while (true)
-                {
-                    var message = Console.ReadLine();
-                    await client.InvokeAsync("SendMessage", "arai", message);
-                }
             }
             catch (Exception ex)
             {
@@ -36,6 +31,11 @@ namespace TatehamaATS_v1.Network
                 await client.DisposeAsync();
                 Console.WriteLine("Cpnnection Closed");
             }
+        }
+
+        public async Task SendData_to_Server()
+        {
+            throw new NotImplementedException();
         }
     }
 }
