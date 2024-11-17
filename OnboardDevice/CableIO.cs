@@ -62,11 +62,10 @@ namespace TatehamaATS_v1.OnboardDevice
         /// TC状態変更司令線
         /// </summary>
         /// <param name="TcData"></param>
-        private void RelayUpdatad(DataFromTrainCrew TcData)
+        private void RelayUpdatad(TrainCrewStateData TcData)
         {
             InspectionRecord.RelayUpdate(TcData);
-            ControlLED.TC_ATSDisplayData.SetLED(TcData.myTrainData.ATS_Class, TcData.myTrainData.ATS_Speed);
-            ControlLED.TC_ATSDisplayData.AddState(TcData.myTrainData.ATS_State);
+            ControlLED.TC_ATSDisplayData.SetLED(TcData.myTrainData.ATS_Class, TcData.myTrainData.ATS_Speed, TcData.myTrainData.ATS_State);
             isKyokanChenge.Invoke(TcData.driveMode == DriveMode.Normal && (TcData.gameScreen == GameScreen.MainGame || TcData.gameScreen == GameScreen.MainGame_Pause || TcData.gameScreen == GameScreen.MainGame_Loading));
         }
 
@@ -90,9 +89,10 @@ namespace TatehamaATS_v1.OnboardDevice
             {
                 InspectionRecord.RelayReset = true;
 
-                //特発確認
-                Relay.SendSingleCommand("SetEmergencyLight", new string[] { "新井川2号踏切", "true" });
-                Relay.SendSingleCommand("SetSignalPhase", new string[] { "新野崎下り出発3L", "R" });
+                //特発確認                                 
+                Relay.EMSet(new EmergencyLightData() { Name = "浜園2号踏切", State = true });
+                Relay.EMSet(new EmergencyLightData() { Name = "浜園2号踏切", State = false });
+                Relay.SignalSet(new SignalData() { Name = "津崎下り出発3L", phase = Phase.None });
             }
             else
             {
@@ -114,10 +114,12 @@ namespace TatehamaATS_v1.OnboardDevice
             if (ControlLED.isShow)
             {
                 ControlLED.LEDHide();
+                Relay.EMSet(new EmergencyLightData() { Name = "浜園2号踏切", State = true });
             }
             else
             {
                 ControlLED.LEDShow();
+                Relay.EMSet(new EmergencyLightData() { Name = "浜園2号踏切", State = false });
             }
         }
 
@@ -139,6 +141,21 @@ namespace TatehamaATS_v1.OnboardDevice
         {
             Console.WriteLine(exception.ToString());
             InspectionRecord.AddException(exception);
+        }
+
+        /// <summary>
+        /// サーバーからデータきた
+        /// </summary>
+        /// <param name="dataFromServer"></param>
+        internal void ServerDataUpdate(DataFromServer dataFromServer)
+        {
+            Relay.SignalSet(dataFromServer.NextSignalData);
+            Relay.SignalSet(dataFromServer.DoubleNextSignalData);
+            foreach (var item in dataFromServer.EmergencyLightDatas)
+            {
+                Relay.EMSet(item);
+            }
+
         }
     }
 }

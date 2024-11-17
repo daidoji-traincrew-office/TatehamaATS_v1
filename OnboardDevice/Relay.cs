@@ -52,7 +52,7 @@ namespace TatehamaATS_v1.OnboardDevice
         //all仮設定　必要な分に後で絞る  tconlyontrain?                   
 
         // プロパティ                                                                        
-        internal DataFromTrainCrew TcData { get; private set; } = new DataFromTrainCrew();
+        internal TrainCrewStateData TcData { get; private set; } = new TrainCrewStateData();
 
         private ConnectionState status = ConnectionState.DisConnect;
         private int BeforeBrake = 0;
@@ -60,7 +60,7 @@ namespace TatehamaATS_v1.OnboardDevice
         // イベント
         internal event Action<TimeSpan> TC_TimeUpdated;
         internal event Action<ConnectionState> ConnectionStatusChanged;
-        internal event Action<DataFromTrainCrew> TrainCrewDataUpdated;
+        internal event Action<TrainCrewStateData> TrainCrewDataUpdated;
 
         /// <summary>
         /// 故障発生
@@ -290,6 +290,17 @@ namespace TatehamaATS_v1.OnboardDevice
             }
         }
 
+        internal void SignalSet(SignalData signalData)
+        {
+            SendSingleCommand("SetSignalPhase", new string[] { signalData.Name, signalData.phase.ToString() });
+
+        }
+
+        internal void EMSet(EmergencyLightData emergencyLightData)
+        {
+            SendSingleCommand("SetEmergencyLight", new string[] { emergencyLightData.Name, emergencyLightData.State ? "true" :"false" });
+        }
+
         internal async Task SendSingleCommand(string command, string[] request)
         {
             try
@@ -357,7 +368,7 @@ namespace TatehamaATS_v1.OnboardDevice
                 // JSON受信データ処理
                 lock (TcData)
                 {
-                    var newData = JsonConvert.DeserializeObject<DataFromTrainCrew>(jsonResponse);
+                    var newData = JsonConvert.DeserializeObject<TrainCrewStateData>(jsonResponse);
                     if (newData != null)
                     {
                         UpdateFieldsAndProperties(TcData, newData);
