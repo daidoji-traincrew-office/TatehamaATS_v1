@@ -79,7 +79,15 @@ namespace TatehamaATS_v1.Network
 
             connection.Reconnecting += exception =>
             {
-                Console.WriteLine("再接続中");
+                connected = false;
+                Console.WriteLine("reconnecting");
+                return Task.CompletedTask;
+            };
+
+            connection.Reconnected +=  exeption =>
+            {
+                connected = true;
+                Console.WriteLine("Connected");
                 return Task.CompletedTask;
             };
             await Task.Delay(Timeout.Infinite);
