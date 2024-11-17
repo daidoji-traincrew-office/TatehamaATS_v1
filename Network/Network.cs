@@ -12,7 +12,6 @@ namespace TatehamaATS_v1.Network
     public class Network
     {
         public static HubConnection connection;
-        public static async Task Connect()
         /// <summary>
         /// åÃè·î≠ê∂
         /// </summary>
@@ -80,7 +79,7 @@ namespace TatehamaATS_v1.Network
 
         public async Task SendData_to_Server(DataToServer sendData)
         {
-            await connection.SendAsync("SendData_ATS", sendData); 
+            await connection.SendAsync("SendData_ATS", sendData);
         }
     }
 }
