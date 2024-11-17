@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 
 // TRAIN CREW WebSocket API
 
+
 // ▼　送信関係　▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
+[System.Serializable]
 public class CommandToTrainCrew
 {
     public string command;
@@ -15,17 +18,19 @@ public class CommandToTrainCrew
  * ●データ取得要求
  * command = DataRequest
  * args = 取得したいデータ
- *        all             :   全て
- *        tc              :   軌道回路
- *        tconlyontrain   :   踏んでいる軌道回路のみ
- *        tcall           :   全ての軌道回路
- *        signal          :   信号機の現示
- *        train           :   他列車の情報
+ *      all :   全て
+ *      tc  :   軌道回路
+ *      tconlyontrain   :   踏んでいる軌道回路のみ
+ *      tcall   :   全ての軌道回路
+ *      signal  :   信号機の現示
+ *      train   :   他列車の情報
+ * 
  * 
  * ●特発の動作を設定する
  * command = SetEmergencyLight
  * args[0] = 踏切名
  * args[1] = true or false
+ * 
  * 
  * ●信号の現示を設定する　※ゲーム内現示より下位の現示のみ設定可能
  * command = SetSignalPhase
@@ -38,10 +43,32 @@ public class CommandToTrainCrew
  *      減速  :   YG
  *      進行  :   G
  * 
+ * 
  */
 
-// ▼　受信関係　▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
 
+
+
+
+
+
+
+// ▼　受信関係　▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
+[System.Serializable]
+public class Data_Base
+{
+    public string type;
+    public object data;
+}
+
+[System.Serializable]
+public class TrainCrewState
+{
+    public string type;
+    public TrainCrewStateData data;
+}
+
+[System.Serializable]
 public class TrainCrewStateData
 {
     public TimeData nowTime;
@@ -54,6 +81,7 @@ public class TrainCrewStateData
     public CrewType crewType = CrewType.Driver;
     public DriveMode driveMode = DriveMode.Normal;
 }
+
 
 //地上子イベント
 [System.Serializable]
@@ -74,25 +102,9 @@ public class RecvBeaconStateData
     public bool Processed = true;
 }
 
-public enum BeaconType
-{
-    Signal,
-    Constant,
-    SigIfStop,
-    PatternConst,
-    PatternSig,
-    PatternFlat,
-    PatternClear,
-    PatternSigClear,
-    PatternSwitch,
-    PatternSwitchClear,
-    StationStop,
-    誤出発防止,
-    ConstantTimer,
-    PatternConstStopEnd,
-    DoorCut,
-}
 
+
+[System.Serializable]
 public struct TimeData
 {
     public int hour;
@@ -121,16 +133,13 @@ public struct TimeData
     }
 }
 
+
+[System.Serializable]
 public class TrackCircuitData
 {
     public bool On = false;
     public string Last = null;//軌道回路を踏んだ列車の名前
     public string Name = "";
-
-    public override string ToString()
-    {
-        return $"{Name}/{Last}/{On}";
-    }
 }
 
 public enum DriveMode
@@ -139,7 +148,6 @@ public enum DriveMode
     Free,
     RTA,
 }
-
 public enum CrewType
 {
     Driver,
@@ -159,6 +167,7 @@ public enum GameScreen
     NotRunningGame,
 }
 
+[System.Serializable]
 public class RunTrainData
 {
     public string Name;
@@ -174,6 +183,8 @@ public class RunTrainData
     public string debugMsg = "";
 }
 
+
+[System.Serializable]
 public class SignalData
 {
     public string Name;
@@ -189,7 +200,26 @@ public enum Phase
     YG,
     G
 }
+public enum BeaconType
+{
+    Signal,
+    Constant,
+    SigIfStop,
+    PatternConst,
+    PatternSig,
+    PatternFlat,
+    PatternClear,
+    PatternSigClear,
+    PatternSwitch,
+    PatternSwitchClear,
+    StationStop,
+    誤出発防止,
+    ConstantTimer,
+    PatternConstStopEnd,
+    DoorCut,
+}
 
+[System.Serializable]
 public class TrainState
 {
     public float Speed;
@@ -232,19 +262,7 @@ public class TrainState
         }
     }
 }
-
-[Flags] // ビット演算をサポートするためFlags属性を付与
-public enum AtsState
-{
-    P = 1,
-    P接近 = 1 << 1,
-    B動作 = 1 << 2,
-    EB = 1 << 3,
-    終端P = 1 << 4,
-    停P = 1 << 5,
-    OFF = 1 << 6
-}
-
+[System.Serializable]
 public class CarState
 {
     public bool DoorClose;
@@ -256,7 +274,7 @@ public class CarState
     public bool HasConductorCab = false;
     public bool HasMotor = false;
 }
-
+[System.Serializable]
 public class StationInfo
 {
     public string Name;
@@ -268,6 +286,7 @@ public class StationInfo
     public float TotalLength = 0;
 }
 
+[System.Serializable]
 public enum PanelLamp
 {
     /// <summary>
@@ -302,4 +321,16 @@ public enum PanelLamp
     /// 過負荷
     /// </summary>
     Overload,
+}
+
+[Flags] // ビット演算をサポートするためFlags属性を付与
+public enum AtsState
+{
+    P = 1,
+    P接近 = 1 << 1,
+    B動作 = 1 << 2,
+    EB = 1 << 3,
+    終端P = 1 << 4,
+    停P = 1 << 5,
+    OFF = 1 << 6
 }

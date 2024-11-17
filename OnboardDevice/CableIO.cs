@@ -97,10 +97,6 @@ namespace TatehamaATS_v1.OnboardDevice
             {
                 InspectionRecord.RelayReset = true;
 
-                //特発確認                                 
-                Relay.EMSet(new EmergencyLightData() { Name = "浜園2号踏切", State = true });
-                Relay.EMSet(new EmergencyLightData() { Name = "浜園2号踏切", State = false });
-                Relay.SignalSet(new SignalData() { Name = "津崎下り出発3L", phase = Phase.None });
             }
             else
             {
@@ -123,11 +119,13 @@ namespace TatehamaATS_v1.OnboardDevice
             {
                 ControlLED.LEDHide();
                 Relay.EMSet(new EmergencyLightData() { Name = "浜園2号踏切", State = true });
+                Relay.SignalSet(new SignalData() { Name = "江ノ原検車区下り場内5LE", phase = Phase.R });
             }
             else
             {
                 ControlLED.LEDShow();
                 Relay.EMSet(new EmergencyLightData() { Name = "浜園2号踏切", State = false });
+                Relay.SignalSet(new SignalData() { Name = "江ノ原検車区下り場内5LE", phase = Phase.None });
             }
         }
 

@@ -167,14 +167,14 @@ namespace TatehamaATS_v1.OnboardDevice
         {
             TrainCrewDataUpdated.Invoke(TcData);
             // 必要情報の抜き出し    
-            var nowOnTrack = new List<string>();
-            foreach (var circuit in TcData.trackCircuitList)
-            {
-                if (circuit.Last == TcData.myTrainData.diaName)
-                {
-                    nowOnTrack.Add(circuit.Name);
-                }
-            }
+            //var nowOnTrack = new List<string>();
+            //foreach (var circuit in TcData.trackCircuitList)
+            //{
+            //    if (circuit.Last == TcData.myTrainData.diaName)
+            //    {
+            //        nowOnTrack.Add(circuit.Name);
+            //    }
+            //}
             //Debug.WriteLine($"在線トラック：{string.Join(",", nowOnTrack)}");
         }
 
@@ -298,7 +298,7 @@ namespace TatehamaATS_v1.OnboardDevice
 
         internal void EMSet(EmergencyLightData emergencyLightData)
         {
-            SendSingleCommand("SetEmergencyLight", new string[] { emergencyLightData.Name, emergencyLightData.State ? "true" :"false" });
+            SendSingleCommand("SetEmergencyLight", new string[] { emergencyLightData.Name, emergencyLightData.State ? "true" : "false" });
         }
 
         internal async Task SendSingleCommand(string command, string[] request)
@@ -368,10 +368,10 @@ namespace TatehamaATS_v1.OnboardDevice
                 // JSON受信データ処理
                 lock (TcData)
                 {
-                    var newData = JsonConvert.DeserializeObject<TrainCrewStateData>(jsonResponse);
+                    var newData = JsonConvert.DeserializeObject<TrainCrewState>(jsonResponse);
                     if (newData != null)
                     {
-                        UpdateFieldsAndProperties(TcData, newData);
+                        UpdateFieldsAndProperties(TcData, newData.data);
                     }
                     TC_TimeUpdated?.Invoke(TcData.nowTime.ToTimeSpan());
 
