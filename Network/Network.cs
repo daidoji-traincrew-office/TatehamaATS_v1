@@ -3,12 +3,16 @@ namespace TatehamaATS_v1.Network
     using System.Diagnostics;
     using System.Net.WebSockets;
     using System.Runtime.CompilerServices;
+    using Microsoft.AspNetCore.Connections;
+
     using Microsoft.AspNetCore.SignalR.Client;
     using TatehamaATS_v1.Exceptions;
     using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
     public class Network
     {
+        public static HubConnection connection;
+        public static async Task Connect()
         /// <summary>
         /// åÃè·î≠ê∂
         /// </summary>
@@ -47,24 +51,20 @@ namespace TatehamaATS_v1.Network
 
         private async Task Connect()
         {
-            var client = new HubConnectionBuilder()
+            connection = new HubConnectionBuilder()
                 .WithUrl("http://localhost:5154/hub/train")
                 .WithAutomaticReconnect()
                 .Build();
-            client.On<String, String>("RecieveMessage", (user, message) =>
+
+            connection.On<DataFromServer>("ReceiveData_ATS", DataFromServer =>
             {
-                Console.WriteLine("Hello");
+                throw new NotImplementedException();
             });
 
             try
             {
-                await client.StartAsync();
+                await connection.StartAsync();
                 Console.WriteLine("Connected");
-                while (true)
-                {
-                    var message = Console.ReadLine();
-                    await client.InvokeAsync("SendMessage", "arai", message);
-                }
             }
             catch (Exception ex)
             {
@@ -72,10 +72,15 @@ namespace TatehamaATS_v1.Network
             }
             finally
             {
-                await client.StopAsync();
-                await client.DisposeAsync();
-                Debug.WriteLine("Cpnnection Closed");
+                await connection.StopAsync();
+                await connection.DisposeAsync();
+                Console.WriteLine("Cpnnection Closed");
             }
+        }
+
+        public async Task SendData_to_Server(DataToServer sendData)
+        {
+            await connection.SendAsync("SendData_ATS", sendData); 
         }
     }
 }

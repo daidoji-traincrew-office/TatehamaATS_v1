@@ -17,6 +17,7 @@ namespace TatehamaATS_v1.KokuchiWindow
     {
         KokuchiData KokuchiData;
         private Bitmap sourceImage;
+        public bool ShowLED;
 
 
         /// <summary>
@@ -30,6 +31,9 @@ namespace TatehamaATS_v1.KokuchiWindow
             sourceImage = KokuchiResource.Kokuchi_LED;
             DisplayImageByPos(1, 154);
             TopMost = true;
+            BackColor = Color.Red;
+            TransparencyKey = BackColor;
+            ShowLED = true;
         }
 
         public void SetData(KokuchiData kokuchiData)
@@ -182,39 +186,36 @@ namespace TatehamaATS_v1.KokuchiWindow
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            if (KokuchiData == null)
+            if (ShowLED)
             {
-                DisplayImageByPos(1, 154);
-                return;
+                this.BackgroundImage = null;
+                KokuchiLED.BackgroundImage = null;
+                KokuchiLED.Image = null;
             }
-            var DeltaTime = (DateTime.Now - KokuchiData.OriginTime).TotalMilliseconds;
-
-            switch (KokuchiData.Type)
+            else
             {
-                case KokuchiType.None:
-                case KokuchiType.Kaijo:
-                case KokuchiType.Shuppatsu:
-                case KokuchiType.ShuppatsuJikoku:
-                    //点滅しないやつ
-                    SetLED(KokuchiData);
-                    break;
-                case KokuchiType.Yokushi:
-                case KokuchiType.Tsuuchi:
-                    //1000+500点滅
-                    if (DeltaTime % 1500 < 1000)
-                    {
+                this.BackgroundImage = KokuchiResource.Kokuchi_Background;
+                KokuchiLED.Image = KokuchiResource.KokuchiLED_Waku;
+                if (KokuchiData == null)
+                {
+                    DisplayImageByPos(1, 154);
+                    return;
+                }
+                var DeltaTime = (DateTime.Now - KokuchiData.OriginTime).TotalMilliseconds;
+
+                switch (KokuchiData.Type)
+                {
+                    case KokuchiType.None:
+                    case KokuchiType.Kaijo:
+                    case KokuchiType.Shuppatsu:
+                    case KokuchiType.ShuppatsuJikoku:
+                        //点滅しないやつ
                         SetLED(KokuchiData);
-                    }
-                    else
-                    {
-                        DisplayImageByPos(50, 171);
-                    }
-                    break;
-                case KokuchiType.TsuuchiKaijo:
-                    if (DeltaTime < 5 * 1000)
-                    {
-                        //500+250点滅     
-                        if (DeltaTime % 750 < 500)
+                        break;
+                    case KokuchiType.Yokushi:
+                    case KokuchiType.Tsuuchi:
+                        //1000+500点滅
+                        if (DeltaTime % 1500 < 1000)
                         {
                             SetLED(KokuchiData);
                         }
@@ -222,38 +223,52 @@ namespace TatehamaATS_v1.KokuchiWindow
                         {
                             DisplayImageByPos(50, 171);
                         }
-                    }
-                    else if (DeltaTime < 20 * 1000)
-                    {
-                        //250+250点滅     
-                        if (DeltaTime % 500 < 250)
+                        break;
+                    case KokuchiType.TsuuchiKaijo:
+                        if (DeltaTime < 5 * 1000)
                         {
+                            //500+250点滅     
+                            if (DeltaTime % 750 < 500)
+                            {
+                                SetLED(KokuchiData);
+                            }
+                            else
+                            {
+                                DisplayImageByPos(50, 171);
+                            }
+                        }
+                        else if (DeltaTime < 20 * 1000)
+                        {
+                            //250+250点滅     
+                            if (DeltaTime % 500 < 250)
+                            {
+                                SetLED(KokuchiData);
+                            }
+                            else
+                            {
+                                DisplayImageByPos(50, 171);
+                            }
+                        }
+                        else
+                        {
+                            DisplayImageByPos(50, 171);
+                        }
+                        break;
+                    case KokuchiType.Tenmatsusho:
+                        if (DeltaTime % 2000 < 1500)
+                        {
+                            //1500+500点滅   
                             SetLED(KokuchiData);
                         }
                         else
                         {
                             DisplayImageByPos(50, 171);
                         }
-                    }
-                    else
-                    {
+                        break;
+                    default:
                         DisplayImageByPos(50, 171);
-                    }
-                    break;
-                case KokuchiType.Tenmatsusho:
-                    if (DeltaTime % 2000 < 1500)
-                    {
-                        //1500+500点滅   
-                        SetLED(KokuchiData);
-                    }
-                    else
-                    {
-                        DisplayImageByPos(50, 171);
-                    }
-                    break;
-                default:
-                    DisplayImageByPos(50, 171);
-                    break;
+                        break;
+                }
             }
         }
 

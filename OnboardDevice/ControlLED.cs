@@ -280,6 +280,7 @@ namespace TatehamaATS_v1
             {
                 case "":
                 case "無表示":
+                case "OFF":
                 case null:
                     return 0;
                 case "普通":

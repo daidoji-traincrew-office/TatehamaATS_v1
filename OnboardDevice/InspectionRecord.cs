@@ -29,7 +29,7 @@ namespace TatehamaATS_v1.OnboardDevice
         public bool ATSReset;
         private bool PowerReset;
         private TimeSpan RelayUpdatedTime;
-        internal DataFromTrainCrew TcData;
+        internal TrainCrewStateData TcData;
 
         /// <summary>
         /// 非常状態変更
@@ -57,7 +57,7 @@ namespace TatehamaATS_v1.OnboardDevice
             RelayReset = false;
             ATSReset = false;
             PowerReset = false;
-            TcData = new DataFromTrainCrew();
+            TcData = new TrainCrewStateData();
             Task.Run(() => StartDisplayUpdateLoop());
         }
 
@@ -200,7 +200,7 @@ namespace TatehamaATS_v1.OnboardDevice
             ATSReset = false;
         }
 
-        internal void RelayUpdate(DataFromTrainCrew tcData)
+        internal void RelayUpdate(TrainCrewStateData tcData)
         {
             TcData = tcData;
             RelayUpdatedTime = DateTime.Now.TimeOfDay;

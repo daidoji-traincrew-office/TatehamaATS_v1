@@ -41,7 +41,8 @@ public class CommandToTrainCrew
  */
 
 // ▼　受信関係　▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
-public class DataFromTrainCrew
+
+public class TrainCrewStateData
 {
     public TimeData nowTime;
     public TrainState myTrainData = new TrainState();
@@ -52,6 +53,44 @@ public class DataFromTrainCrew
     public GameScreen gameScreen = GameScreen.Other;
     public CrewType crewType = CrewType.Driver;
     public DriveMode driveMode = DriveMode.Normal;
+}
+
+//地上子イベント
+[System.Serializable]
+public class RecvBeaconState
+{
+    public string type = "RecvBeaconStateData";
+    public RecvBeaconStateData data;
+}
+
+[System.Serializable]
+public class RecvBeaconStateData
+{
+    public BeaconType beaconType;
+    public float Speed = 0;
+    public float PtnLength = 0;
+    public float Gradient = 0;
+    public string DataString = "";
+    public bool Processed = true;
+}
+
+public enum BeaconType
+{
+    Signal,
+    Constant,
+    SigIfStop,
+    PatternConst,
+    PatternSig,
+    PatternFlat,
+    PatternClear,
+    PatternSigClear,
+    PatternSwitch,
+    PatternSwitchClear,
+    StationStop,
+    誤出発防止,
+    ConstantTimer,
+    PatternConstStopEnd,
+    DoorCut,
 }
 
 public struct TimeData
@@ -161,7 +200,7 @@ public class TrainState
     public Dictionary<PanelLamp, bool> Lamps = new Dictionary<PanelLamp, bool>();
     public string ATS_Class = "普通";
     public string ATS_Speed = "110";
-    public string ATS_State = "無表示";
+    public AtsState ATS_State = AtsState.OFF;
 
     public string diaName = "";
     public string Class = "";
@@ -192,6 +231,18 @@ public class TrainState
             Lamps[lmp] = (lmp == PanelLamp.ATS_Ready);
         }
     }
+}
+
+[Flags] // ビット演算をサポートするためFlags属性を付与
+public enum AtsState
+{
+    P = 1,
+    P接近 = 1 << 1,
+    B動作 = 1 << 2,
+    EB = 1 << 3,
+    終端P = 1 << 4,
+    停P = 1 << 5,
+    OFF = 1 << 6
 }
 
 public class CarState
