@@ -16,6 +16,7 @@ namespace TatehamaATS_v1.MainWindow
             CableIO.isKyokanChenge += Kyokan;
             CableIO.isATSReadyChenge += ATSReadyLamp;
             CableIO.isATSBrakeApplyChenge += ATSBrakeApplyLamp;
+            Application.ApplicationExit += new EventHandler(Application_ApplicationExit);
         }
 
         /// <summary>
@@ -95,6 +96,13 @@ namespace TatehamaATS_v1.MainWindow
             {
                 kokuchiWindow.Show();
             }
+        }
+        public void Application_ApplicationExit(object sender, EventArgs e)
+        {
+            //切断処理
+            CableIO.ServerDisconnect();
+            //ApplicationExitイベントハンドラを削除
+            Application.ApplicationExit -= new EventHandler(Application_ApplicationExit);
         }
     }
 }
