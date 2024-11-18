@@ -37,8 +37,9 @@
             Image_ATSBrakeApply = new PictureBox();
             Image_ATSOpen = new PictureBox();
             Image_Transfer = new PictureBox();
-            Image_Server = new PictureBox();
+            Image_Network = new PictureBox();
             Image_Kyokan = new PictureBox();
+            Image_Relay = new PictureBox();
             ((System.ComponentModel.ISupportInitialize)Image_ATSCut).BeginInit();
             ((System.ComponentModel.ISupportInitialize)Image_Reset).BeginInit();
             ((System.ComponentModel.ISupportInitialize)Image_Kokuchi).BeginInit();
@@ -48,8 +49,9 @@
             ((System.ComponentModel.ISupportInitialize)Image_ATSBrakeApply).BeginInit();
             ((System.ComponentModel.ISupportInitialize)Image_ATSOpen).BeginInit();
             ((System.ComponentModel.ISupportInitialize)Image_Transfer).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)Image_Server).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)Image_Network).BeginInit();
             ((System.ComponentModel.ISupportInitialize)Image_Kyokan).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)Image_Relay).BeginInit();
             SuspendLayout();
             // 
             // Image_ATSCut
@@ -109,7 +111,7 @@
             // 
             Image_ATSReady.BackgroundImage = MainResource.Lamp_ATS_Ready;
             Image_ATSReady.BackgroundImageLayout = ImageLayout.None;
-            Image_ATSReady.Location = new Point(12, 229);
+            Image_ATSReady.Location = new Point(12, 225);
             Image_ATSReady.Name = "Image_ATSReady";
             Image_ATSReady.Size = new Size(36, 10);
             Image_ATSReady.TabIndex = 5;
@@ -120,7 +122,7 @@
             // 
             Image_ATSBrakeApply.BackgroundImage = MainResource.Lamp_ATS_BrakeApply;
             Image_ATSBrakeApply.BackgroundImageLayout = ImageLayout.None;
-            Image_ATSBrakeApply.Location = new Point(12, 242);
+            Image_ATSBrakeApply.Location = new Point(12, 237);
             Image_ATSBrakeApply.Name = "Image_ATSBrakeApply";
             Image_ATSBrakeApply.Size = new Size(36, 10);
             Image_ATSBrakeApply.TabIndex = 6;
@@ -130,7 +132,7 @@
             // 
             Image_ATSOpen.BackgroundImage = MainResource.Lamp_ATS_Open;
             Image_ATSOpen.BackgroundImageLayout = ImageLayout.None;
-            Image_ATSOpen.Location = new Point(12, 255);
+            Image_ATSOpen.Location = new Point(12, 249);
             Image_ATSOpen.Name = "Image_ATSOpen";
             Image_ATSOpen.Size = new Size(36, 10);
             Image_ATSOpen.TabIndex = 6;
@@ -141,21 +143,21 @@
             // 
             Image_Transfer.BackgroundImage = MainResource.Lamp_Transfar_Abnormal;
             Image_Transfer.BackgroundImageLayout = ImageLayout.None;
-            Image_Transfer.Location = new Point(12, 268);
+            Image_Transfer.Location = new Point(12, 273);
             Image_Transfer.Name = "Image_Transfer";
             Image_Transfer.Size = new Size(36, 10);
             Image_Transfer.TabIndex = 6;
             Image_Transfer.TabStop = false;
             // 
-            // Image_Server
+            // Image_Network
             // 
-            Image_Server.BackgroundImage = MainResource.Lamp_Server_Abnormal;
-            Image_Server.BackgroundImageLayout = ImageLayout.None;
-            Image_Server.Location = new Point(12, 281);
-            Image_Server.Name = "Image_Server";
-            Image_Server.Size = new Size(36, 10);
-            Image_Server.TabIndex = 6;
-            Image_Server.TabStop = false;
+            Image_Network.BackgroundImage = MainResource.Lamp_Server_Abnormal;
+            Image_Network.BackgroundImageLayout = ImageLayout.None;
+            Image_Network.Location = new Point(12, 285);
+            Image_Network.Name = "Image_Network";
+            Image_Network.Size = new Size(36, 10);
+            Image_Network.TabIndex = 6;
+            Image_Network.TabStop = false;
             // 
             // Image_Kyokan
             // 
@@ -169,23 +171,34 @@
             Image_Kyokan.TabStop = false;
             Image_Kyokan.Visible = false;
             // 
+            // Image_Relay
+            // 
+            Image_Relay.BackgroundImage = MainResource.Lamp_Relay_Abnormal;
+            Image_Relay.BackgroundImageLayout = ImageLayout.None;
+            Image_Relay.Location = new Point(12, 261);
+            Image_Relay.Name = "Image_Relay";
+            Image_Relay.Size = new Size(36, 10);
+            Image_Relay.TabIndex = 8;
+            Image_Relay.TabStop = false;
+            // 
             // MainWindow
             // 
             AutoScaleMode = AutoScaleMode.None;
             BackgroundImage = MainResource.Main_Background;
             BackgroundImageLayout = ImageLayout.None;
             ClientSize = new Size(300, 300);
-            Controls.Add(Image_Kyokan);
+            Controls.Add(Image_Relay);
             Controls.Add(Image_Retsuban);
             Controls.Add(Image_LED);
             Controls.Add(Image_Kokuchi);
-            Controls.Add(Image_Server);
+            Controls.Add(Image_Network);
             Controls.Add(Image_Transfer);
             Controls.Add(Image_ATSOpen);
             Controls.Add(Image_ATSBrakeApply);
             Controls.Add(Image_ATSReady);
             Controls.Add(Image_Reset);
             Controls.Add(Image_ATSCut);
+            Controls.Add(Image_Kyokan);
             FormBorderStyle = FormBorderStyle.FixedToolWindow;
             MaximumSize = new Size(316, 339);
             MinimumSize = new Size(316, 339);
@@ -201,8 +214,9 @@
             ((System.ComponentModel.ISupportInitialize)Image_ATSBrakeApply).EndInit();
             ((System.ComponentModel.ISupportInitialize)Image_ATSOpen).EndInit();
             ((System.ComponentModel.ISupportInitialize)Image_Transfer).EndInit();
-            ((System.ComponentModel.ISupportInitialize)Image_Server).EndInit();
+            ((System.ComponentModel.ISupportInitialize)Image_Network).EndInit();
             ((System.ComponentModel.ISupportInitialize)Image_Kyokan).EndInit();
+            ((System.ComponentModel.ISupportInitialize)Image_Relay).EndInit();
             ResumeLayout(false);
         }
 
@@ -219,5 +233,7 @@
         private PictureBox Image_Transfer;
         private PictureBox Image_Server;
         private PictureBox Image_Kyokan;
+        private PictureBox Image_Network;
+        private PictureBox Image_Relay;
     }
 }

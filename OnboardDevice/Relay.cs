@@ -184,6 +184,9 @@ namespace TatehamaATS_v1.OnboardDevice
         /// <returns></returns>
         internal async Task TryConnectWebSocket()
         {
+            status = ConnectionState.DisConnect;
+            ConnectionStatusChanged?.Invoke(status);
+            AddExceptionAction.Invoke(new RelayConnectException(3, "起動直後"));
             while (true)
             {
                 _webSocket = new ClientWebSocket();

@@ -52,12 +52,17 @@ namespace TatehamaATS_v1.OnboardDevice
         internal event Action<bool> isATSBrakeApplyChenge;
 
         /// <summary>
-        /// ATS正常変化
+        /// 継電異常変化
+        /// </summary>
+        internal event Action<bool> isRelayChenge;
+
+        /// <summary>
+        /// 伝送異常変化
         /// </summary>
         internal event Action<bool> isTransferChenge;
 
         /// <summary>
-        /// ATS動作変化
+        /// 通信異常変化
         /// </summary>
         internal event Action<bool> isNetworkChenge;
 
@@ -86,6 +91,9 @@ namespace TatehamaATS_v1.OnboardDevice
             InspectionRecord.RelayUpdate(TcData);
             ControlLED.TC_ATSDisplayData.SetLED(TcData.myTrainData.ATS_Class, TcData.myTrainData.ATS_Speed, TcData.myTrainData.ATS_State);
             isKyokanChenge.Invoke(TcData.driveMode == DriveMode.Normal && (TcData.gameScreen == GameScreen.MainGame || TcData.gameScreen == GameScreen.MainGame_Pause || TcData.gameScreen == GameScreen.MainGame_Loading));
+
+            //Todo:データ整形後接続
+            //SendData_to_Server
         }
 
         /// <summary>
@@ -96,6 +104,7 @@ namespace TatehamaATS_v1.OnboardDevice
         {
             isATSReadyChenge?.Invoke(exceptionCodes.Count == 0);
             ControlLED.ExceptionCodes = exceptionCodes;
+            isRelayChenge?.Invoke(ContainsPartialMatch(exceptionCodes, "3C"));
             isTransferChenge?.Invoke(ContainsPartialMatch(exceptionCodes, "3D"));
             isNetworkChenge?.Invoke(ContainsPartialMatch(exceptionCodes, "3E"));
 
