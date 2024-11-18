@@ -33,7 +33,7 @@ namespace TatehamaATS_v1.KokuchiWindow
             TopMost = true;
             BackColor = Color.Red;
             TransparencyKey = BackColor;
-            ShowLED = true;
+            ShowLED = false;
         }
 
         public void SetData(KokuchiData kokuchiData)
@@ -188,14 +188,20 @@ namespace TatehamaATS_v1.KokuchiWindow
         {
             if (ShowLED)
             {
-                this.BackgroundImage = null;
-                KokuchiLED.BackgroundImage = null;
-                KokuchiLED.Image = null;
+                if(this.BackgroundImage != null)
+                {
+                    this.BackgroundImage = null;
+                    KokuchiLED.BackgroundImage = null;
+                    KokuchiLED.Image = null;
+                }
             }
             else
             {
-                this.BackgroundImage = KokuchiResource.Kokuchi_Background;
-                KokuchiLED.Image = KokuchiResource.KokuchiLED_Waku;
+                if (this.BackgroundImage == null)
+                {
+                    this.BackgroundImage = KokuchiResource.Kokuchi_Background;
+                    KokuchiLED.Image = KokuchiResource.KokuchiLED_Waku;
+                }
                 if (KokuchiData == null)
                 {
                     DisplayImageByPos(1, 154);
@@ -274,7 +280,7 @@ namespace TatehamaATS_v1.KokuchiWindow
 
         private void KokuchiLED_Click(object sender, EventArgs e)
         {
-            SetData(new KokuchiData(KokuchiType.TsuuchiKaijo, "9999", DateTime.Now));
+            SetData(new KokuchiData(KokuchiType.Tenmatsusho, "M", DateTime.Now));
         }
     }
 }
