@@ -1,4 +1,6 @@
-﻿namespace TatehamaATS_v1
+﻿using TrainCrewAPI;
+
+namespace TatehamaATS_v1
 {
     public class DataToServer
     {

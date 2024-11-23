@@ -6,6 +6,7 @@ using System.Xml.Linq;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
+using TrainCrewAPI;
 
 namespace TatehamaATS_v1.OnboardDevice
 {
@@ -53,6 +54,7 @@ namespace TatehamaATS_v1.OnboardDevice
 
         // プロパティ                                                                        
         internal TrainCrewStateData TcData { get; private set; } = new TrainCrewStateData();
+        internal RecvBeaconStateData BeaconData { get; private set; } = new RecvBeaconStateData();
 
         private ConnectionState status = ConnectionState.DisConnect;
         private int BeforeBrake = 0;
@@ -61,6 +63,7 @@ namespace TatehamaATS_v1.OnboardDevice
         internal event Action<TimeSpan> TC_TimeUpdated;
         internal event Action<ConnectionState> ConnectionStatusChanged;
         internal event Action<TrainCrewStateData> TrainCrewDataUpdated;
+        internal event Action<RecvBeaconStateData> BeaconChenged;
 
         /// <summary>
         /// 故障発生
@@ -242,8 +245,8 @@ namespace TatehamaATS_v1.OnboardDevice
 
                 CommandToTrainCrew requestCommand = new CommandToTrainCrew()
                 {
-                    command = Command,
-                    args = Request
+                    Command = Command,
+                    Args = Request
                 };
 
                 // JSON形式にシリアライズ
@@ -274,8 +277,8 @@ namespace TatehamaATS_v1.OnboardDevice
 
                 CommandToTrainCrew requestCommand = new CommandToTrainCrew()
                 {
-                    command = command,
-                    args = request
+                    Command = command,
+                    Args = request
                 };
 
                 // JSON形式にシリアライズ
@@ -343,6 +346,7 @@ namespace TatehamaATS_v1.OnboardDevice
 
             while (_webSocket.State == WebSocketState.Open)
             {
+                _stopwatch.Restart();
                 WebSocketReceiveResult result;
                 do
                 {
@@ -359,28 +363,77 @@ namespace TatehamaATS_v1.OnboardDevice
                     }
                     else
                     {
-                        string partMessage = Encoding.UTF8.GetString(buffer, 0, result.Count);
+                        if (messageBuilder == null)
+                        {
+                            messageBuilder = new StringBuilder();
+                        }
+                        string partMessage = _encoding.GetString(buffer, 0, result.Count);
                         messageBuilder.Append(partMessage);
                     }
 
                 } while (!result.EndOfMessage);
 
                 string jsonResponse = messageBuilder.ToString();
-                messageBuilder.Clear();
+                messageBuilder = null;
 
-                // JSON受信データ処理
-                lock (TcData)
+                // 一旦Data_Base型でデシリアライズ
+                var baseData = JsonConvert.DeserializeObject<Data_Base>(jsonResponse, JsonSerializerSettings);
+
+                if (baseData != null)
                 {
-                    var newData = JsonConvert.DeserializeObject<TrainCrewState>(jsonResponse);
-                    if (newData != null)
+                    // Typeプロパティに応じて処理
+                    if (baseData.type == "TrainCrewStateData")
                     {
-                        UpdateFieldsAndProperties(TcData, newData.data);
-                    }
-                    TC_TimeUpdated?.Invoke(TcData.nowTime.ToTimeSpan());
+                        // Data_Base.DataをTrainCrewStateData型にデシリアライズ
+                        var _trainCrewStateData = JsonConvert.DeserializeObject<TrainCrewStateData>(baseData.data.ToString());
 
-                    // その他処理
-                    ProcessingReceiveData();
+                        if (_trainCrewStateData != null)
+                        {
+                            // JSON受信データ処理
+                            lock (TcData)
+                            {
+                                UpdateFieldsAndProperties(TcData, _trainCrewStateData);
+                                // Form関連処理                           
+                                TC_TimeUpdated?.Invoke(TcData.nowTime.ToTimeSpan());
+                            }
+                            // その他処理
+                            ProcessingReceiveData();
+                        }
+                        else
+                        {
+                            var e = new RelayCarInfoAbnormal(3, "TcData作成失敗");
+                            AddExceptionAction.Invoke(e);
+                        }
+                    }
+                    else if (baseData.type == "RecvBeaconStateData")
+                    {
+                        // Data_Base.DataをRecvBeaconStateData型にデシリアライズ
+                        var _recvBeaconStateData = JsonConvert.DeserializeObject<RecvBeaconStateData>(baseData.data.ToString());
+
+                        if (_recvBeaconStateData != null)
+                        {
+                            // JSON受信データ処理
+                            lock (BeaconData)
+                            {
+                                UpdateFieldsAndProperties(BeaconData, _recvBeaconStateData);
+                                // Form関連処理
+                                BeaconChenged?.Invoke(BeaconData);
+                            }
+                        }
+                        else
+                        {
+                            var e = new TransponderInfoAbnormal(3, "BeaconData作成失敗");
+                            AddExceptionAction.Invoke(e);
+                        }
+                    }
+                    else
+                    {
+                        var e = new RelayOtherInfoAbnormal(3, "不明タイプ");
+                        AddExceptionAction.Invoke(e);
+                    }
                 }
+                _stopwatch.Stop();
+                string s = (_stopwatch.Elapsed.TotalSeconds * 1000).ToString("F2");
             }
         }
 
