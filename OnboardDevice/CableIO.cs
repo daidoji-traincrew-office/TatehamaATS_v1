@@ -1,4 +1,5 @@
 ﻿using TatehamaATS_v1.Exceptions;
+using TrainCrewAPI;
 
 namespace TatehamaATS_v1.OnboardDevice
 {
