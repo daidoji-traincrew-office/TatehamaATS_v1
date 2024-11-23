@@ -31,7 +31,7 @@
         }
         public override ResetConditions ResetCondition()
         {
-            return ResetConditions.RetsubanReset;
+            return ResetConditions.StopDetection_NetworkReset;
         }
         public override OutputBrake ToBrake()
         {

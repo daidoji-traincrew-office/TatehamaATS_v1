@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace TrainCrewAPI
@@ -49,7 +50,7 @@ namespace TrainCrewAPI
         public string type;
         public object data;
     }
-
+  
     [Serializable]
     public class TrainCrewState
     {

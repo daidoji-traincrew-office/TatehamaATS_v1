@@ -173,6 +173,16 @@ namespace TatehamaATS_v1.MainWindow {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
+        internal static System.Drawing.Bitmap Lamp_Relay_Abnormal {
+            get {
+                object obj = ResourceManager.GetObject("Lamp_Relay_Abnormal", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
         internal static System.Drawing.Bitmap Lamp_Server_Abnormal {
             get {
                 object obj = ResourceManager.GetObject("Lamp_Server_Abnormal", resourceCulture);

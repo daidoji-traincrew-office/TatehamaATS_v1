@@ -3,25 +3,25 @@
     /// <summary>                   
     /// ED:Socket接続失敗
     /// </summary>
-    internal class brabra : ATSCommonException
+    internal class SocketConnectException : ATSCommonException
     {
         /// <summary>
         /// ED:Socket接続失敗
         /// </summary>
-        public brabra(int place) : base(place)
+        public SocketConnectException(int place) : base(place)
         {
         }
         /// <summary>                
         /// ED:Socket接続失敗
         /// </summary>
-        public brabra(int place, string message)
+        public SocketConnectException(int place, string message)
             : base(place, message)
         {
         }
         /// <summary>                 
         /// ED:Socket接続失敗
         /// </summary>
-        public brabra(int place, string message, Exception inner)
+        public SocketConnectException(int place, string message, Exception inner)
             : base(place, message, inner)
         {
         }
@@ -31,7 +31,7 @@
         }
         public override ResetConditions ResetCondition()
         {
-            return ResetConditions.StopDetection;
+            return ResetConditions.StopDetection_NetworkReset;
         }
         public override OutputBrake ToBrake()
         {
