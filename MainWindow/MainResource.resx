@@ -118,14 +118,20 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="ATS_Cut0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Image\ATS_Cut0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Button_Retsuban" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Image\Button_Retsuban.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ATS_Cut1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Image\ATS_Cut1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Lamp_ATS_BrakeApply" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Image\Lamp_ATS_BrakeApply.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Lamp_Relay_Abnormal" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Image\Lamp_Relay_Abnormal.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="ATS_Reset0" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Image\ATS_Reset0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Lamp_ATS_Ready" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Image\Lamp_ATS_Ready.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="ATS_Reset1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Image\ATS_Reset1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -133,34 +139,31 @@
   <data name="Button_Kokuchi" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Image\Button_Kokuchi.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Button_LED" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Image\Button_LED.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Button_Retsuban" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Image\Button_Retsuban.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Kyokan" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Image\Kyokan.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Lamp_ATS_BrakeApply" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Image\Lamp_ATS_BrakeApply.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Lamp_ATS_Open" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Image\Lamp_ATS_Open.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Lamp_ATS_Ready" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Image\Lamp_ATS_Ready.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Lamp_Relay_Abnormal" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Image\Lamp_Relay_Abnormal.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="ATS_Cut0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Image\ATS_Cut0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Lamp_Server_Abnormal" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Image\Lamp_Server_Abnormal.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ATS_Cut1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Image\ATS_Cut1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Button_LED" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Image\Button_LED.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Lamp_Transfar_Abnormal" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Image\Lamp_Transfar_Abnormal.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Main_Background" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Image\Main_Background.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Lamp_ATS_Open" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Image\Lamp_ATS_Open.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Kyokan" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Image\Kyokan.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="TopMostOFF" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Image\TopMostOFF.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

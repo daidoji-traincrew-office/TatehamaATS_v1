@@ -209,5 +209,15 @@ namespace TatehamaATS_v1.MainWindow {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.Drawing.Bitmap TopMostOFF {
+            get {
+                object obj = ResourceManager.GetObject("TopMostOFF", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }

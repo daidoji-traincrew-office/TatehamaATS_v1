@@ -34,7 +34,7 @@ namespace TatehamaATS_v1.Network
             ConnectionStatusChanged?.Invoke(connected);
 
             connection = new HubConnectionBuilder()
-                .WithUrl("http://localhost:5154/hub/train")
+                .WithUrl(ServerAddless.SignalAddless)
                 .WithAutomaticReconnect()
                 .Build();
 
@@ -48,13 +48,13 @@ namespace TatehamaATS_v1.Network
                 try
                 {
                     await connection.StartAsync();
-                    Console.WriteLine("Connected");
+                    Debug.WriteLine("Connected");
                     connected = true;
                     ConnectionStatusChanged?.Invoke(connected);
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("connection Error!!");
+                    Debug.WriteLine("connection Error!!");
                     var e = new SocketConnectException(3, "通信部接続失敗", ex);
                     AddExceptionAction.Invoke(e);
                 }
@@ -64,7 +64,7 @@ namespace TatehamaATS_v1.Network
             {
                 connected = false;
                 ConnectionStatusChanged?.Invoke(connected);
-                Console.WriteLine("reconnecting");
+                Debug.WriteLine("reconnecting");
                 return Task.CompletedTask;
             };
 
@@ -72,7 +72,7 @@ namespace TatehamaATS_v1.Network
             {
                 connected = true;
                 ConnectionStatusChanged?.Invoke(connected);
-                Console.WriteLine("Connected");
+                Debug.WriteLine("Connected");
                 return Task.CompletedTask;
             };
             await Task.Delay(Timeout.Infinite);

@@ -7,6 +7,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using TrainCrewAPI;
+using TrainCrew;
 
 namespace TatehamaATS_v1.OnboardDevice
 {
@@ -36,6 +37,8 @@ namespace TatehamaATS_v1.OnboardDevice
         private readonly Stopwatch _stopwatch = new Stopwatch();
         private static readonly Encoding _encoding = Encoding.UTF8;
         private readonly string _connectUri = "ws://127.0.0.1:50300/"; //TRAIN CREWのポート番号は50300
+
+        private int brake;
 
         // キャッシュ用の静的辞書
         private static readonly ConcurrentDictionary<Type, PropertyInfo[]> PropertyCache = new ConcurrentDictionary<Type, PropertyInfo[]>();
@@ -160,6 +163,7 @@ namespace TatehamaATS_v1.OnboardDevice
         /// </summary>
         public Relay()
         {
+            TrainCrewInput.Init();
             _webSocket = new ClientWebSocket();
         }
 
@@ -486,6 +490,11 @@ namespace TatehamaATS_v1.OnboardDevice
                 var newValue = field.GetValue(source);
                 field.SetValue(target, newValue);
             }
+        }
+
+        public void SetEB(bool State)
+        {
+            TrainCrewInput.SetATO_Notch(State ? -8 : 0);
         }
     }
 }

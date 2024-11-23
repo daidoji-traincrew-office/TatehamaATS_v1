@@ -47,6 +47,7 @@ namespace TatehamaATS_v1.RetsubanWindow
             InitializeComponent();
             this.Load += Loaded;
             var tst_time = DateTime.Now + ShiftTime;
+            TopMost = true;
             BeforeTimeData = new TimeData()
             {
                 hour = tst_time.Hour,

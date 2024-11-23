@@ -35,7 +35,7 @@ namespace TatehamaATS_v1.OnboardDevice
         /// <summary>
         /// 検査記録部非常線
         /// </summary>
-        bool RelayEmBrakeState;
+        bool InspectionRecordEmBrakeState;
 
         /// <summary>
         /// 教官添乗状態変化
@@ -72,7 +72,7 @@ namespace TatehamaATS_v1.OnboardDevice
             InspectionRecord = new InspectionRecord();
             InspectionRecord.AddExceptionAction += AddException;
             InspectionRecord.ExceptionCodesChenge += ExceptionCodesChenge;
-            InspectionRecord.EmBrakeStateUpdated += RelayEmBrakeStateChenge;
+            InspectionRecord.EmBrakeStateUpdated += InspectionRecordEmBrakeStateChenge;
             Relay = new Relay();
             Relay.AddExceptionAction += AddException;
             Relay.TrainCrewDataUpdated += RelayUpdatad;
@@ -145,17 +145,27 @@ namespace TatehamaATS_v1.OnboardDevice
         /// <param name="connectionState"></param>
         private void NetworkStatesChenged(bool connectionState)
         {
-            InspectionRecord.RelayState = connectionState;
+            InspectionRecord.NetworkState = connectionState;
         }
 
         /// <summary>
-        /// 継電部非常状態変化指令線
+        /// 検査記録部非常状態変化指令線
         /// </summary>
         /// <param name="brake"></param>
-        private void RelayEmBrakeStateChenge(bool brake)
+        private void InspectionRecordEmBrakeStateChenge(bool brake)
         {
-            RelayEmBrakeState = brake;
-            isATSBrakeApplyChenge?.Invoke(brake);
+            InspectionRecordEmBrakeState = brake;
+            EmBrakeStateChenge();
+        }
+
+        /// <summary>
+        /// 非常状態変化指令線
+        /// </summary>
+        private void EmBrakeStateChenge()
+        {
+            var emBrakeState = InspectionRecordEmBrakeState;
+            isATSBrakeApplyChenge?.Invoke(emBrakeState);
+            Relay.SetEB(emBrakeState);
         }
 
         /// <summary>
@@ -211,6 +221,14 @@ namespace TatehamaATS_v1.OnboardDevice
             {
                 Relay.EMSet(item);
             }
+        }
+
+        /// <summary>
+        /// ATS復帰指令線
+        /// </summary>
+        internal void ATSResetPush()
+        {
+            InspectionRecord.ATSReset = true;
         }
 
         /// <summary>

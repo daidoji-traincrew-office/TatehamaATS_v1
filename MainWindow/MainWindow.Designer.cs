@@ -40,6 +40,7 @@
             Image_Network = new PictureBox();
             Image_Kyokan = new PictureBox();
             Image_Relay = new PictureBox();
+            Image_TopMostOFF = new PictureBox();
             ((System.ComponentModel.ISupportInitialize)Image_ATSCut).BeginInit();
             ((System.ComponentModel.ISupportInitialize)Image_Reset).BeginInit();
             ((System.ComponentModel.ISupportInitialize)Image_Kokuchi).BeginInit();
@@ -52,6 +53,7 @@
             ((System.ComponentModel.ISupportInitialize)Image_Network).BeginInit();
             ((System.ComponentModel.ISupportInitialize)Image_Kyokan).BeginInit();
             ((System.ComponentModel.ISupportInitialize)Image_Relay).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)Image_TopMostOFF).BeginInit();
             SuspendLayout();
             // 
             // Image_ATSCut
@@ -181,12 +183,24 @@
             Image_Relay.TabIndex = 8;
             Image_Relay.TabStop = false;
             // 
+            // Image_TopMostOFF
+            // 
+            Image_TopMostOFF.BackgroundImage = MainResource.TopMostOFF;
+            Image_TopMostOFF.BackgroundImageLayout = ImageLayout.None;
+            Image_TopMostOFF.Location = new Point(245, 285);
+            Image_TopMostOFF.Name = "Image_TopMostOFF";
+            Image_TopMostOFF.Size = new Size(50, 10);
+            Image_TopMostOFF.TabIndex = 9;
+            Image_TopMostOFF.TabStop = false;
+            Image_TopMostOFF.Click += Image_TopMostOFF_Click;
+            // 
             // MainWindow
             // 
             AutoScaleMode = AutoScaleMode.None;
             BackgroundImage = MainResource.Main_Background;
             BackgroundImageLayout = ImageLayout.None;
             ClientSize = new Size(300, 300);
+            Controls.Add(Image_TopMostOFF);
             Controls.Add(Image_Relay);
             Controls.Add(Image_Retsuban);
             Controls.Add(Image_LED);
@@ -217,6 +231,7 @@
             ((System.ComponentModel.ISupportInitialize)Image_Network).EndInit();
             ((System.ComponentModel.ISupportInitialize)Image_Kyokan).EndInit();
             ((System.ComponentModel.ISupportInitialize)Image_Relay).EndInit();
+            ((System.ComponentModel.ISupportInitialize)Image_TopMostOFF).EndInit();
             ResumeLayout(false);
         }
 
@@ -235,5 +250,6 @@
         private PictureBox Image_Kyokan;
         private PictureBox Image_Network;
         private PictureBox Image_Relay;
+        private PictureBox Image_TopMostOFF;
     }
 }
