@@ -80,7 +80,7 @@ namespace TatehamaATS_v1.Network
 
         public async Task SendData_to_Server(DataToServer sendData)
         {
-            await connection.SendAsync("SendData_ATS", sendData);
+            await connection.SendAsync("ReceiveData_ATS", sendData);
         }
 
         public async Task Close()
