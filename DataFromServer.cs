@@ -1,17 +1,23 @@
-﻿using TrainCrewAPI;
+﻿using System.Linq;
+using TrainCrewAPI;
 
 namespace TatehamaATS_v1
 {
     public class DataToServer
     {
         public string DiaName;
-        public List<TrackCircuitData> OnTrackList = null;
+        public List<TrackCircuitData> OnTrackList = new List<TrackCircuitData>();
         public bool BougoState;
+        public string Kokuchi;
         //将来用
         public float Speed;
         public int PNotch;
         public int BNotch;
         public List<CarState> CarStates = new List<CarState>();
+        public override string ToString()
+        {
+            return $"DiaName:{DiaName}/{string.Join(",", OnTrackList)}";
+        }
     }
 
     public class DataFromServer

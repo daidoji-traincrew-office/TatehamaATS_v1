@@ -56,8 +56,8 @@ namespace TatehamaATS_v1.OnboardDevice
         //all仮設定　必要な分に後で絞る  tconlyontrain?                   
 
         // プロパティ                                                                        
-        internal TrainCrewStateData TcData { get; private set; } = new TrainCrewStateData();
-        internal RecvBeaconStateData BeaconData { get; private set; } = new RecvBeaconStateData();
+        public TrainCrewStateData TcData { get; private set; } = new TrainCrewStateData();
+        public RecvBeaconStateData BeaconData { get; private set; } = new RecvBeaconStateData();
 
         private ConnectionState status = ConnectionState.DisConnect;
         private int BeforeBrake = 0;
@@ -78,7 +78,7 @@ namespace TatehamaATS_v1.OnboardDevice
         /// TrainCrew側データ要求コマンド
         /// (DataRequest, SetEmergencyLight, SetSignalPhase)
         /// </summary>
-        internal string Command
+        public string Command
         {
             get => _command;
             set
@@ -105,7 +105,7 @@ namespace TatehamaATS_v1.OnboardDevice
         /// TrainCrew側データ要求引数
         /// (all, tc, tconlyontrain, tcall, signal, train)
         /// </summary>
-        internal string[] Request
+        public string[] Request
         {
             get => _request;
             set
@@ -249,8 +249,8 @@ namespace TatehamaATS_v1.OnboardDevice
 
                 CommandToTrainCrew requestCommand = new CommandToTrainCrew()
                 {
-                    Command = Command,
-                    Args = Request
+                    command = _command,
+                    args = _request
                 };
 
                 // JSON形式にシリアライズ
@@ -281,8 +281,8 @@ namespace TatehamaATS_v1.OnboardDevice
 
                 CommandToTrainCrew requestCommand = new CommandToTrainCrew()
                 {
-                    Command = command,
-                    Args = request
+                    command = command,
+                    args = request
                 };
 
                 // JSON形式にシリアライズ
@@ -303,7 +303,6 @@ namespace TatehamaATS_v1.OnboardDevice
         internal void SignalSet(SignalData signalData)
         {
             SendSingleCommand("SetSignalPhase", new string[] { signalData.Name, signalData.phase.ToString() });
-
         }
 
         internal void EMSet(EmergencyLightData emergencyLightData)
@@ -388,6 +387,7 @@ namespace TatehamaATS_v1.OnboardDevice
                     // Typeプロパティに応じて処理
                     if (baseData.type == "TrainCrewStateData")
                     {
+                        // Debug.WriteLine(baseData.data);
                         // Data_Base.DataをTrainCrewStateData型にデシリアライズ
                         var _trainCrewStateData = JsonConvert.DeserializeObject<TrainCrewStateData>(baseData.data.ToString());
 
@@ -494,7 +494,16 @@ namespace TatehamaATS_v1.OnboardDevice
 
         public void SetEB(bool State)
         {
-            TrainCrewInput.SetATO_Notch(State ? -8 : 0);
+            if (State)
+            {
+                TrainCrewInput.SetATO_Notch(-8);
+                brake = -8;
+            }
+            else if (brake == -8 && !State)
+            {
+                TrainCrewInput.SetATO_Notch(0);
+                brake = 0;
+            }
         }
     }
 }

@@ -10,8 +10,8 @@ namespace TrainCrewAPI
     [Serializable]
     public class CommandToTrainCrew
     {
-        public string Command { get; set; }
-        public string[] Args { get; set; }
+        public string command { get; set; }
+        public string[] args { get; set; }
     }
 
     /* コマンド一覧
@@ -50,7 +50,7 @@ namespace TrainCrewAPI
         public string type;
         public object data;
     }
-  
+
     [Serializable]
     public class TrainCrewState
     {
@@ -129,6 +129,11 @@ namespace TrainCrewAPI
         public bool On = false;
         public string Last = null; // 軌道回路を踏んだ列車の名前
         public string Name = "";
+
+        public override string ToString()
+        {
+            return $"{Name}";
+        }
     }
 
     public enum DriveMode

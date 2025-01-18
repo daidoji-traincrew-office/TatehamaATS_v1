@@ -28,6 +28,11 @@ namespace TatehamaATS_v1.OnboardDevice
         Network Network;
 
         /// <summary>
+        /// スピーカー
+        /// </summary>
+        ConsoleSpeaker Speaker;
+
+        /// <summary>
         /// ゲーム内時間
         /// </summary>
         static TimeSpan TC_Time;
@@ -36,6 +41,22 @@ namespace TatehamaATS_v1.OnboardDevice
         /// 検査記録部非常線
         /// </summary>
         bool InspectionRecordEmBrakeState;
+
+        /// <summary>
+        /// 自車防護無線
+        /// </summary>
+        bool MyBougoState;
+
+        /// <summary>
+        /// 他車防護無線
+        /// </summary>
+        bool OtherBougoState;
+
+
+        /// <summary>
+        /// 教官添乗状態
+        /// </summary>
+        bool isKyokan;
 
         /// <summary>
         /// 教官添乗状態変化
@@ -69,16 +90,23 @@ namespace TatehamaATS_v1.OnboardDevice
 
         internal CableIO()
         {
+            Speaker = new ConsoleSpeaker();
+
             InspectionRecord = new InspectionRecord();
             InspectionRecord.AddExceptionAction += AddException;
             InspectionRecord.ExceptionCodesChenge += ExceptionCodesChenge;
             InspectionRecord.EmBrakeStateUpdated += InspectionRecordEmBrakeStateChenge;
+
+            ControlLED.AddExceptionAction += AddException;
+
             Relay = new Relay();
             Relay.AddExceptionAction += AddException;
             Relay.TrainCrewDataUpdated += RelayUpdatad;
             Relay.ConnectionStatusChanged += RelayStatesChenged;
+
             Network = new Network();
             Network.AddExceptionAction += AddException;
+            Network.ServerDataUpdate += ServerDataUpdate;
             Network.ConnectionStatusChanged += NetworkStatesChenged;
             Network.Connect();
         }
@@ -91,10 +119,14 @@ namespace TatehamaATS_v1.OnboardDevice
         {
             InspectionRecord.RelayUpdate(TcData);
             ControlLED.TC_ATSDisplayData.SetLED(TcData.myTrainData.ATS_Class, TcData.myTrainData.ATS_Speed, TcData.myTrainData.ATS_State);
-            isKyokanChenge.Invoke(TcData.driveMode == DriveMode.Normal && (TcData.gameScreen == GameScreen.MainGame || TcData.gameScreen == GameScreen.MainGame_Pause || TcData.gameScreen == GameScreen.MainGame_Loading));
-
-            //Todo:データ整形後接続
-            //SendData_to_Server
+            var nowKyokan = TcData.driveMode == DriveMode.Normal && (TcData.gameScreen == GameScreen.MainGame || TcData.gameScreen == GameScreen.MainGame_Pause || TcData.gameScreen == GameScreen.MainGame_Loading);
+            if (nowKyokan != isKyokan)
+            {
+                isKyokanChenge.Invoke(nowKyokan);
+                Speaker.ChengeKyokan(nowKyokan);
+                isKyokan = nowKyokan;
+            }
+            Network.TcDataUpdate(TcData);
         }
 
         /// <summary>
@@ -176,16 +208,20 @@ namespace TatehamaATS_v1.OnboardDevice
             if (ControlLED.isShow)
             {
                 ControlLED.LEDHide();
-                Relay.EMSet(new EmergencyLightData() { Name = "浜園2号踏切", State = true });
-                Relay.SignalSet(new SignalData() { Name = "大道寺入換32L", phase = Phase.R });
-                Relay.SignalSet(new SignalData() { Name = "大道寺下り出発5L", phase = Phase.R });
+                Relay.EMSet(new EmergencyLightData() { Name = "駒野3号踏切", State = true });
+                //Relay.SignalSet(new SignalData() { Name = "大道寺下り出発6L", phase = Phase.R });
+                //Relay.SignalSet(new SignalData() { Name = "江ノ原検車区下り場内5LE", phase = Phase.None });
+                //Relay.SignalSet(new SignalData() { Name = "大道寺上り出発7R", phase = Phase.R });
+                //Relay.SignalSet(new SignalData() { Name = "上り閉塞166", phase = Phase.None });
             }
             else
             {
                 ControlLED.LEDShow();
-                Relay.EMSet(new EmergencyLightData() { Name = "浜園2号踏切", State = false });
-                Relay.SignalSet(new SignalData() { Name = "大道寺入換32L", phase = Phase.G });
-                Relay.SignalSet(new SignalData() { Name = "大道寺下り出発5L", phase = Phase.None });
+                Relay.EMSet(new EmergencyLightData() { Name = "駒野3号踏切", State = false });
+                //Relay.SignalSet(new SignalData() { Name = "大道寺下り出発6L", phase = Phase.None });
+                //Relay.SignalSet(new SignalData() { Name = "江ノ原検車区下り場内5LE", phase = Phase.R });
+                //Relay.SignalSet(new SignalData() { Name = "大道寺上り出発7R", phase = Phase.None });
+                //Relay.SignalSet(new SignalData() { Name = "上り閉塞166", phase = Phase.R });
             }
         }
 
@@ -195,7 +231,7 @@ namespace TatehamaATS_v1.OnboardDevice
         public async void StartRelay()
         {
             Relay.Command = "DataRequest";
-            Relay.Request = new[] { "tconlyontrain" };
+            Relay.Request = new[] { "tcall", "signal" };
             await Relay.TryConnectWebSocket();
         }
 
@@ -221,6 +257,8 @@ namespace TatehamaATS_v1.OnboardDevice
             {
                 Relay.EMSet(item);
             }
+            OtherBougoState = dataFromServer.BougoState;
+            Speaker.ChengeBougoState(MyBougoState || OtherBougoState);
         }
 
         /// <summary>
@@ -237,6 +275,16 @@ namespace TatehamaATS_v1.OnboardDevice
         internal void ATSOffing()
         {
             Network.Close();
+        }
+
+        /// <summary>
+        /// 防護無線指令線
+        /// </summary>
+        /// <param name="State"></param>
+        internal void BougoStateChenge(bool State)
+        {
+            MyBougoState = State;
+            Speaker.ChengeBougoState(MyBougoState || OtherBougoState);
         }
     }
 }

@@ -10,6 +10,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using TakumiteAudioWrapper;
+using TatehamaATS_v1.Exceptions;
 using TrainCrewAPI;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -42,6 +44,20 @@ namespace TatehamaATS_v1.RetsubanWindow
 
         private PictureBox[] Retsuban_7seg;
         private Dictionary<string, Image> Images_7seg;
+
+        /// <summary>
+        /// 故障発生
+        /// </summary>
+        internal event Action<ATSCommonException> AddExceptionAction;
+
+        private AudioManager AudioManager;
+        private AudioWrapper beep1;
+        private AudioWrapper beep2;
+        private AudioWrapper beep3;
+        private AudioWrapper set_trainsetlen;
+        private AudioWrapper set_trainnum;
+        private AudioWrapper set_complete;
+
         public RetsubanWindow()
         {
             InitializeComponent();
@@ -73,6 +89,26 @@ namespace TatehamaATS_v1.RetsubanWindow
                 {" ",  RetsubanResource._7seg_N} ,
                 {"",  RetsubanResource._7seg_N}
             };
+            try
+            {
+                AudioManager = new AudioManager();
+                beep1 = AudioManager.AddAudio("sound/beep1.wav", 1.0f);
+                beep2 = AudioManager.AddAudio("sound/beep2.wav", 1.0f);
+                beep3 = AudioManager.AddAudio("sound/beep3.wav", 1.0f);
+                set_trainnum = AudioManager.AddAudio("sound/set_trainnum.wav", 1.0f);
+                set_trainsetlen = AudioManager.AddAudio("sound/set_trainsetlen.wav", 1.0f);
+                set_complete = AudioManager.AddAudio("sound/set_complete.wav", 1.0f);
+            }
+            catch (ATSCommonException ex)
+            {
+                AddExceptionAction?.Invoke(ex);
+            }
+            catch (Exception ex)
+            {
+                var e = new CsharpException(3, "sound死亡", ex);
+                AddExceptionAction?.Invoke(e);
+            }
+            set_trainnum?.PlayLoop(1.0f);
         }
 
         private void Loaded(object sender, EventArgs e)
@@ -265,6 +301,7 @@ namespace TatehamaATS_v1.RetsubanWindow
             Buttons_Set();
             retsubanMode = RetsubanMode.RetsubanHead;
             NewRetsuban = "";
+            beep1.PlayOnce(1.0f);
             RetsubanDrawing();
         }
 
@@ -274,6 +311,7 @@ namespace TatehamaATS_v1.RetsubanWindow
             Buttons_Set();
             NewCar = "";
             retsubanMode = RetsubanMode.Car;
+            beep1.PlayOnce(1.0f);
             CarDrawing(Car);
         }
 
@@ -283,6 +321,7 @@ namespace TatehamaATS_v1.RetsubanWindow
             Buttons_Set();
             NewHour = "";
             retsubanMode = RetsubanMode.Time;
+            beep1.PlayOnce(1.0f);
             TimeDrawing(BeforeTimeData);
         }
 
@@ -345,6 +384,7 @@ namespace TatehamaATS_v1.RetsubanWindow
                 if (Regex.IsMatch(NewRetsuban, pattern))
                 {
                     NewRetsuban += "X";
+                    beep1.PlayOnce(1.0f);
                     RetsubanDrawing();
                     retsubanMode = RetsubanMode.RetsubanTail;
                 }
@@ -360,6 +400,7 @@ namespace TatehamaATS_v1.RetsubanWindow
                 if (Regex.IsMatch(NewRetsuban, pattern))
                 {
                     NewRetsuban += Tail;
+                    beep1.PlayOnce(1.0f);
                     RetsubanDrawing();
                     retsubanMode = RetsubanMode.RetsubanTail;
                 }
@@ -390,6 +431,7 @@ namespace TatehamaATS_v1.RetsubanWindow
             {
                 NewRetsuban += Head;
                 RetsubanDrawing();
+                beep1.PlayOnce(1.0f);
                 retsubanMode = RetsubanMode.RetsubanDigit;
             }
         }
@@ -463,6 +505,7 @@ namespace TatehamaATS_v1.RetsubanWindow
             if (retsubanMode == RetsubanMode.RetsubanHead || retsubanMode == RetsubanMode.RetsubanDigit)
             {
                 NewRetsuban += Digit;
+                beep1.PlayOnce(1.0f);
                 RetsubanDrawing();
 
                 // 正規表現パターンの定義
@@ -483,15 +526,18 @@ namespace TatehamaATS_v1.RetsubanWindow
                 {
                     case "":
                         NewHour += Digit;
+                        beep1.PlayOnce(1.0f);
                         break;
                     case "0":
                     case "1":
                         NewHour += Digit;
+                        beep1.PlayOnce(1.0f);
                         break;
                     case "2":
                         if (!(Digit == "8" || Digit == "9"))
                         {
                             NewHour += Digit;
+                            beep1.PlayOnce(1.0f);
                         }
                         break;
                     default:
@@ -503,10 +549,12 @@ namespace TatehamaATS_v1.RetsubanWindow
                 if (NewCar == "" && (Digit != "0"))
                 {
                     NewCar += Digit;
+                    beep1.PlayOnce(1.0f);
                 }
                 else if (NewCar == "1" && Digit == "0")
                 {
                     NewCar += Digit;
+                    beep1.PlayOnce(1.0f);
                 }
                 CarDrawing(NewCar);
             }
@@ -525,7 +573,10 @@ namespace TatehamaATS_v1.RetsubanWindow
                     Retsuban = NewRetsuban;
                     retsubanMode = RetsubanMode.None;
                     RetsubanDrawing();
+                    set_trainnum?.Stop();
+                    set_trainsetlen.PlayLoop(1.0f);
                 }
+                beep2.PlayOnce(1.0f);
                 return;
             }
             if (retsubanMode == RetsubanMode.Time)
@@ -534,6 +585,7 @@ namespace TatehamaATS_v1.RetsubanWindow
                 newHour = newHour + 24;
                 ShiftTime = TimeSpan.FromHours(newHour - DateTime.Now.Hour);
                 retsubanMode = RetsubanMode.None;
+                beep2.PlayOnce(1.0f);
                 return;
             }
             if (retsubanMode == RetsubanMode.Car)
@@ -545,6 +597,9 @@ namespace TatehamaATS_v1.RetsubanWindow
                 }
                 retsubanMode = RetsubanMode.None;
                 CarDrawing(NewCar);
+                set_trainsetlen?.Stop();
+                set_complete.PlayOnce(1.0f);
+                beep2.PlayOnce(1.0f);
                 return;
             }
         }
@@ -562,6 +617,7 @@ namespace TatehamaATS_v1.RetsubanWindow
                     return;
                 }
                 NewRetsuban = NewRetsuban.Remove(NewRetsuban.Length - 1);
+                beep1.PlayOnce(1.0f);
                 // 正規表現でモード変更
                 if (Regex.IsMatch(NewRetsuban, @"([回試臨]?)([0-9]{4})(A|B|C|K)?$"))
                 {
@@ -597,6 +653,7 @@ namespace TatehamaATS_v1.RetsubanWindow
                     return;
                 }
                 NewHour = NewHour.Remove(NewHour.Length - 1);
+                beep1.PlayOnce(1.0f);
                 return;
             }
             if (retsubanMode == RetsubanMode.Car)
@@ -606,6 +663,7 @@ namespace TatehamaATS_v1.RetsubanWindow
                     return;
                 }
                 NewCar = NewCar.Remove(NewCar.Length - 1);
+                beep1.PlayOnce(1.0f);
                 CarDrawing(NewCar);
                 return;
             }
