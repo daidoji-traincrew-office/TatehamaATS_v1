@@ -10,6 +10,8 @@ namespace TatehamaATS_v1.MainWindow
     using System.Windows.Forms;
     public partial class MainWindow : Form
     {
+        private const int HOTKEY_ID_F4 = 2; // F4キー用ホットキーID
+        private bool bougoState = false; // トグル用の状態管理変数
 
         private Timer longPressTimer; // 長押し判定用
         private Timer resetImageTimer; // 画像差し替え期間管理用
@@ -62,6 +64,9 @@ namespace TatehamaATS_v1.MainWindow
 
             // グローバルホットキーを登録 (Ctrl + 0)
             RegisterHotKey(this.Handle, HOTKEY_ID, MOD_CONTROL, Keys.D0.GetHashCode());
+
+            // グローバルホットキーの登録 (F4)
+            RegisterHotKey(this.Handle, HOTKEY_ID_F4, 0, Keys.F4.GetHashCode());
 
             // イベントの設定
             Image_Reset.MouseDown += Image_Reset_MouseDown;
@@ -268,9 +273,16 @@ namespace TatehamaATS_v1.MainWindow
         {
             const int WM_HOTKEY = 0x0312;
 
-            if (m.Msg == WM_HOTKEY && m.WParam.ToInt32() == HOTKEY_ID)
+            if (m.Msg == WM_HOTKEY)
             {
-                OnTopMost(); // ホットキーでTopMost切り替え
+                if (m.WParam.ToInt32() == HOTKEY_ID_F4)
+                {
+                    ToggleBougoState(); // F4キーの処理を呼び出し
+                }
+                else if (m.WParam.ToInt32() == HOTKEY_ID)
+                {
+                    OnTopMost(); // Ctrl+0の処理
+                }
             }
             base.WndProc(ref m);
         }
@@ -280,10 +292,20 @@ namespace TatehamaATS_v1.MainWindow
             this.TopMost = true;
         }
 
+        /// <summary>
+        /// F4キー押下時にBougoStateをトグルする処理
+        /// </summary>
+        private void ToggleBougoState()
+        {
+            bougoState = !bougoState; // トグル処理
+            CableIO.BougoStateChenge(bougoState); // 状態をCableIOに送信
+        }
+
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             // フォームが閉じる際にホットキーを解除          
             UnregisterHotKey(this.Handle, HOTKEY_ID);
+            UnregisterHotKey(this.Handle, HOTKEY_ID_F4);
         }
         private void SavePreviousWindowHandle()
         {
