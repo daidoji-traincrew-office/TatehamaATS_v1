@@ -83,6 +83,26 @@ namespace TatehamaATS_v1.MainWindow {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
+        internal static System.Drawing.Bitmap ATS_Cut2 {
+            get {
+                object obj = ResourceManager.GetObject("ATS_Cut2", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.Drawing.Bitmap ATS_Cut3 {
+            get {
+                object obj = ResourceManager.GetObject("ATS_Cut3", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
         internal static System.Drawing.Bitmap ATS_Reset0 {
             get {
                 object obj = ResourceManager.GetObject("ATS_Reset0", resourceCulture);

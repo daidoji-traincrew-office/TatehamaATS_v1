@@ -65,6 +65,8 @@
             Image_ATSCut.Size = new Size(80, 95);
             Image_ATSCut.TabIndex = 0;
             Image_ATSCut.TabStop = false;
+            Image_ATSCut.MouseDown += Image_ATSCut_MouseDown;
+            Image_ATSCut.MouseUp += Image_ATSCut_MouseUp;
             // 
             // Image_Reset
             // 
@@ -200,7 +202,6 @@
             BackgroundImage = MainResource.Main_Background;
             BackgroundImageLayout = ImageLayout.None;
             ClientSize = new Size(300, 300);
-            Controls.Add(Image_Kyokan);
             Controls.Add(Image_TopMostOFF);
             Controls.Add(Image_Relay);
             Controls.Add(Image_Retsuban);
@@ -213,6 +214,7 @@
             Controls.Add(Image_ATSReady);
             Controls.Add(Image_Reset);
             Controls.Add(Image_ATSCut);
+            Controls.Add(Image_Kyokan);
             FormBorderStyle = FormBorderStyle.FixedToolWindow;
             MaximumSize = new Size(316, 339);
             MinimumSize = new Size(316, 339);

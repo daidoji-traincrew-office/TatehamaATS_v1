@@ -505,5 +505,10 @@ namespace TatehamaATS_v1.OnboardDevice
                 brake = 0;
             }
         }
+
+        public void ATSResetPush()
+        {
+            //Todo:ATS復帰入力
+        }
     }
 }

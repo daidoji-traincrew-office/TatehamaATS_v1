@@ -17,12 +17,16 @@ namespace TatehamaATS_v1.MainWindow
         private Timer resetImageTimer; // 画像差し替え期間管理用
         private bool isLongPressed = false;
 
+        private int atsState = 0; // 0: 蓋アリ正常, 1: 蓋アリ開放, 2: 蓋ナシ正常, 3: 蓋ナシ開放
+        private Timer lidTimer; // 0.5秒無操作で蓋が戻る                               
+        private Timer cutLongPressTimer; // 0.3秒長押し判定用
+        private bool isLongPressHandled = false; // 長押し処理を1回だけ実行するためのフラグ
+
         private CableIO CableIO;
         private RetsubanWindow.RetsubanWindow retsubanWindow = new RetsubanWindow.RetsubanWindow();
         private KokuchiWindow.KokuchiWindow kokuchiWindow = new KokuchiWindow.KokuchiWindow();
 
         //TopMost切替用
-
         private const int HOTKEY_ID = 1; // ホットキーID
         private bool isNPressed = false; // Nキーが押されたかを判定するフラグ
 
@@ -73,13 +77,22 @@ namespace TatehamaATS_v1.MainWindow
             Image_Reset.MouseUp += Image_Reset_MouseUp;
             Image_Reset.Click += Image_Reset_Click;
 
-            // 長押し判定用タイマー（0.2秒）
+            // 長押し判定用タイマー（0.3秒）
             longPressTimer = new Timer { Interval = 300 };
             longPressTimer.Tick += LongPressTimer_Tick;
 
-            // 差し替え画像のタイマー（0.5秒）
+            // 差し替え画像のタイマー（0.8秒）
             resetImageTimer = new Timer { Interval = 800 };
             resetImageTimer.Tick += ResetImageTimer_Tick;
+
+            // 0.5 秒後に蓋が戻るためのタイマー       
+            lidTimer = new Timer();
+            lidTimer.Interval = 500; // 0.5 秒
+            lidTimer.Tick += LidTimer_Tick;
+            // 0.3 秒長押し判定用のタイマー                   
+            cutLongPressTimer = new Timer();
+            cutLongPressTimer.Interval = 300; // 0.3 秒
+            cutLongPressTimer.Tick += CutLongPressTimer_Tick;
 
             CableIO = new CableIO();
             CableIO.isKyokanChenge += Kyokan;
@@ -220,7 +233,7 @@ namespace TatehamaATS_v1.MainWindow
         public void Application_ApplicationExit(object sender, EventArgs e)
         {
             //切断処理
-            CableIO.ATSOffing();
+            CableIO.ATSPower_Off();
             //ApplicationExitイベントハンドラを削除
             Application.ApplicationExit -= new EventHandler(Application_ApplicationExit);
         }
@@ -265,6 +278,93 @@ namespace TatehamaATS_v1.MainWindow
                 //Todo: ATS復帰操作を送る
                 Debug.WriteLine("ATS復帰");
                 CableIO.ATSResetPush();
+            }
+        }
+
+        private void Image_ATSCut_MouseDown(object sender, MouseEventArgs e)
+        {
+            isLongPressHandled = false; // フラグリセット
+            cutLongPressTimer.Start(); // 長押し判定タイマー開始
+            lidTimer.Stop(); // クリック時に蓋戻りタイマーをリセット
+        }
+
+        private void Image_ATSCut_MouseUp(object sender, MouseEventArgs e)
+        {
+            cutLongPressTimer.Stop(); // 長押しタイマーを停止
+
+            lidTimer.Start(); // クリック後 0.5 秒後に蓋を戻す
+            if (isLongPressHandled)
+            {
+                return; // すでに長押し処理が実行されていたら、クリック処理を無効化
+            }
+
+            // クリック（短押し）による正常位置と開放位置の切り替え
+            if (atsState == 2 || atsState == 3)
+            {
+                atsState = (atsState == 2) ? 3 : 2;
+                if (atsState == 2)
+                {
+                    Debug.WriteLine("ATS: 正常位置へ変更");
+                    CableIO.ATSPower_On();
+                }
+                else if (atsState == 3)
+                {
+                    Debug.WriteLine("ATS: 開放位置へ変更");
+                    CableIO.ATSPower_Off();
+                }
+            }
+
+            UpdateATSCutImage();
+        }
+
+        private void CutLongPressTimer_Tick(object sender, EventArgs e)
+        {
+            cutLongPressTimer.Stop(); // 長押し検知完了
+            isLongPressHandled = true; // フラグをセット
+
+            // 0.3秒以上の長押しで蓋を外す
+            if (atsState == 0 || atsState == 1) // 通常 or 開放状態で蓋あり → 蓋なし
+            {
+                atsState += 2;
+            }
+            else if (atsState == 3) // 開放蓋なし → 開放蓋ありに変更
+            {
+                atsState = 1;
+            }
+
+            UpdateATSCutImage();
+        }
+
+
+
+        private void LidTimer_Tick(object sender, EventArgs e)
+        {
+            // 0.5 秒後に蓋を戻す
+            if (atsState == 2 || atsState == 3)
+            {
+                atsState -= 2;
+                Debug.WriteLine("ATS: 蓋が落ちて元の状態に戻る");
+                UpdateATSCutImage();
+            }
+            lidTimer.Stop();
+        }
+
+        private void UpdateATSCutImage()
+        {
+            switch (atsState)
+            {
+                case 0:
+                    Image_ATSCut.Image = MainResource.ATS_Cut0; // 蓋アリ/正常位置
+                    break;
+                case 1:
+                    Image_ATSCut.Image = MainResource.ATS_Cut1; // 蓋アリ/開放位置
+                    break;
+                case 2:
+                    Image_ATSCut.Image = MainResource.ATS_Cut2; // 蓋ナシ/正常位置
+                    break;
+                case 3:
+                    Image_ATSCut.Image = MainResource.ATS_Cut3; // 蓋ナシ/開放位置
+                    break;
             }
         }
 
@@ -355,6 +455,11 @@ namespace TatehamaATS_v1.MainWindow
         {
             this.TopMost = false;
             ReturnFocusToTrainCrew();
+        }
+
+        private void Image_ATSCut_Click(object sender, MouseEventArgs e)
+        {
+
         }
     }
 }

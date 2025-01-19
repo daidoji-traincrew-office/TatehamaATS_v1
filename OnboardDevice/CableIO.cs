@@ -3,6 +3,7 @@ using TrainCrewAPI;
 
 namespace TatehamaATS_v1.OnboardDevice
 {
+    using System;
     using System.Diagnostics;
     using TatehamaATS_v1.Network;
     public class CableIO
@@ -36,6 +37,11 @@ namespace TatehamaATS_v1.OnboardDevice
         /// ゲーム内時間
         /// </summary>
         static TimeSpan TC_Time;
+
+        /// <summary>
+        /// ATS電源状態
+        /// </summary>
+        bool ATSPowerState;
 
         /// <summary>
         /// 検査記録部非常線
@@ -91,6 +97,17 @@ namespace TatehamaATS_v1.OnboardDevice
         internal CableIO()
         {
             Speaker = new ConsoleSpeaker();
+            ATSPower_On();
+
+            Network = new Network();
+            Network.AddExceptionAction += AddException;
+            Network.ServerDataUpdate += ServerDataUpdate;
+            Network.ConnectionStatusChanged += NetworkStatesChenged;
+
+            Relay = new Relay();
+            Relay.AddExceptionAction += AddException;
+            Relay.TrainCrewDataUpdated += RelayUpdatad;
+            Relay.ConnectionStatusChanged += RelayStatesChenged;
 
             InspectionRecord = new InspectionRecord();
             InspectionRecord.AddExceptionAction += AddException;
@@ -98,17 +115,24 @@ namespace TatehamaATS_v1.OnboardDevice
             InspectionRecord.EmBrakeStateUpdated += InspectionRecordEmBrakeStateChenge;
 
             ControlLED.AddExceptionAction += AddException;
+        }
 
-            Relay = new Relay();
-            Relay.AddExceptionAction += AddException;
-            Relay.TrainCrewDataUpdated += RelayUpdatad;
-            Relay.ConnectionStatusChanged += RelayStatesChenged;
+        public void ATSPower_On()
+        {
+            ATSPowerState = true;
+            EmBrakeStateChenge();
+            ExceptionCodesChenge(InspectionRecord.exceptions.Values.Select(e => e.ToCode()).ToList());
+        }
 
-            Network = new Network();
-            Network.AddExceptionAction += AddException;
-            Network.ServerDataUpdate += ServerDataUpdate;
-            Network.ConnectionStatusChanged += NetworkStatesChenged;
-            Network.Connect();
+        /// <summary>
+        /// ATS電源切指令線
+        /// </summary>
+        public void ATSPower_Off()
+        {
+            ATSPowerState = false;
+            ExceptionCodesChenge(new List<string> { });
+            EmBrakeStateChenge();
+            ControlLED.TC_ATSDisplayData.SetLED("", "", AtsState.OFF);
         }
 
         /// <summary>
@@ -118,7 +142,14 @@ namespace TatehamaATS_v1.OnboardDevice
         private void RelayUpdatad(TrainCrewStateData TcData)
         {
             InspectionRecord.RelayUpdate(TcData);
-            ControlLED.TC_ATSDisplayData.SetLED(TcData.myTrainData.ATS_Class, TcData.myTrainData.ATS_Speed, TcData.myTrainData.ATS_State);
+            if (ATSPowerState)
+            {
+                ControlLED.TC_ATSDisplayData.SetLED(TcData.myTrainData.ATS_Class, TcData.myTrainData.ATS_Speed, TcData.myTrainData.ATS_State);
+            }
+            else
+            {
+                ControlLED.TC_ATSDisplayData.SetLED("", "", AtsState.OFF);
+            }
             var nowKyokan = TcData.driveMode == DriveMode.Normal && (TcData.gameScreen == GameScreen.MainGame || TcData.gameScreen == GameScreen.MainGame_Pause || TcData.gameScreen == GameScreen.MainGame_Loading);
             if (nowKyokan != isKyokan)
             {
@@ -135,12 +166,22 @@ namespace TatehamaATS_v1.OnboardDevice
         /// <param name="exceptionCodes"></param>
         private void ExceptionCodesChenge(List<string> exceptionCodes)
         {
-            isATSReadyChenge?.Invoke(exceptionCodes.Count == 0);
-            ControlLED.ExceptionCodes = exceptionCodes;
-            isRelayChenge?.Invoke(ContainsPartialMatch(exceptionCodes, "3C"));
-            isTransferChenge?.Invoke(ContainsPartialMatch(exceptionCodes, "3D"));
-            isNetworkChenge?.Invoke(ContainsPartialMatch(exceptionCodes, "3E"));
-
+            if (ATSPowerState)
+            {
+                isATSReadyChenge?.Invoke(exceptionCodes.Count == 0);
+                ControlLED.ExceptionCodes = exceptionCodes;
+                isRelayChenge?.Invoke(ContainsPartialMatch(exceptionCodes, "3C"));
+                isTransferChenge?.Invoke(ContainsPartialMatch(exceptionCodes, "3D"));
+                isNetworkChenge?.Invoke(ContainsPartialMatch(exceptionCodes, "3E"));
+            }
+            else
+            {
+                isATSReadyChenge?.Invoke(false);
+                ControlLED.ExceptionCodes = new List<string> { };
+                isRelayChenge?.Invoke(false);
+                isTransferChenge?.Invoke(false);
+                isNetworkChenge?.Invoke(false);
+            }
         }
 
         /// <summary>
@@ -195,9 +236,17 @@ namespace TatehamaATS_v1.OnboardDevice
         /// </summary>
         private void EmBrakeStateChenge()
         {
-            var emBrakeState = InspectionRecordEmBrakeState;
+            bool emBrakeState;
+            if (ATSPowerState)
+            {
+                emBrakeState = InspectionRecordEmBrakeState;
+            }
+            else
+            {
+                emBrakeState = false;
+            }
             isATSBrakeApplyChenge?.Invoke(emBrakeState);
-            Relay.SetEB(emBrakeState);
+            Relay?.SetEB(emBrakeState);
         }
 
         /// <summary>
@@ -208,20 +257,10 @@ namespace TatehamaATS_v1.OnboardDevice
             if (ControlLED.isShow)
             {
                 ControlLED.LEDHide();
-                Relay.EMSet(new EmergencyLightData() { Name = "駒野3号踏切", State = true });
-                //Relay.SignalSet(new SignalData() { Name = "大道寺下り出発6L", phase = Phase.R });
-                //Relay.SignalSet(new SignalData() { Name = "江ノ原検車区下り場内5LE", phase = Phase.None });
-                //Relay.SignalSet(new SignalData() { Name = "大道寺上り出発7R", phase = Phase.R });
-                //Relay.SignalSet(new SignalData() { Name = "上り閉塞166", phase = Phase.None });
             }
             else
             {
                 ControlLED.LEDShow();
-                Relay.EMSet(new EmergencyLightData() { Name = "駒野3号踏切", State = false });
-                //Relay.SignalSet(new SignalData() { Name = "大道寺下り出発6L", phase = Phase.None });
-                //Relay.SignalSet(new SignalData() { Name = "江ノ原検車区下り場内5LE", phase = Phase.R });
-                //Relay.SignalSet(new SignalData() { Name = "大道寺上り出発7R", phase = Phase.None });
-                //Relay.SignalSet(new SignalData() { Name = "上り閉塞166", phase = Phase.R });
             }
         }
 
@@ -242,7 +281,7 @@ namespace TatehamaATS_v1.OnboardDevice
         internal void AddException(ATSCommonException exception)
         {
             Console.WriteLine(exception.ToString());
-            InspectionRecord.AddException(exception);
+            InspectionRecord?.AddException(exception);
         }
 
         /// <summary>
@@ -267,14 +306,6 @@ namespace TatehamaATS_v1.OnboardDevice
         internal void ATSResetPush()
         {
             InspectionRecord.ATSReset = true;
-        }
-
-        /// <summary>
-        /// ATS電源切指令線
-        /// </summary>
-        internal void ATSOffing()
-        {
-            Network.Close();
         }
 
         /// <summary>
