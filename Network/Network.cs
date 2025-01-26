@@ -53,6 +53,7 @@ namespace TatehamaATS_v1.Network
 
         public Network(OpenIddictClientService service)
         {
+            _service = service;
             Task.Run(() => UpdateLoop());
             OverrideDiaName = "9999";
             TcData = new TrainCrewStateData();
@@ -115,9 +116,8 @@ namespace TatehamaATS_v1.Network
                     Nonce = result.Nonce
                 });
                 _token = resultAuth.BackchannelAccessToken!;
-                // 認証完了！                          
-                connected = true;
-                ConnectionStatusChanged?.Invoke(connected);
+                // 認証完了！      
+                await Connect();
             }
             catch (OpenIddictExceptions.ProtocolException exception)
                 when (exception.Error is OpenIddictConstants.Errors.AccessDenied)
@@ -142,7 +142,7 @@ namespace TatehamaATS_v1.Network
         /// <returns></returns>
         public async Task Connect()
         {
-            AddExceptionAction?.Invoke(new NetworkConnectException(3, "通信部接続失敗"));
+            AddExceptionAction?.Invoke(new NetworkConnectException(7, "通信部接続失敗"));
             ConnectionStatusChanged?.Invoke(connected);
 
             connection = new HubConnectionBuilder()
@@ -244,8 +244,16 @@ namespace TatehamaATS_v1.Network
         /// <returns></returns>
         public async Task SendData_to_Server()
         {
-            Debug.WriteLine($"{SendData}");
-            await connection.SendAsync("SendData_ATS", SendData);
+            try
+            {
+                Debug.WriteLine($"{SendData}");
+                await connection.SendAsync("SendData_ATS", SendData);
+            }
+            catch (Exception ex)
+            {
+                var e = new NetworkException(7, "", ex);
+                AddExceptionAction.Invoke(e);
+            }
         }
 
         public async Task Close()
