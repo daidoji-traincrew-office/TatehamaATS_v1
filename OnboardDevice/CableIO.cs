@@ -1,4 +1,5 @@
-﻿using TatehamaATS_v1.Exceptions;
+﻿using OpenIddict.Client;
+using TatehamaATS_v1.Exceptions;
 using TrainCrewAPI;
 
 namespace TatehamaATS_v1.OnboardDevice
@@ -94,12 +95,12 @@ namespace TatehamaATS_v1.OnboardDevice
         /// </summary>
         internal event Action<bool> isNetworkChenge;
 
-        internal CableIO()
+        internal CableIO(OpenIddictClientService service)
         {
             Speaker = new ConsoleSpeaker();
             ATSPower_On();
 
-            Network = new Network();
+            Network = new Network(service);
             Network.AddExceptionAction += AddException;
             Network.ServerDataUpdate += ServerDataUpdate;
             Network.ConnectionStatusChanged += NetworkStatesChenged;

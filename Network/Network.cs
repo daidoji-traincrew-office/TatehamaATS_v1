@@ -1,3 +1,6 @@
+using OpenIddict.Abstractions;
+using OpenIddict.Client;
+
 namespace TatehamaATS_v1.Network
 {
     using Microsoft.AspNetCore.SignalR.Client;
@@ -10,6 +13,8 @@ namespace TatehamaATS_v1.Network
     {
         public static HubConnection connection;
         public static bool connected = false;
+        private static string _token = "";
+        private readonly OpenIddictClientService _service;
 
         /// <summary>
         /// 送信するべきデータ
@@ -46,7 +51,7 @@ namespace TatehamaATS_v1.Network
         /// </summary>
         internal event Action<DataFromServer> ServerDataUpdate;
 
-        public Network()
+        public Network(OpenIddictClientService service)
         {
             Task.Run(() => UpdateLoop());
             OverrideDiaName = "9999";
@@ -87,6 +92,41 @@ namespace TatehamaATS_v1.Network
                 }
             }
         }
+       
+        /// <summary>
+        /// 認証処理
+        /// </summary>
+        /// <returns></returns>
+        public async Task Authorize()
+        {
+            using var source = new CancellationTokenSource(delay: TimeSpan.FromSeconds(90));
+            try
+            {
+                // Ask OpenIddict to initiate the authentication flow (typically, by starting the system browser).
+                var result = await _service.ChallengeInteractivelyAsync(new()
+                {
+                    CancellationToken = source.Token
+                });
+
+                // Wait for the user to complete the authorization process.
+                var resultAuth = await _service.AuthenticateInteractivelyAsync(new()
+                {
+                    CancellationToken = source.Token,
+                    Nonce = result.Nonce
+                });
+                _token = resultAuth.BackchannelAccessToken!;
+                // 認証完了！
+            }
+            catch (OpenIddictExceptions.ProtocolException exception) 
+                when (exception.Error is OpenIddictConstants.Errors.AccessDenied)
+            {
+                // 認証拒否(サーバーに入ってないとか、ロールがついてないetc...) 
+            }
+            catch (Exception exception)
+            {
+               // その他別な理由で認証失敗 
+            }
+        }
 
         /// <summary>
         /// 接続処理
@@ -98,7 +138,7 @@ namespace TatehamaATS_v1.Network
             ConnectionStatusChanged?.Invoke(connected);
 
             connection = new HubConnectionBuilder()
-                .WithUrl(ServerAddress.SignalAddress)
+                .WithUrl($"{ServerAddress.SignalAddress}/hub/train?access_token={_token}")
                 .WithAutomaticReconnect()
                 .Build();
 
