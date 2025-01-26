@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Drawing;
+using Dapplo.Microsoft.Extensions.Hosting.WinForms;
+using OpenIddict.Client;
 using TatehamaATS_v1.OnboardDevice;
 
 
@@ -8,7 +10,7 @@ namespace TatehamaATS_v1.MainWindow
     using System.Diagnostics;
     using System.Runtime.InteropServices;
     using System.Windows.Forms;
-    public partial class MainWindow : Form
+    public partial class MainWindow : Form, IWinFormsShell
     {
         private const int HOTKEY_ID_F4 = 2; // F4キー用ホットキーID
         private bool bougoState = false; // トグル用の状態管理変数
@@ -58,7 +60,7 @@ namespace TatehamaATS_v1.MainWindow
 
         private IntPtr previousWindowHandle = IntPtr.Zero;
 
-        public MainWindow()
+        public MainWindow(OpenIddictClientService service)
         {
             InitializeComponent();
             this.Load += MainForm_Load;
@@ -94,7 +96,7 @@ namespace TatehamaATS_v1.MainWindow
             cutLongPressTimer.Interval = 300; // 0.3 秒
             cutLongPressTimer.Tick += CutLongPressTimer_Tick;
 
-            CableIO = new CableIO();
+            CableIO = new CableIO(service);
             CableIO.isKyokanChenge += Kyokan;
             CableIO.isATSReadyChenge += ATSReadyLamp;
             CableIO.isATSBrakeApplyChenge += ATSBrakeApplyLamp;
