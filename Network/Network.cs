@@ -1,3 +1,7 @@
+
+using OpenIddict.Abstractions;
+using OpenIddict.Client;
+
 namespace TatehamaATS_v1.Network
 {
     using System.Diagnostics;
@@ -13,6 +17,8 @@ namespace TatehamaATS_v1.Network
     {
         public static HubConnection connection;
         public static bool connected = false;
+        private static string token = "";
+        private readonly OpenIddictClientService _service;
 
         /// <summary>
         /// 故障発生
@@ -34,7 +40,7 @@ namespace TatehamaATS_v1.Network
             ConnectionStatusChanged?.Invoke(connected);
 
             connection = new HubConnectionBuilder()
-                .WithUrl(ServerAddless.SignalAddless)
+                .WithUrl("http://localhost:5154/hub/train")
                 .WithAutomaticReconnect()
                 .Build();
 
@@ -76,6 +82,32 @@ namespace TatehamaATS_v1.Network
                 return Task.CompletedTask;
             };
             await Task.Delay(Timeout.Infinite);
+        }
+
+        public async Task Authorize()
+        {
+            try
+            {
+                // Ask OpenIddict to initiate the authentication flow (typically, by starting the system browser).
+                var result = await _service.ChallengeInteractivelyAsync(new());
+
+                // Wait for the user to complete the authorization process.
+                var resultAuth = await _service.AuthenticateInteractivelyAsync(new()
+                {
+                    Nonce = result.Nonce
+                });
+                token = resultAuth.BackchannelAccessToken!;
+                // 認証完了！
+            }
+            catch (OpenIddictExceptions.ProtocolException exception) 
+                when (exception.Error is OpenIddictConstants.Errors.AccessDenied)
+            {
+                // 認証拒否(サーバーに入ってないとか、ロールがついてないetc...) 
+            }
+            catch (Exception exception)
+            {
+               // その他別な理由で認証失敗 
+            }
         }
 
         public async Task SendData_to_Server(DataToServer sendData)
