@@ -87,12 +87,12 @@ namespace TatehamaATS_v1.Network
                 }
                 catch (Exception ex)
                 {
-                    var e = new SocketCountaException(3, "UpdateLoopぶつ切り", ex);
+                    var e = new NetworkCountaException(3, "UpdateLoopぶつ切り", ex);
                     AddExceptionAction.Invoke(e);
                 }
             }
         }
-       
+
         /// <summary>
         /// 認証処理
         /// </summary>
@@ -115,16 +115,24 @@ namespace TatehamaATS_v1.Network
                     Nonce = result.Nonce
                 });
                 _token = resultAuth.BackchannelAccessToken!;
-                // 認証完了！
+                // 認証完了！                          
+                connected = true;
+                ConnectionStatusChanged?.Invoke(connected);
             }
-            catch (OpenIddictExceptions.ProtocolException exception) 
+            catch (OpenIddictExceptions.ProtocolException exception)
                 when (exception.Error is OpenIddictConstants.Errors.AccessDenied)
             {
-                // 認証拒否(サーバーに入ってないとか、ロールがついてないetc...) 
+                // 認証拒否(サーバーに入ってないとか、ロールがついてないetc...)      
+                var e = new NetworkAccessDenied(7, "認証拒否", exception);
+                AddExceptionAction.Invoke(e);
+                MessageBox.Show($"認証が拒否されました。\n司令主任に連絡してください。", "認証拒否 | 館浜ATS - ダイヤ運転会");
             }
             catch (Exception exception)
             {
-               // その他別な理由で認証失敗 
+                // その他別な理由で認証失敗      
+                var e = new NetworkAuthorizeException(7, "認証拒否以外", exception);
+                AddExceptionAction.Invoke(e);
+                MessageBox.Show($"認証に失敗しました。\n再認証しますか？\n\n{exception.Message}\n{exception.StackTrace})", "認証失敗 | 館浜ATS - ダイヤ運転会", MessageBoxButtons.YesNo);
             }
         }
 
@@ -134,7 +142,7 @@ namespace TatehamaATS_v1.Network
         /// <returns></returns>
         public async Task Connect()
         {
-            AddExceptionAction?.Invoke(new SocketConnectException(3, "通信部接続失敗"));
+            AddExceptionAction?.Invoke(new NetworkConnectException(3, "通信部接続失敗"));
             ConnectionStatusChanged?.Invoke(connected);
 
             connection = new HubConnectionBuilder()
@@ -159,7 +167,7 @@ namespace TatehamaATS_v1.Network
                 catch (Exception ex)
                 {
                     Debug.WriteLine("connection Error!!");
-                    var e = new SocketConnectException(3, "通信部接続失敗", ex);
+                    var e = new NetworkConnectException(3, "通信部接続失敗", ex);
                     AddExceptionAction.Invoke(e);
                 }
             }
@@ -225,7 +233,7 @@ namespace TatehamaATS_v1.Network
             }
             catch (Exception ex)
             {
-                var e = new SocketCountaException(3, "SendDataUpdateぶつ切り", ex);
+                var e = new NetworkCountaException(3, "SendDataUpdateぶつ切り", ex);
                 AddExceptionAction.Invoke(e);
             }
         }
