@@ -1,37 +1,37 @@
 ﻿namespace TatehamaATS_v1.Exceptions
 {
     /// <summary>
-    /// E3:データ有効期限切れ
+    /// EF:通信部未定義故障
     /// </summary>
-    internal class SocketDataExpired : ATSCommonException
+    internal class NetworkException : ATSCommonException
     {
         /// <summary>
-        /// E3:データ有効期限切れ
+        /// EF:通信部未定義故障
         /// </summary>
-        public SocketDataExpired(int place) : base(place)
+        public NetworkException(int place) : base(place)
         {
         }
         /// <summary>
-        /// E3:データ有効期限切れ
+        /// EF:通信部未定義故障
         /// </summary>
-        public SocketDataExpired(int place, string message)
+        public NetworkException(int place, string message)
             : base(place, message)
         {
         }
         /// <summary>
-        /// E3:データ有効期限切れ
+        /// EF:通信部未定義故障
         /// </summary>
-        public SocketDataExpired(int place, string message, Exception inner)
+        public NetworkException(int place, string message, Exception inner)
             : base(place, message, inner)
         {
         }
         public override string ToCode()
         {
-            return Place.ToString() + "E3";
+            return Place.ToString() + "EF";
         }
         public override ResetConditions ResetCondition()
         {
-            return ResetConditions.StopDetection_NetworkReset;
+            return ResetConditions.PowerReset;
         }
         public override OutputBrake ToBrake()
         {

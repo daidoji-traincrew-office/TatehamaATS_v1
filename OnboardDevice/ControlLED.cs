@@ -234,7 +234,7 @@ namespace TatehamaATS_v1
             {
                 int parse = int.Parse(str, System.Globalization.NumberStyles.HexNumber);
                 //数値が故障表示範囲内の場合
-                if (0x180 <= parse && parse <= 0x1FF || 0x280 <= parse && parse <= 0x2FF || 0x380 <= parse && parse <= 0x3FF)
+                if (0x180 <= parse && parse <= 0x1FF || 0x280 <= parse && parse <= 0x2FF || 0x380 <= parse && parse <= 0x3FF || 0x580 <= parse && parse <= 0x5FF || 0x680 <= parse && parse <= 0x6FF || 0x780 <= parse && parse <= 0x7FF || 0x880 <= parse && parse <= 0x8FF)
                 {
                     return parse;
                 }

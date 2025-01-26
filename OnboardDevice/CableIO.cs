@@ -171,9 +171,9 @@ namespace TatehamaATS_v1.OnboardDevice
             {
                 isATSReadyChenge?.Invoke(exceptionCodes.Count == 0);
                 ControlLED.ExceptionCodes = exceptionCodes;
-                isRelayChenge?.Invoke(ContainsPartialMatch(exceptionCodes, "3C"));
-                isTransferChenge?.Invoke(ContainsPartialMatch(exceptionCodes, "3D"));
-                isNetworkChenge?.Invoke(ContainsPartialMatch(exceptionCodes, "3E"));
+                isRelayChenge?.Invoke(ContainsPartialMatch(exceptionCodes, "5C") || ContainsPartialMatch(exceptionCodes, "58"));
+                isTransferChenge?.Invoke(ContainsPartialMatch(exceptionCodes, "6D") || ContainsPartialMatch(exceptionCodes, "68"));
+                isNetworkChenge?.Invoke(ContainsPartialMatch(exceptionCodes, "7E") || ContainsPartialMatch(exceptionCodes, "78"));
             }
             else
             {
@@ -317,6 +317,14 @@ namespace TatehamaATS_v1.OnboardDevice
         {
             MyBougoState = State;
             Speaker.ChengeBougoState(MyBougoState || OtherBougoState);
+        }
+
+        /// <summary>
+        /// 認証司令線
+        /// </summary>
+        internal void NetworkAuthorize()
+        {
+            Network.Authorize();
         }
     }
 }

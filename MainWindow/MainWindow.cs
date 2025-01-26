@@ -114,6 +114,7 @@ namespace TatehamaATS_v1.MainWindow
         private async void MainForm_Load(object sender, EventArgs e)
         {
             CableIO.StartRelay();
+            CableIO.NetworkAuthorize();
         }
 
         private void ATSReadyLamp(bool state)
