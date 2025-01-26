@@ -31,7 +31,7 @@ namespace TatehamaATS_v1.ATSDisplay
             try
             {
                 Bitmap croppedImage;
-                if (0x180 <= imageNumber && imageNumber <= 0x1FF || 0x280 <= imageNumber && imageNumber <= 0x2FF || 0x380 <= imageNumber && imageNumber <= 0x3FF)
+                if (0x180 <= imageNumber && imageNumber <= 0x1FF || 0x280 <= imageNumber && imageNumber <= 0x2FF || 0x380 <= imageNumber && imageNumber <= 0x3FF || 0x580 <= imageNumber && imageNumber <= 0x5FF || 0x680 <= imageNumber && imageNumber <= 0x6FF || 0x780 <= imageNumber && imageNumber <= 0x7FF || 0x880 <= imageNumber && imageNumber <= 0x8FF)
                 {
                     croppedImage = GetImageByNumber(250);
                     //コード表示無視

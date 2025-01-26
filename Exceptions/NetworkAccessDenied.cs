@@ -1,33 +1,38 @@
-﻿namespace TatehamaATS_v1.Exceptions
-{
-    /// <summary>                   
-    /// ED:Socket接続失敗
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace TatehamaATS_v1.Exceptions
+{   /// <summary>                   
+    /// 87:地上認証拒否
     /// </summary>
-    internal class SocketConnectException : ATSCommonException
+    internal class NetworkAccessDenied : ATSCommonException
     {
         /// <summary>
-        /// ED:Socket接続失敗
+        /// 87:地上認証拒否
         /// </summary>
-        public SocketConnectException(int place) : base(place)
+        public NetworkAccessDenied(int place) : base(place)
         {
         }
         /// <summary>                
-        /// ED:Socket接続失敗
+        /// 87:地上認証拒否
         /// </summary>
-        public SocketConnectException(int place, string message)
+        public NetworkAccessDenied(int place, string message)
             : base(place, message)
         {
         }
         /// <summary>                 
-        /// ED:Socket接続失敗
+        /// 87:地上認証拒否
         /// </summary>
-        public SocketConnectException(int place, string message, Exception inner)
+        public NetworkAccessDenied(int place, string message, Exception inner)
             : base(place, message, inner)
         {
         }
         public override string ToCode()
         {
-            return Place.ToString() + "ED";
+            return Place.ToString() + "87";
         }
         public override ResetConditions ResetCondition()
         {

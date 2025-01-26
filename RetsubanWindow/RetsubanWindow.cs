@@ -50,6 +50,11 @@ namespace TatehamaATS_v1.RetsubanWindow
         /// </summary>
         internal event Action<ATSCommonException> AddExceptionAction;
 
+        /// <summary>
+        /// 設定情報変更
+        /// </summary>
+        internal event Action<string> SetDiaNameAction;
+
         private AudioManager AudioManager;
         private AudioWrapper beep1;
         private AudioWrapper beep2;
@@ -105,7 +110,7 @@ namespace TatehamaATS_v1.RetsubanWindow
             }
             catch (Exception ex)
             {
-                var e = new CsharpException(3, "sound死亡", ex);
+                var e = new CsharpException(9, "sound死亡", ex);
                 AddExceptionAction?.Invoke(e);
             }
             set_trainnum?.PlayLoop(1.0f);
@@ -571,10 +576,19 @@ namespace TatehamaATS_v1.RetsubanWindow
                 if (Regex.IsMatch(NewRetsuban, pattern))
                 {
                     Retsuban = NewRetsuban;
+                    SetDiaNameAction?.Invoke(Retsuban);
                     retsubanMode = RetsubanMode.None;
                     RetsubanDrawing();
                     set_trainnum?.Stop();
-                    set_trainsetlen.PlayLoop(1.0f);
+                    if (Car != 0 || Retsuban == "9999")
+                    {
+                        set_trainsetlen?.Stop();
+                        set_complete.PlayOnce(1.0f);
+                    }
+                    else
+                    {
+                        set_trainsetlen.PlayLoop(1.0f);
+                    }
                 }
                 beep2.PlayOnce(1.0f);
                 return;
@@ -598,7 +612,15 @@ namespace TatehamaATS_v1.RetsubanWindow
                 retsubanMode = RetsubanMode.None;
                 CarDrawing(NewCar);
                 set_trainsetlen?.Stop();
-                set_complete.PlayOnce(1.0f);
+                if (Retsuban != null || Retsuban == "9999")
+                {
+                    set_trainnum?.Stop();
+                    set_complete.PlayOnce(1.0f);
+                }
+                else
+                {
+                    set_trainnum.PlayLoop(1.0f);
+                }                                 
                 beep2.PlayOnce(1.0f);
                 return;
             }
