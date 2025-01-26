@@ -29,7 +29,7 @@ namespace TatehamaATS_v1.Network
         /// <summary>
         /// 運転会列番
         /// </summary>
-        private string OverrideDiaName;
+        internal string OverrideDiaName;
 
         /// <summary>
         /// 防護無線発報状態
@@ -80,6 +80,7 @@ namespace TatehamaATS_v1.Network
                 await timer;
                 if (!connected)
                 {
+                    AddExceptionAction.Invoke(new NetworkConnectException(7, "未接続"));
                     continue;
                 }
                 try
@@ -132,7 +133,11 @@ namespace TatehamaATS_v1.Network
                 // その他別な理由で認証失敗      
                 var e = new NetworkAuthorizeException(7, "認証拒否以外", exception);
                 AddExceptionAction.Invoke(e);
-                MessageBox.Show($"認証に失敗しました。\n再認証しますか？\n\n{exception.Message}\n{exception.StackTrace})", "認証失敗 | 館浜ATS - ダイヤ運転会", MessageBoxButtons.YesNo);
+                DialogResult result = MessageBox.Show($"認証に失敗しました。\n再認証しますか？\n\n{exception.Message}\n{exception.StackTrace})", "認証失敗 | 館浜ATS - ダイヤ運転会", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
+                if (result == DialogResult.Yes)
+                {
+                    Authorize();
+                }
             }
         }
 
@@ -167,6 +172,8 @@ namespace TatehamaATS_v1.Network
                 catch (Exception ex)
                 {
                     Debug.WriteLine("connection Error!!");
+                    connected = false;
+                    ConnectionStatusChanged?.Invoke(connected);
                     var e = new NetworkConnectException(7, "通信部接続失敗", ex);
                     AddExceptionAction.Invoke(e);
                 }

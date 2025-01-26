@@ -104,6 +104,9 @@ namespace TatehamaATS_v1.MainWindow
             CableIO.isTransferChenge += TransferLamp;
             CableIO.isNetworkChenge += NetworkLamp;
             Application.ApplicationExit += new EventHandler(Application_ApplicationExit);
+
+            retsubanWindow.AddExceptionAction += CableIO.AddException;
+            retsubanWindow.SetDiaNameAction += CableIO.RetsubanSet;
         }
 
         /// <summary>

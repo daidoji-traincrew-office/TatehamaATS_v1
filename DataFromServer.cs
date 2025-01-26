@@ -5,15 +5,15 @@ namespace TatehamaATS_v1
 {
     public class DataToServer
     {
-        public string DiaName;
-        public List<TrackCircuitData> OnTrackList = new List<TrackCircuitData>();
-        public bool BougoState;
-        public string Kokuchi;
+        public string DiaName { get; set; }
+        public List<TrackCircuitData> OnTrackList { get; set; } = new List<TrackCircuitData>();
+        public bool BougoState { get; set; }
+        public string Kokuchi { get; set; }
         //将来用
-        public float Speed;
-        public int PNotch;
-        public int BNotch;
-        public List<CarState> CarStates = new List<CarState>();
+        public float Speed { get; set; }
+        public int PNotch { get; set; }
+        public int BNotch { get; set; }
+        public List<CarState> CarStates { get; set; } = new List<CarState>();
         public override string ToString()
         {
             return $"DiaName:{DiaName}/{string.Join(",", OnTrackList)}";

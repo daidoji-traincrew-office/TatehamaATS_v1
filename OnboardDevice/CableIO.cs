@@ -118,6 +118,9 @@ namespace TatehamaATS_v1.OnboardDevice
             ControlLED.AddExceptionAction += AddException;
         }
 
+        /// <summary>
+        /// ATS電源入指令線
+        /// </summary>
         public void ATSPower_On()
         {
             ATSPowerState = true;
@@ -320,11 +323,19 @@ namespace TatehamaATS_v1.OnboardDevice
         }
 
         /// <summary>
-        /// 認証司令線
+        /// 認証指令線
         /// </summary>
         internal void NetworkAuthorize()
         {
             Network.Authorize();
+        }
+
+        /// <summary>
+        /// 列番情報変更線
+        /// </summary>
+        internal void RetsubanSet(string Retsuban)
+        {
+            Network.OverrideDiaName = Retsuban;
         }
     }
 }
