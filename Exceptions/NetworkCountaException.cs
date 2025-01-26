@@ -1,37 +1,37 @@
 ﻿namespace TatehamaATS_v1.Exceptions
 {
     /// <summary>
-    /// EF:通信部未定義故障
+    /// EE:通信部カウンタ異常
     /// </summary>
-    internal class SocketException : ATSCommonException
+    internal class NetworkCountaException : ATSCommonException
     {
         /// <summary>
-        /// EF:通信部未定義故障
+        /// EE:通信部カウンタ異常
         /// </summary>
-        public SocketException(int place) : base(place)
+        public NetworkCountaException(int place) : base(place)
         {
         }
         /// <summary>
-        /// EF:通信部未定義故障
+        /// EE:通信部カウンタ異常
         /// </summary>
-        public SocketException(int place, string message)
+        public NetworkCountaException(int place, string message)
             : base(place, message)
         {
         }
         /// <summary>
-        /// EF:通信部未定義故障
+        /// EE:通信部カウンタ異常
         /// </summary>
-        public SocketException(int place, string message, Exception inner)
+        public NetworkCountaException(int place, string message, Exception inner)
             : base(place, message, inner)
         {
         }
         public override string ToCode()
         {
-            return Place.ToString() + "EF";
+            return Place.ToString() + "EE";
         }
         public override ResetConditions ResetCondition()
         {
-            return ResetConditions.PowerReset;
+            return ResetConditions.StopDetection_NetworkReset;
         }
         public override OutputBrake ToBrake()
         {

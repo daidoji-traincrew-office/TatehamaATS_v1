@@ -1,33 +1,33 @@
 ﻿namespace TatehamaATS_v1.Exceptions
 {
     /// <summary>
-    /// EE:通信部カウンタ異常
+    /// E5:連続タイムアウト
     /// </summary>
-    internal class SocketCountaException : ATSCommonException
+    internal class NetworkTimeOutException : ATSCommonException
     {
         /// <summary>
-        /// EE:通信部カウンタ異常
+        /// E5:連続タイムアウト
         /// </summary>
-        public SocketCountaException(int place) : base(place)
+        public NetworkTimeOutException(int place) : base(place)
         {
         }
         /// <summary>
-        /// EE:通信部カウンタ異常
+        /// E5:連続タイムアウト
         /// </summary>
-        public SocketCountaException(int place, string message)
+        public NetworkTimeOutException(int place, string message)
             : base(place, message)
         {
         }
         /// <summary>
-        /// EE:通信部カウンタ異常
+        /// E5:連続タイムアウト
         /// </summary>
-        public SocketCountaException(int place, string message, Exception inner)
+        public NetworkTimeOutException(int place, string message, Exception inner)
             : base(place, message, inner)
         {
         }
         public override string ToCode()
         {
-            return Place.ToString() + "EE";
+            return Place.ToString() + "E5";
         }
         public override ResetConditions ResetCondition()
         {

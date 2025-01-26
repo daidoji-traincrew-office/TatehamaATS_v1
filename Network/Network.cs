@@ -29,7 +29,7 @@ namespace TatehamaATS_v1.Network
         /// <summary>
         /// 運転会列番
         /// </summary>
-        private string OverrideDiaName;
+        internal string OverrideDiaName;
 
         /// <summary>
         /// 防護無線発報状態
@@ -53,6 +53,7 @@ namespace TatehamaATS_v1.Network
 
         public Network(OpenIddictClientService service)
         {
+            _service = service;
             Task.Run(() => UpdateLoop());
             OverrideDiaName = "9999";
             TcData = new TrainCrewStateData();
@@ -79,6 +80,7 @@ namespace TatehamaATS_v1.Network
                 await timer;
                 if (!connected)
                 {
+                    AddExceptionAction.Invoke(new NetworkConnectException(7, "未接続"));
                     continue;
                 }
                 try
@@ -87,12 +89,12 @@ namespace TatehamaATS_v1.Network
                 }
                 catch (Exception ex)
                 {
-                    var e = new SocketCountaException(3, "UpdateLoopぶつ切り", ex);
+                    var e = new NetworkCountaException(3, "UpdateLoopぶつ切り", ex);
                     AddExceptionAction.Invoke(e);
                 }
             }
         }
-       
+
         /// <summary>
         /// 認証処理
         /// </summary>
@@ -115,16 +117,27 @@ namespace TatehamaATS_v1.Network
                     Nonce = result.Nonce
                 });
                 _token = resultAuth.BackchannelAccessToken!;
-                // 認証完了！
+                // 認証完了！      
+                await Connect();
             }
-            catch (OpenIddictExceptions.ProtocolException exception) 
+            catch (OpenIddictExceptions.ProtocolException exception)
                 when (exception.Error is OpenIddictConstants.Errors.AccessDenied)
             {
-                // 認証拒否(サーバーに入ってないとか、ロールがついてないetc...) 
+                // 認証拒否(サーバーに入ってないとか、ロールがついてないetc...)      
+                var e = new NetworkAccessDenied(7, "認証拒否", exception);
+                AddExceptionAction.Invoke(e);
+                MessageBox.Show($"認証が拒否されました。\n司令主任に連絡してください。", "認証拒否 | 館浜ATS - ダイヤ運転会");
             }
             catch (Exception exception)
             {
-               // その他別な理由で認証失敗 
+                // その他別な理由で認証失敗      
+                var e = new NetworkAuthorizeException(7, "認証拒否以外", exception);
+                AddExceptionAction.Invoke(e);
+                DialogResult result = MessageBox.Show($"認証に失敗しました。\n再認証しますか？\n\n{exception.Message}\n{exception.StackTrace})", "認証失敗 | 館浜ATS - ダイヤ運転会", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
+                if (result == DialogResult.Yes)
+                {
+                    Authorize();
+                }
             }
         }
 
@@ -134,7 +147,7 @@ namespace TatehamaATS_v1.Network
         /// <returns></returns>
         public async Task Connect()
         {
-            AddExceptionAction?.Invoke(new SocketConnectException(3, "通信部接続失敗"));
+            AddExceptionAction?.Invoke(new NetworkConnectException(7, "通信部接続失敗"));
             ConnectionStatusChanged?.Invoke(connected);
 
             connection = new HubConnectionBuilder()
@@ -159,7 +172,9 @@ namespace TatehamaATS_v1.Network
                 catch (Exception ex)
                 {
                     Debug.WriteLine("connection Error!!");
-                    var e = new SocketConnectException(3, "通信部接続失敗", ex);
+                    connected = false;
+                    ConnectionStatusChanged?.Invoke(connected);
+                    var e = new NetworkConnectException(7, "通信部接続失敗", ex);
                     AddExceptionAction.Invoke(e);
                 }
             }
@@ -225,7 +240,7 @@ namespace TatehamaATS_v1.Network
             }
             catch (Exception ex)
             {
-                var e = new SocketCountaException(3, "SendDataUpdateぶつ切り", ex);
+                var e = new NetworkCountaException(7, "SendDataUpdateぶつ切り", ex);
                 AddExceptionAction.Invoke(e);
             }
         }
@@ -236,8 +251,16 @@ namespace TatehamaATS_v1.Network
         /// <returns></returns>
         public async Task SendData_to_Server()
         {
-            Debug.WriteLine($"{SendData}");
-            await connection.SendAsync("SendData_ATS", SendData);
+            try
+            {
+                Debug.WriteLine($"{SendData}");
+                await connection.SendAsync("SendData_ATS", SendData);
+            }
+            catch (Exception ex)
+            {
+                var e = new NetworkException(7, "", ex);
+                AddExceptionAction.Invoke(e);
+            }
         }
 
         public async Task Close()
