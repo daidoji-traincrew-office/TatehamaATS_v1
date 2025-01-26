@@ -98,7 +98,7 @@ namespace TatehamaATS_v1.Network
             ConnectionStatusChanged?.Invoke(connected);
 
             connection = new HubConnectionBuilder()
-                .WithUrl(ServerAddless.SignalAddless)
+                .WithUrl(ServerAddress.SignalAddress)
                 .WithAutomaticReconnect()
                 .Build();
 
