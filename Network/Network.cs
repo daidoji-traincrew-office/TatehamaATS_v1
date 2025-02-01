@@ -256,6 +256,11 @@ namespace TatehamaATS_v1.Network
                 Debug.WriteLine($"{SendData}");
                 await connection.SendAsync("SendData_ATS", SendData);
             }
+            catch (InvalidOperationException ex)
+            {
+                var e = new NetworkConnectException(7, "切断と思われる", ex);
+                AddExceptionAction.Invoke(e);
+            }
             catch (Exception ex)
             {
                 var e = new NetworkException(7, "", ex);
