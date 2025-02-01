@@ -85,7 +85,7 @@ namespace TatehamaATS_v1.OnboardDevice
             {
                 if (value == null)
                 {
-                    var e = new RelayException(3, "無効なコマンドです。null");
+                    var e = new RelayException(5, "無効なコマンドです。null");
                     AddExceptionAction.Invoke(e);
                 }
 
@@ -95,7 +95,7 @@ namespace TatehamaATS_v1.OnboardDevice
                 }
                 else
                 {
-                    var e = new RelayException(3, "無効なコマンドです。");
+                    var e = new RelayException(5, "無効なコマンドです。");
                     AddExceptionAction.Invoke(e);
                 }
             }
@@ -112,7 +112,7 @@ namespace TatehamaATS_v1.OnboardDevice
             {
                 if (value == null)
                 {
-                    var e = new RelayException(3, "無効なコマンドです。");
+                    var e = new RelayException(5, "無効なコマンドです。");
                     AddExceptionAction.Invoke(e);
                 }
 
@@ -122,7 +122,7 @@ namespace TatehamaATS_v1.OnboardDevice
                 }
                 else
                 {
-                    var e = new RelayException(3, "無効な要求です。");
+                    var e = new RelayException(5, "無効な要求です。");
                     AddExceptionAction.Invoke(e);
                 }
             }
@@ -193,7 +193,7 @@ namespace TatehamaATS_v1.OnboardDevice
         {
             status = ConnectionState.DisConnect;
             ConnectionStatusChanged?.Invoke(status);
-            AddExceptionAction.Invoke(new RelayConnectException(3, "起動直後"));
+            AddExceptionAction.Invoke(new RelayConnectException(5, "起動直後"));
             while (true)
             {
                 _webSocket = new ClientWebSocket();
@@ -214,7 +214,7 @@ namespace TatehamaATS_v1.OnboardDevice
                 {
                     status = ConnectionState.DisConnect;
                     ConnectionStatusChanged?.Invoke(status);
-                    var e = new RelayConnectException(3, "", ex);
+                    var e = new RelayConnectException(5, "", ex);
                     AddExceptionAction.Invoke(e);
                     await Task.Delay(1000);
                 }
@@ -264,7 +264,7 @@ namespace TatehamaATS_v1.OnboardDevice
             {
                 status = ConnectionState.DisConnect;
                 ConnectionStatusChanged?.Invoke(status);
-                throw new RelayConnectException(3, "50300弾かれ", ex);
+                throw new RelayConnectException(5, "50300弾かれ", ex);
             }
         }
 
@@ -296,7 +296,7 @@ namespace TatehamaATS_v1.OnboardDevice
             {
                 status = ConnectionState.DisConnect;
                 ConnectionStatusChanged?.Invoke(status);
-                throw new RelayConnectException(3, "50300弾かれ", ex);
+                throw new RelayConnectException(5, "50300弾かれ", ex);
             }
         }
 
@@ -321,7 +321,7 @@ namespace TatehamaATS_v1.OnboardDevice
                 }
                 else
                 {
-                    throw new RelayException(3, $"無効なコマンド({command})または要求{string.Join(",", request)}です。");
+                    throw new RelayException(5, $"無効なコマンド({command})または要求{string.Join(",", request)}です。");
                 }
             }
             catch (ATSCommonException ex)
@@ -332,7 +332,7 @@ namespace TatehamaATS_v1.OnboardDevice
             {
                 status = ConnectionState.DisConnect;
                 ConnectionStatusChanged?.Invoke(status);
-                var e = new RelayConnectException(3, "", ex);
+                var e = new RelayConnectException(5, "", ex);
                 AddExceptionAction.Invoke(e);
                 await Task.Delay(1000);
             }
@@ -405,7 +405,7 @@ namespace TatehamaATS_v1.OnboardDevice
                         }
                         else
                         {
-                            var e = new RelayCarInfoAbnormal(3, "TcData作成失敗");
+                            var e = new RelayCarInfoAbnormal(5, "TcData作成失敗");
                             AddExceptionAction.Invoke(e);
                         }
                     }
@@ -426,13 +426,13 @@ namespace TatehamaATS_v1.OnboardDevice
                         }
                         else
                         {
-                            var e = new TransponderInfoAbnormal(3, "BeaconData作成失敗");
+                            var e = new TransponderInfoAbnormal(5, "BeaconData作成失敗");
                             AddExceptionAction.Invoke(e);
                         }
                     }
                     else
                     {
-                        var e = new RelayOtherInfoAbnormal(3, "不明タイプ");
+                        var e = new RelayOtherInfoAbnormal(5, "不明タイプ");
                         AddExceptionAction.Invoke(e);
                     }
                 }
@@ -468,7 +468,7 @@ namespace TatehamaATS_v1.OnboardDevice
         {
             if (target == null || source == null)
             {
-                var e = new RelayException(3, "ターゲットまたはソースは null にできません");
+                var e = new RelayException(5, "ターゲットまたはソースは null にできません");
                 AddExceptionAction.Invoke(e);
             }
 

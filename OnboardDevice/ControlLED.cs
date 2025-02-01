@@ -37,7 +37,7 @@ namespace TatehamaATS_v1
             }
             catch (Exception ex)
             {
-                throw new LEDControlInitialzingFailure(3, "ControlLED.cs@ControlLED()", ex);
+                throw new LEDControlInitialzingFailure(8, "ControlLED.cs@ControlLED()", ex);
             }
             Task.Run(() => StartDisplayUpdateLoop());
         }
@@ -93,7 +93,7 @@ namespace TatehamaATS_v1
                 }
                 catch (Exception ex)
                 {
-                    var e = new LEDControlException(3, "LEDカウンタ異常", ex);
+                    var e = new LEDControlException(8, "LEDカウンタ異常", ex);
                     AddExceptionAction.Invoke(e);
                 }
                 await timer;
@@ -350,7 +350,7 @@ namespace TatehamaATS_v1
                 case "御水 澪":
                     return 63;
                 default:
-                    throw new LEDDisplayStringAbnormal(3, $"未定義:{str}　ControlLED.cs@ConvertToLEDNumber()");
+                    throw new LEDDisplayStringAbnormal(8, $"未定義:{str}　ControlLED.cs@ConvertToLEDNumber()");
             }
         }
     }
