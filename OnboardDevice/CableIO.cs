@@ -137,6 +137,7 @@ namespace TatehamaATS_v1.OnboardDevice
             ExceptionCodesChenge(new List<string> { });
             EmBrakeStateChenge();
             ControlLED.TC_ATSDisplayData.SetLED("", "", AtsState.OFF);
+            Relay?.SetEB(false);
         }
 
         /// <summary>
@@ -294,8 +295,14 @@ namespace TatehamaATS_v1.OnboardDevice
         /// <param name="dataFromServer"></param>
         internal void ServerDataUpdate(DataFromServer dataFromServer)
         {
-            Relay.SignalSet(dataFromServer.NextSignalData);
-            Relay.SignalSet(dataFromServer.DoubleNextSignalData);
+            foreach (var sigdata in dataFromServer.NextSignalData)
+            {
+                Relay.SignalSet(sigdata);
+            }
+            foreach (var sigdata in dataFromServer.DoubleNextSignalData)
+            {
+                Relay.SignalSet(sigdata);
+            }
             foreach (var item in dataFromServer.EmergencyLightDatas)
             {
                 Relay.EMSet(item);

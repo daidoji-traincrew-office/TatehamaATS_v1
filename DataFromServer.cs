@@ -22,8 +22,8 @@ namespace TatehamaATS_v1
 
     public class DataFromServer
     {
-        public SignalData NextSignalData = null;
-        public SignalData DoubleNextSignalData = null;
+        public List<SignalData> NextSignalData = null;
+        public List<SignalData> DoubleNextSignalData = null;
         //進路表示の表示はTC本体実装待ち　未決定
         public bool BougoState;
         public List<EmergencyLightData> EmergencyLightDatas;
