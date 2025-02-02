@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using NAudio.Wave;
 
 namespace TakumiteAudioWrapper
@@ -7,22 +6,18 @@ namespace TakumiteAudioWrapper
     /// <summary>
     /// ループ再生を実現するためのストリーム
     /// </summary>
-    internal class LoopStream : WaveStream
+    public class LoopStream : WaveStream
     {
         private readonly WaveStream _sourceStream;
+        public float Volume { get; set; } = 1.0f; // 音量調整用プロパティを追加
 
         public LoopStream(WaveStream sourceStream)
         {
             _sourceStream = sourceStream;
-            EnableLooping = true;
         }
 
-        public bool EnableLooping { get; set; }
-
         public override WaveFormat WaveFormat => _sourceStream.WaveFormat;
-
         public override long Length => _sourceStream.Length;
-
         public override long Position
         {
             get => _sourceStream.Position;
@@ -31,23 +26,23 @@ namespace TakumiteAudioWrapper
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            int totalBytesRead = 0;
-
-            while (totalBytesRead < count)
+            int bytesRead = _sourceStream.Read(buffer, offset, count);
+            if (bytesRead == 0)
             {
-                int bytesRead = _sourceStream.Read(buffer, offset + totalBytesRead, count - totalBytesRead);
-                if (bytesRead == 0)
-                {
-                    if (_sourceStream.Position == 0 || !EnableLooping)
-                    {
-                        break;
-                    }
-                    _sourceStream.Position = 0;
-                }
-                totalBytesRead += bytesRead;
+                _sourceStream.Position = 0; // ループ
+                bytesRead = _sourceStream.Read(buffer, offset, count);
             }
 
-            return totalBytesRead;
+            // 音量調整
+            for (int i = 0; i < bytesRead; i += 2)
+            {
+                short sample = (short)(buffer[offset + i] | (buffer[offset + i + 1] << 8));
+                sample = (short)(sample * Volume);
+                buffer[offset + i] = (byte)(sample & 0xFF);
+                buffer[offset + i + 1] = (byte)((sample >> 8) & 0xFF);
+            }
+
+            return bytesRead;
         }
     }
 }
