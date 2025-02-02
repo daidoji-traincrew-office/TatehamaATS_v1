@@ -34,7 +34,7 @@ namespace TatehamaATS_v1.Network
         /// <summary>
         /// 防護無線発報状態
         /// </summary>
-        private bool IsBougo;
+        internal bool IsBougo;
 
         /// <summary>
         /// 故障発生

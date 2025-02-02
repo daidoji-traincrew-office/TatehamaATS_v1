@@ -326,6 +326,7 @@ namespace TatehamaATS_v1.OnboardDevice
         internal void BougoStateChenge(bool State)
         {
             MyBougoState = State;
+            Network.IsBougo = State; 
             Speaker.ChengeBougoState(MyBougoState || OtherBougoState);
         }
 
