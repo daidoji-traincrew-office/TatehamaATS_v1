@@ -155,10 +155,12 @@ namespace TatehamaATS_v1.Network
                 .WithAutomaticReconnect()
                 .Build();
 
-            connection.On<DataFromServer>("ReceiveData_ATS", DataFromServer =>
-            {
-                ServerDataUpdate?.Invoke(DataFromServer);
-            });
+            //connection.On<DataFromServer>("ReceiveData_ATS", DataFromServer =>
+            //{
+            //    Debug.WriteLine("受信");
+            //    Debug.WriteLine(DataFromServer.ToString());
+            //    ServerDataUpdate?.Invoke(DataFromServer);
+            //});
 
             while (!connected)
             {
@@ -220,6 +222,7 @@ namespace TatehamaATS_v1.Network
                 if (TcData.trackCircuitList != null)
                 {
                     var sendCircuit = new List<TrackCircuitData>();
+                    var HasInvalidCharsFlag = false;
                     //軌道回路
                     foreach (var trackCircuit in TcData.trackCircuitList)
                     {
@@ -228,11 +231,15 @@ namespace TatehamaATS_v1.Network
                             if (trackCircuit.Last == TcData.myTrainData.diaName)
                             {
                                 trackCircuit.Last = OverrideDiaName;
+                                if (HasInvalidChars(trackCircuit.Name)) HasInvalidCharsFlag = true;
                                 sendCircuit.Add(trackCircuit);
                             }
                         }
                     }
-                    SendData.OnTrackList = sendCircuit;
+                    if (!HasInvalidCharsFlag)
+                    {
+                        SendData.OnTrackList = sendCircuit;
+                    }
                 }
 
                 //告知仮実装
@@ -246,6 +253,22 @@ namespace TatehamaATS_v1.Network
         }
 
         /// <summary>
+        /// 文字列に不正な文字が含まれているか判定する
+        /// </summary>
+        public static bool HasInvalidChars(string input)
+        {
+            foreach (char c in input)
+            {
+                // 制御文字（改行・タブを除く）またはU+FFFD（�）が含まれていたら文字化け
+                if ((char.IsControl(c) && c != '\r' && c != '\n' && c != '\t') || c == '\uFFFD')
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
         /// サーバーにデータ
         /// </summary>
         /// <returns></returns>
@@ -254,7 +277,10 @@ namespace TatehamaATS_v1.Network
             try
             {
                 Debug.WriteLine($"{SendData}");
-                await connection.SendAsync("SendData_ATS", SendData);
+                DataFromServer DataFromServer = await connection.InvokeAsync<DataFromServer>("SendData_ATS", SendData);
+                //    Debug.WriteLine("受信");
+                Debug.WriteLine(DataFromServer.ToString());
+                ServerDataUpdate?.Invoke(DataFromServer);
             }
             catch (InvalidOperationException ex)
             {

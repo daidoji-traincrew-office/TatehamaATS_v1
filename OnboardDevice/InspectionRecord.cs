@@ -29,7 +29,7 @@ namespace TatehamaATS_v1.OnboardDevice
         public bool RelayState;
         public bool NetworkState;
         public bool ATSReset;
-        private bool PowerReset;
+        public bool PowerReset;
         private TimeSpan RelayUpdatedTime;
         internal TrainCrewStateData TcData;
 
@@ -161,7 +161,7 @@ namespace TatehamaATS_v1.OnboardDevice
                         break;
                     case ResetConditions.StopDetection_RelayReset:
                         if (RelayState) exceptions.Remove(key);
-                        break;          
+                        break;
                     case ResetConditions.StopDetection_NetworkReset:
                         if (NetworkState) exceptions.Remove(key);
                         break;
@@ -196,6 +196,7 @@ namespace TatehamaATS_v1.OnboardDevice
                         }
                         break;
                 }
+                if (PowerReset) exceptions.Remove(key);
             }
             if (StopDetection)
             {
@@ -203,6 +204,7 @@ namespace TatehamaATS_v1.OnboardDevice
             }
             RetsubanReset = false;
             ATSReset = false;
+            PowerReset = false;
         }
 
         internal void RelayUpdate(TrainCrewStateData tcData)

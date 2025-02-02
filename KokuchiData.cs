@@ -2,9 +2,9 @@
 {
     public class KokuchiData
     {
-        public KokuchiType Type;
-        public string DisplayData;
-        public DateTime OriginTime;
+        public KokuchiType Type { get; set; }
+        public string DisplayData { get; set; }
+        public DateTime OriginTime { get; set; }
 
         public KokuchiData(KokuchiType Type, string DisplayData, DateTime OriginTime)
         {

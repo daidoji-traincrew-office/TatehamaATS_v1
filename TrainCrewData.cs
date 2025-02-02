@@ -181,8 +181,12 @@ namespace TrainCrewAPI
     [Serializable]
     public class SignalData
     {
-        public string Name;
-        public Phase phase = Phase.None;
+        public string Name { get; set; }
+        public Phase phase { get; set; } = Phase.None;
+        public override string ToString()
+        {
+            return $"SignalData:{Name}/{phase}";
+        }
     }
 
     public enum Phase

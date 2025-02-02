@@ -138,6 +138,7 @@ namespace TatehamaATS_v1.OnboardDevice
             EmBrakeStateChenge();
             ControlLED.TC_ATSDisplayData.SetLED("", "", AtsState.OFF);
             Relay?.SetEB(false);
+            InspectionRecord.PowerReset = true;
         }
 
         /// <summary>

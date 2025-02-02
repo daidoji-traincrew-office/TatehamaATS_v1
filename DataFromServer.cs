@@ -22,17 +22,21 @@ namespace TatehamaATS_v1
 
     public class DataFromServer
     {
-        public List<SignalData> NextSignalData = null;
-        public List<SignalData> DoubleNextSignalData = null;
+        public List<SignalData> NextSignalData { get; set; } = null;
+        public List<SignalData> DoubleNextSignalData { get; set; } = null;
         //進路表示の表示はTC本体実装待ち　未決定
-        public bool BougoState;
-        public List<EmergencyLightData> EmergencyLightDatas;
-        public Dictionary<string, KokuchiData> KokuchiData;
+        public bool BougoState { get; set; }
+        public List<EmergencyLightData> EmergencyLightDatas { get; set; }
+        public Dictionary<string, KokuchiData> KokuchiData { get; set; }
+        public override string ToString()
+        {
+            return $"BougoState:{BougoState}/{string.Join(",", NextSignalData)}/{string.Join(",", DoubleNextSignalData)}";
+        }
     }
 
     public class EmergencyLightData
     {
-        public string Name;
-        public bool State;
+        public string Name { get; set; }
+        public bool State { get; set; }
     }
 }
