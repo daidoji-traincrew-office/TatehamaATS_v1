@@ -16,7 +16,7 @@ namespace TatehamaATS_v1
         public List<CarState> CarStates { get; set; } = new List<CarState>();
         public override string ToString()
         {
-            return $"DiaName:{DiaName}/{string.Join(",", OnTrackList)}";
+            return $"BougoState:{BougoState}/DiaName:{DiaName}/{string.Join(",", OnTrackList)}";
         }
     }
 
