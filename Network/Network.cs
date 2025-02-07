@@ -89,7 +89,7 @@ namespace TatehamaATS_v1.Network
                 }
                 catch (Exception ex)
                 {
-                    var e = new NetworkCountaException(3, "UpdateLoopぶつ切り", ex);
+                    var e = new NetworkCountaException(7, "UpdateLoopぶつ切り", ex);
                     AddExceptionAction.Invoke(e);
                 }
             }
@@ -133,7 +133,7 @@ namespace TatehamaATS_v1.Network
                 // その他別な理由で認証失敗      
                 var e = new NetworkAuthorizeException(7, "認証拒否以外", exception);
                 AddExceptionAction.Invoke(e);
-                DialogResult result = MessageBox.Show($"認証に失敗しました。\n再認証しますか？\n\n{exception.Message}\n{exception.StackTrace})", "認証失敗 | 館浜ATS - ダイヤ運転会", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
+                DialogResult result = MessageBox.Show($"認証に失敗しました。\n再認証しますか？\n※いいえを選択した場合、再認証にはATS再起動が必要です。\n\n{exception.Message}\n{exception.StackTrace})", "認証失敗 | 館浜ATS - ダイヤ運転会", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
                 if (result == DialogResult.Yes)
                 {
                     Authorize();
