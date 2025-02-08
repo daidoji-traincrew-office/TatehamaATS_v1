@@ -604,25 +604,32 @@ namespace TatehamaATS_v1.RetsubanWindow
             }
             if (retsubanMode == RetsubanMode.Car)
             {
-                var newCar = Int32.Parse(NewCar);
-                if (2 <= newCar && newCar <= 10)
+                try
                 {
-                    Car = newCar;
+                    var newCar = Int32.Parse(NewCar);
+                    if (2 <= newCar && newCar <= 10)
+                    {
+                        Car = newCar;
+                    }
+                    retsubanMode = RetsubanMode.None;
+                    CarDrawing(NewCar);
+                    set_trainsetlen?.Stop();
+                    if (Retsuban != null || Retsuban == "9999")
+                    {
+                        set_trainnum?.Stop();
+                        set_complete.PlayOnce(1.0f);
+                    }
+                    else
+                    {
+                        set_trainnum.PlayLoop(1.0f);
+                    }
+                    beep2.PlayOnce(1.0f);
+                    return;
                 }
-                retsubanMode = RetsubanMode.None;
-                CarDrawing(NewCar);
-                set_trainsetlen?.Stop();
-                if (Retsuban != null || Retsuban == "9999")
+                catch (Exception ex)
                 {
-                    set_trainnum?.Stop();
-                    set_complete.PlayOnce(1.0f);
+                    return;
                 }
-                else
-                {
-                    set_trainnum.PlayLoop(1.0f);
-                }                                 
-                beep2.PlayOnce(1.0f);
-                return;
             }
         }
 
