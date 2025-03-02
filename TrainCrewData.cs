@@ -127,6 +127,7 @@ namespace TrainCrewAPI
     public class TrackCircuitData
     {
         public bool On { get; set; } = false;
+        public bool Lock { get; set; } = false;
         public string Last { get; set; } = null; // 軌道回路を踏んだ列車の名前
         public string Name { get; set; } = "";
 
