@@ -277,6 +277,7 @@ namespace TatehamaATS_v1.Network
             try
             {
                 Debug.WriteLine($"{SendData}");
+                if (!(TcData.gameScreen == GameScreen.MainGame || TcData.gameScreen == GameScreen.MainGame_Pause)) return;
                 DataFromServer DataFromServer = await connection.InvokeAsync<DataFromServer>("SendData_ATS", SendData);
                 //    Debug.WriteLine("受信");
                 Debug.WriteLine(DataFromServer.ToString());
@@ -289,7 +290,7 @@ namespace TatehamaATS_v1.Network
             }
             catch (Exception ex)
             {
-                var e = new NetworkException(7, "", ex);
+                var e = new NetworkDataException(7, "", ex);
                 AddExceptionAction.Invoke(e);
             }
         }
