@@ -137,7 +137,7 @@ namespace TatehamaATS_v1.OnboardDevice
         /// </summary>
         internal void ResetException()
         {
-            var StopDetection = TcData.myTrainData.Speed == 0;
+            var StopDetection = TcData.myTrainData.Speed == 0 && (TcData.gameScreen == GameScreen.MainGame || TcData.gameScreen == GameScreen.MainGame_Pause);
             var MasconEB = TcData.myTrainData.Bnotch == 8;
             foreach (var ex in exceptions)
             {
@@ -160,10 +160,10 @@ namespace TatehamaATS_v1.OnboardDevice
                         if (RetsubanReset) exceptions.Remove(key);
                         break;
                     case ResetConditions.StopDetection_RelayReset:
-                        if (RelayState) exceptions.Remove(key);
+                        if (RelayState && StopDetection) exceptions.Remove(key);
                         break;
                     case ResetConditions.StopDetection_NetworkReset:
-                        if (NetworkState) exceptions.Remove(key);
+                        if (NetworkState && StopDetection) exceptions.Remove(key);
                         break;
                     case ResetConditions.StopDetection:
                         if (time < resetTime)
