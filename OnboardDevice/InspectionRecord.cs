@@ -159,6 +159,9 @@ namespace TatehamaATS_v1.OnboardDevice
                     case ResetConditions.RetsubanReset:
                         if (RetsubanReset) exceptions.Remove(key);
                         break;
+                    case ResetConditions.NetworkReset:
+                        if (NetworkState) exceptions.Remove(key);
+                        break;
                     case ResetConditions.StopDetection_RelayReset:
                         if (RelayState && StopDetection) exceptions.Remove(key);
                         break;
