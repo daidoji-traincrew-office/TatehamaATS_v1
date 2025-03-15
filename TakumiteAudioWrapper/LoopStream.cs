@@ -8,12 +8,12 @@ namespace TakumiteAudioWrapper
     /// </summary>
     public class LoopStream : WaveStream
     {
-        private readonly WaveStream _sourceStream;
-        public float Volume { get; set; } = 1.0f; // 音量調整用プロパティを追加
+        private WaveStream _sourceStream;
+        public float Volume { get; set; } = 1.0f;
 
         public LoopStream(WaveStream sourceStream)
         {
-            _sourceStream = sourceStream;
+            _sourceStream = sourceStream ?? throw new ArgumentNullException(nameof(sourceStream));
         }
 
         public override WaveFormat WaveFormat => _sourceStream.WaveFormat;
@@ -26,23 +26,48 @@ namespace TakumiteAudioWrapper
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            int bytesRead = _sourceStream.Read(buffer, offset, count);
-            if (bytesRead == 0)
-            {
-                _sourceStream.Position = 0; // ループ
-                bytesRead = _sourceStream.Read(buffer, offset, count);
-            }
+            if (_sourceStream == null)
+                return 0;
 
-            // 音量調整
-            for (int i = 0; i < bytesRead; i += 2)
+            try
             {
-                short sample = (short)(buffer[offset + i] | (buffer[offset + i + 1] << 8));
-                sample = (short)(sample * Volume);
-                buffer[offset + i] = (byte)(sample & 0xFF);
-                buffer[offset + i + 1] = (byte)((sample >> 8) & 0xFF);
-            }
+                int bytesRead = _sourceStream.Read(buffer, offset, count);
+                if (bytesRead == 0)
+                {
+                    _sourceStream.Position = 0;
+                    bytesRead = _sourceStream.Read(buffer, offset, count);
+                }
 
-            return bytesRead;
+                // 音量調整
+                for (int i = 0; i < bytesRead; i += 2)
+                {
+                    short sample = (short)(buffer[offset + i] | (buffer[offset + i + 1] << 8));
+                    sample = (short)Math.Clamp(sample * Volume, short.MinValue, short.MaxValue);
+                    buffer[offset + i] = (byte)(sample & 0xFF);
+                    buffer[offset + i + 1] = (byte)((sample >> 8) & 0xFF);
+                }
+
+                return bytesRead;
+            }
+            catch (ObjectDisposedException)
+            {
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error during reading: {ex.Message}");
+                return 0;
+            }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _sourceStream?.Dispose();
+                _sourceStream = null;
+            }
+            base.Dispose(disposing);
         }
     }
 }
