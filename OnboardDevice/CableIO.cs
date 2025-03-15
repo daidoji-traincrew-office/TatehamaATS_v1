@@ -276,7 +276,7 @@ namespace TatehamaATS_v1.OnboardDevice
         public async void StartRelay()
         {
             Relay.Command = "DataRequest";
-            Relay.Request = new[] { "tcall", "signal" };
+            Relay.Request = new[] { "tconlyontrain" };
             await Relay.TryConnectWebSocket();
         }
 

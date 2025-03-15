@@ -52,7 +52,7 @@ namespace TatehamaATS_v1.OnboardDevice
 
         // データ関連フィールド
         private string _command = "DataRequest";
-        private string[] _request = { "all" };
+        private string[] _request = { "tconlyontrain" };
         //all仮設定　必要な分に後で絞る  tconlyontrain?                   
 
         // プロパティ                                                                        
