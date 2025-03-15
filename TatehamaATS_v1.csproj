@@ -1,74 +1,85 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
-    <Nullable>enable</Nullable>
-    <UseWindowsForms>true</UseWindowsForms>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net8.0-windows</TargetFramework>
+		<Nullable>enable</Nullable>
+		<UseWindowsForms>true</UseWindowsForms>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<OutputPath>bin\TatehamaATS_v1\</OutputPath>
+		<ProduceReferenceAssembly>False</ProduceReferenceAssembly>
+		<PackageOutputPath>$(OutputPath)</PackageOutputPath>
+		<PackAsTool>False</PackAsTool>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNet.SignalR" Version="2.4.3" />
-    <PackageReference Include="Microsoft.AspNetCore.App" Version="2.2.8" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.0" />
-    <PackageReference Include="NAudio" Version="2.2.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="Dapplo.Microsoft.Extensions.Hosting.WinForms" Version="1.0.14" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.0" />
-    <PackageReference Include="OpenIddict.Client" Version="5.8.0" />
-    <PackageReference Include="OpenIddict.Client.SystemIntegration" Version="5.8.0" />
-    <PackageReference Include="OpenIddict.Client.SystemNetHttp" Version="5.8.0" />
-    <PackageReference Include="OpenIddict.EntityFrameworkCore" Version="5.8.0" />
-  </ItemGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+	  <Deterministic>True</Deterministic>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <Reference Include="TrainCrewInput">
-      <HintPath>..\Tatehama_TASC\DLL\TrainCrewInput.dll</HintPath>
-    </Reference>
-  </ItemGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+	  <Deterministic>True</Deterministic>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <Compile Update="ATSDisplay\LEDResource.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>LEDResource.resx</DependentUpon>
-    </Compile>
-    <Compile Update="KokuchiWindow\KokuchiResource.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>KokuchiResource.resx</DependentUpon>
-    </Compile>
-    <Compile Update="MainWindow\MainResource.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>MainResource.resx</DependentUpon>
-    </Compile>
-    <Compile Update="RetsubanWindow\RetsubanResource.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>RetsubanResource.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNet.SignalR" Version="2.4.3" />
+		<PackageReference Include="Microsoft.AspNetCore.App" Version="2.2.8" />
+		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.0" />
+		<PackageReference Include="NAudio" Version="2.2.1" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+		<PackageReference Include="Dapplo.Microsoft.Extensions.Hosting.WinForms" Version="1.0.14" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.0" />
+		<PackageReference Include="OpenIddict.Client" Version="5.8.0" />
+		<PackageReference Include="OpenIddict.Client.SystemIntegration" Version="5.8.0" />
+		<PackageReference Include="OpenIddict.Client.SystemNetHttp" Version="5.8.0" />
+		<PackageReference Include="OpenIddict.EntityFrameworkCore" Version="5.8.0" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Update="ATSDisplay\LEDResource.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>LEDResource.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Update="KokuchiWindow\KokuchiResource.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>KokuchiResource.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Update="MainWindow\MainResource.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>MainResource.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Update="RetsubanWindow\RetsubanResource.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>RetsubanResource.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>
+	<ItemGroup>
+		<Reference Include="TrainCrewInput">
+			<HintPath>..\Tatehama_TASC\DLL\TrainCrewInput.dll</HintPath>
+		</Reference>
+	</ItemGroup>
 
+	<ItemGroup>
+		<Compile Update="ATSDisplay\LEDResource.Designer.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>LEDResource.resx</DependentUpon>
+		</Compile>
+		<Compile Update="KokuchiWindow\KokuchiResource.Designer.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>KokuchiResource.resx</DependentUpon>
+		</Compile>
+		<Compile Update="MainWindow\MainResource.Designer.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>MainResource.resx</DependentUpon>
+		</Compile>
+		<Compile Update="RetsubanWindow\RetsubanResource.Designer.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>RetsubanResource.resx</DependentUpon>
+		</Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Update="ATSDisplay\LEDResource.resx">
+			<Generator>ResXFileCodeGenerator</Generator>
+			<LastGenOutput>LEDResource.Designer.cs</LastGenOutput>
+		</EmbeddedResource>
+		<EmbeddedResource Update="KokuchiWindow\KokuchiResource.resx">
+			<Generator>ResXFileCodeGenerator</Generator>
+			<LastGenOutput>KokuchiResource.Designer.cs</LastGenOutput>
+		</EmbeddedResource>
+		<EmbeddedResource Update="MainWindow\MainResource.resx">
+			<Generator>ResXFileCodeGenerator</Generator>
+			<LastGenOutput>MainResource.Designer.cs</LastGenOutput>
+		</EmbeddedResource>
+		<EmbeddedResource Update="RetsubanWindow\RetsubanResource.resx">
+			<Generator>ResXFileCodeGenerator</Generator>
+			<LastGenOutput>RetsubanResource.Designer.cs</LastGenOutput>
+		</EmbeddedResource>
+	</ItemGroup>
 </Project>
