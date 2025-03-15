@@ -73,6 +73,7 @@ namespace TatehamaATS_v1.OnboardDevice
         /// </summary>
         internal event Action<ATSCommonException> AddExceptionAction;
 
+        private int hasInvalidCharsTimes = 0;
 
         /// <summary>
         /// TrainCrew側データ要求コマンド
@@ -379,6 +380,24 @@ namespace TatehamaATS_v1.OnboardDevice
                 string jsonResponse = messageBuilder.ToString();
                 messageBuilder = null;
 
+                // 文字化けチェック
+                if (HasInvalidChars(jsonResponse))
+                {
+                    Debug.WriteLine("☆文字化け元データ");
+                    Debug.WriteLine(jsonResponse);
+                    hasInvalidCharsTimes++;
+                    if (hasInvalidCharsTimes > 5)
+                    {
+                        var e = new RelayOtherInfoAbnormal(5, $"文字化け検知${hasInvalidCharsTimes}回目");
+                        AddExceptionAction.Invoke(e);
+                    }
+                    continue;
+                }
+                else
+                {
+                    hasInvalidCharsTimes = 0;
+                }
+
                 // 一旦Data_Base型でデシリアライズ
                 var baseData = JsonConvert.DeserializeObject<Data_Base>(jsonResponse, JsonSerializerSettings);
 
@@ -455,6 +474,22 @@ namespace TatehamaATS_v1.OnboardDevice
                 ConnectionStatusChanged?.Invoke(status);
             }
             _webSocket.Dispose();
+        }
+
+        /// <summary>
+        /// 文字列に不正な文字が含まれているか判定する
+        /// </summary>
+        public static bool HasInvalidChars(string input)
+        {
+            foreach (char c in input)
+            {
+                // 制御文字（改行・タブを除く）またはU+FFFD（�）が含まれていたら文字化け
+                if ((char.IsControl(c) && c != '\r' && c != '\n' && c != '\t') || c == '\uFFFD')
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         /// <summary>
