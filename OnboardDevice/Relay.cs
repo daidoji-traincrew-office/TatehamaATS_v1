@@ -38,8 +38,6 @@ namespace TatehamaATS_v1.OnboardDevice
         private static readonly Encoding _encoding = Encoding.UTF8;
         private readonly string _connectUri = "ws://127.0.0.1:50300/"; //TRAIN CREWのポート番号は50300
 
-        private int brake;
-
         // キャッシュ用の静的辞書
         private static readonly ConcurrentDictionary<Type, PropertyInfo[]> PropertyCache = new ConcurrentDictionary<Type, PropertyInfo[]>();
         private static readonly ConcurrentDictionary<Type, FieldInfo[]> FieldCache = new ConcurrentDictionary<Type, FieldInfo[]>();
@@ -59,8 +57,11 @@ namespace TatehamaATS_v1.OnboardDevice
         public TrainCrewStateData TcData { get; private set; } = new TrainCrewStateData();
         public RecvBeaconStateData BeaconData { get; private set; } = new RecvBeaconStateData();
 
+        private int brake;
         private ConnectionState status = ConnectionState.DisConnect;
         private int BeforeBrake = 0;
+
+        private List<SignalData> SignalDatas = new List<SignalData>();
 
         // イベント
         internal event Action<TimeSpan> TC_TimeUpdated;
@@ -300,9 +301,21 @@ namespace TatehamaATS_v1.OnboardDevice
             }
         }
 
-        internal void SignalSet(SignalData signalData)
+        internal void SignalSet(List<SignalData> signalDatas)
         {
-            SendSingleCommand("SetSignalPhase", new string[] { signalData.Name, signalData.phase.ToString() });
+            foreach (var signalData in signalDatas)
+            {
+                _ = SendSingleCommand("SetSignalPhase", new string[] { signalData.Name, signalData.phase.ToString() });
+            }
+            //情報の送られてこなくなった信号機の現示をNoneにする
+            var outSignals = SignalDatas
+                .Where(s2 => !signalDatas.Any(s1 => s1.Name == s2.Name))
+                .ToList();
+            foreach (var signalData in outSignals)
+            {
+                _ = SendSingleCommand("SetSignalPhase", new string[] { signalData.Name, Phase.None.ToString() });
+            }
+            SignalDatas = signalDatas;
         }
 
         internal void EMSet(EmergencyLightData emergencyLightData)
