@@ -296,14 +296,9 @@ namespace TatehamaATS_v1.OnboardDevice
         /// <param name="dataFromServer"></param>
         internal void ServerDataUpdate(DataFromServer dataFromServer)
         {
-            foreach (var sigdata in dataFromServer.NextSignalData)
-            {
-                Relay.SignalSet(sigdata);
-            }
-            foreach (var sigdata in dataFromServer.DoubleNextSignalData)
-            {
-                Relay.SignalSet(sigdata);
-            }
+            var signalDataList = new List<SignalData>(dataFromServer.NextSignalData);
+            signalDataList.AddRange(dataFromServer.DoubleNextSignalData);
+            Relay.SignalSet(signalDataList);
             foreach (var item in dataFromServer.EmergencyLightDatas)
             {
                 Relay.EMSet(item);
