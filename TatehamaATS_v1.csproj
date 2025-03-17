@@ -82,4 +82,24 @@
 			<LastGenOutput>RetsubanResource.Designer.cs</LastGenOutput>
 		</EmbeddedResource>
 	</ItemGroup>
+	<Target Name="AfterBuild" AfterTargets="Build">
+		<PropertyGroup>
+		<!-- ビルド成果物のフォルダ -->
+		<OutputDir>$(OutputPath)</OutputDir>
+		<!-- フォルダ名に付与する日付とビルド回数 -->
+		<BuildDate>$(Date:yyyyMMdd)</BuildDate>
+		<BuildCount>$(BuildCounter)</BuildCount>
+		<TargetFolderName>TatehamaATS_v1_0_$(BuildDate)_$(BuildCount)</TargetFolderName>
+		<ZipFileName>$(TargetFolderName).zip</ZipFileName>
+		</PropertyGroup>
+
+		<!-- フォルダ名変更 -->
+		<Exec Command="if exist $(OutputDir) rename $(OutputDir) $(TargetFolderName)" />
+
+		<!-- zipファイル生成 -->
+		<Exec Command="powershell Compress-Archive -Path '$(TargetFolderName)\*' -DestinationPath '$(TargetFolderName).zip' -Force" />
+
+		<!-- 完了メッセージ -->
+		<Message Importance="high" Text="Zip file created: $(ZipFileName)" />
+	</Target>
 </Project>
