@@ -399,7 +399,7 @@ namespace TatehamaATS_v1.OnboardDevice
                     Debug.WriteLine("☆文字化け元データ");
                     Debug.WriteLine(jsonResponse);
                     hasInvalidCharsTimes++;
-                    if (hasInvalidCharsTimes > 5)
+                    if (hasInvalidCharsTimes > 20)
                     {
                         var e = new RelayOtherInfoAbnormal(5, $"文字化け検知${hasInvalidCharsTimes}回目");
                         AddExceptionAction.Invoke(e);
