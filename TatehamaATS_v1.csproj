@@ -82,24 +82,50 @@
 			<LastGenOutput>RetsubanResource.Designer.cs</LastGenOutput>
 		</EmbeddedResource>
 	</ItemGroup>
-	<Target Name="AfterBuild" AfterTargets="Build">
-		<PropertyGroup>
-		<!-- ビルド成果物のフォルダ -->
-		<OutputDir>$(OutputPath)</OutputDir>
-		<!-- フォルダ名に付与する日付とビルド回数 -->
-		<BuildDate>$(Date:yyyyMMdd)</BuildDate>
-		<BuildCount>$(BuildCounter)</BuildCount>
-		<TargetFolderName>TatehamaATS_v1_0_$(BuildDate)_$(BuildCount)</TargetFolderName>
-		<ZipFileName>$(TargetFolderName).zip</ZipFileName>
-		</PropertyGroup>
+<Target Name="AfterBuild" AfterTargets="Build">
+  <PropertyGroup>
+    <!-- ビルド成果物のフォルダ -->
+    <OutputDir>$(OutputPath)</OutputDir>
+    <!-- 現在の日付 -->
+    <BuildDate>$([System.DateTime]::Now.ToString("yyyyMMdd"))</BuildDate>
+  </PropertyGroup>
 
-		<!-- フォルダ名変更 -->
-		<Exec Command="if exist $(OutputDir) rename $(OutputDir) $(TargetFolderName)" />
+  <!-- BuildCounterとLastBuildDateを取得・更新 -->
+  <ReadLinesFromFile File="$(BuildInfoFile)">
+    <Output TaskParameter="Lines" ItemName="BuildInfo" />
+  </ReadLinesFromFile>
 
-		<!-- zipファイル生成 -->
-		<Exec Command="powershell Compress-Archive -Path '$(TargetFolderName)\*' -DestinationPath '$(TargetFolderName).zip' -Force" />
+  <PropertyGroup>
+    <LastBuildDate>%(BuildInfo[0])</LastBuildDate>
+    <BuildCounter>%(BuildInfo[1])</BuildCounter>
+  </PropertyGroup>
 
-		<!-- 完了メッセージ -->
-		<Message Importance="high" Text="Zip file created: $(ZipFileName)" />
-	</Target>
+  <!-- 日付が変わったらビルド回数をリセット -->
+  <PropertyGroup Condition="'$(BuildDate)' != '$(LastBuildDate)'">
+    <BuildCounter>1</BuildCounter>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(BuildDate)' == '$(LastBuildDate)'">
+    <BuildCounter>$([System.Int32]::Parse('$(BuildCounter)') + 1)</BuildCounter>
+  </PropertyGroup>
+
+  <!-- 更新した日付とビルド回数をファイルに保存 -->
+  <WriteLinesToFile File="$(BuildInfoFile)" Lines="$(BuildDate)" Overwrite="true" />
+  <WriteLinesToFile File="$(BuildInfoFile)" Lines="$(BuildCounter)" Overwrite="false" />
+
+  <!-- 生成するフォルダ名とzip名 -->
+  <PropertyGroup>
+    <TargetFolderName>TatehamaATS_v1_0_$(BuildDate)_$(BuildCounter)</TargetFolderName>
+    <ZipFileName>$(TargetFolderName).zip</ZipFileName>
+  </PropertyGroup>
+
+  <!-- フォルダ名変更 -->
+  <Exec Command="if exist $(OutputDir) rename $(OutputDir) $(TargetFolderName)" />
+
+  <!-- zipファイル生成 -->
+  <Exec Command="powershell Compress-Archive -Path '$(TargetFolderName)\*' -DestinationPath '$(TargetFolderName).zip' -Force" />
+
+  <!-- 完了メッセージ -->
+  <Message Importance="high" Text="Zip file created: $(ZipFileName)" />
+</Target>
+
 </Project>
