@@ -365,7 +365,6 @@ namespace TatehamaATS_v1.OnboardDevice
             {
                 _stopwatch.Restart();
                 WebSocketReceiveResult result;
-                int totalBytes = 0;
                 do
                 {
                     result = await _webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
@@ -381,12 +380,18 @@ namespace TatehamaATS_v1.OnboardDevice
                     }
                     else
                     {
-                        totalBytes += result.Count;
+                        if (messageBuilder == null)
+                        {
+                            messageBuilder = new StringBuilder();
+                        }
+                        string partMessage = _encoding.GetString(buffer, 0, result.Count);
+                        messageBuilder.Append(partMessage);
                     }
 
                 } while (!result.EndOfMessage);
 
-                string jsonResponse = _encoding.GetString(buffer, 0, totalBytes);
+                string jsonResponse = messageBuilder.ToString();
+                messageBuilder = null;
 
                 // 文字化けチェック
                 if (HasInvalidChars(jsonResponse))
