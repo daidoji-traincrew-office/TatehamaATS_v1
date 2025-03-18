@@ -1,7 +1,0 @@
-<Project>
-	<Target Name="IncrementBuildCounter" AfterTargets="Build">
-		<PropertyGroup>
-			<BuildCounter>$([System.Int32]::Parse('$(BuildCounter)') + 1)</BuildCounter>
-		</PropertyGroup>
-	</Target>
-</Project>

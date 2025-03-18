@@ -1,7 +1,0 @@
-<Project>
-	<PropertyGroup
-		<!-- 設定ファイルを保存するパス -->
-		<BuildInfoFile>$(ProjectDir)BuildInfo.txt</BuildInfoFile>
-		<BuildCounter Condition="'$(BuildCounter)' == ''">1</BuildCounter>
-	</PropertyGroup>
-</Project>
