@@ -79,6 +79,7 @@ namespace TatehamaATS_v1.Network
             while (true)
             {
                 var timer = Task.Delay(100);
+                await timer;
                 if (!connected)
                 {
                     AddExceptionAction.Invoke(new NetworkConnectException(7, "未接続"));
@@ -93,7 +94,6 @@ namespace TatehamaATS_v1.Network
                     var e = new NetworkCountaException(7, "UpdateLoopぶつ切り", ex);
                     AddExceptionAction.Invoke(e);
                 }
-                await timer;
             }
         }
 
