@@ -363,6 +363,7 @@ namespace TatehamaATS_v1.OnboardDevice
 
             while (_webSocket.State == WebSocketState.Open)
             {
+                List<byte> messageBytes = new List<byte>();
                 _stopwatch.Restart();
                 WebSocketReceiveResult result;
                 do
@@ -380,18 +381,14 @@ namespace TatehamaATS_v1.OnboardDevice
                     }
                     else
                     {
-                        if (messageBuilder == null)
-                        {
-                            messageBuilder = new StringBuilder();
-                        }
-                        string partMessage = _encoding.GetString(buffer, 0, result.Count);
-                        messageBuilder.Append(partMessage);
+                        messageBytes.AddRange(buffer.Take(result.Count));
                     }
 
                 } while (!result.EndOfMessage);
 
-                string jsonResponse = messageBuilder.ToString();
-                messageBuilder = null;
+                // データが揃ったら文字列へエンコード
+                string jsonResponse = _encoding.GetString(messageBytes.ToArray());
+                messageBytes.Clear();
 
                 // 文字化けチェック
                 if (HasInvalidChars(jsonResponse))
