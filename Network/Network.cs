@@ -4,7 +4,9 @@ using OpenIddict.Client;
 namespace TatehamaATS_v1.Network
 {
     using Microsoft.AspNetCore.SignalR.Client;
+    using System;
     using System.Diagnostics;
+    using System.Net;
     using System.Net.WebSockets;
     using TatehamaATS_v1.Exceptions;
     using TrainCrewAPI;
@@ -120,20 +122,43 @@ namespace TatehamaATS_v1.Network
                 // 認証完了！      
                 await Connect();
             }
-            catch (OpenIddictExceptions.ProtocolException exception)
-                when (exception.Error is OpenIddictConstants.Errors.AccessDenied)
+            catch (OperationCanceledException)
             {
-                // 認証拒否(サーバーに入ってないとか、ロールがついてないetc...)      
-                var e = new NetworkAccessDenied(7, "認証拒否", exception);
+                // その他別な理由で認証失敗      
+                var e = new NetworkAuthorizeException(7, "認証タイムアウト");
                 AddExceptionAction.Invoke(e);
-                MessageBox.Show($"認証が拒否されました。\n司令主任に連絡してください。", "認証拒否 | 館浜ATS - ダイヤ運転会");
+                DialogResult result = MessageBox.Show($"認証でタイムアウトしました。\n再認証してください。\n※いいえを選択した場合、再認証にはATS再起動が必要です。", "認証失敗 | 館浜ATS - ダイヤ運転会", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
+                if (result == DialogResult.Yes)
+                {
+                    Authorize();
+                }
+            }
+            catch (OpenIddictExceptions.ProtocolException exception) when (exception.Error ==
+                                                               OpenIddictConstants.Errors.AccessDenied)
+            {
+                // ログインしたユーザーがサーバーにいないか、入鋏ロールがついてない
+                var e = new NetworkAccessDenied(7, "認証拒否(サーバー非存在・未入鋏)", exception);
+                AddExceptionAction.Invoke(e);
+                MessageBox.Show($"認証が拒否されました。\n運転会サーバーに参加し入鋏を受けてください。", "認証拒否 | 館浜ATS - ダイヤ運転会");
+            }
+            catch (OpenIddictExceptions.ProtocolException exception) when (exception.Error ==
+                                                                           OpenIddictConstants.Errors.ServerError)
+            {
+                // サーバーでトラブル発生                                                                                                       
+                var e = new NetworkAuthorizeException(7, "認証拒否以外", exception);
+                AddExceptionAction.Invoke(e);
+                DialogResult result = MessageBox.Show($"認証に失敗しました。\n再認証しますか？\n※いいえを選択した場合、再認証にはATS再起動が必要です。\n\n{exception.Message}\n{exception.StackTrace}", "認証失敗 | 館浜ATS - ダイヤ運転会", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
+                if (result == DialogResult.Yes)
+                {
+                    Authorize();
+                }
             }
             catch (Exception exception)
             {
                 // その他別な理由で認証失敗      
-                var e = new NetworkAuthorizeException(7, "認証拒否以外", exception);
+                var e = new NetworkAuthorizeException(7, "認証失敗理由不明", exception);
                 AddExceptionAction.Invoke(e);
-                DialogResult result = MessageBox.Show($"認証に失敗しました。\n再認証しますか？\n※いいえを選択した場合、再認証にはATS再起動が必要です。\n\n{exception.Message}\n{exception.StackTrace})", "認証失敗 | 館浜ATS - ダイヤ運転会", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
+                DialogResult result = MessageBox.Show($"認証に失敗しました。\n再認証しますか？\n※いいえを選択した場合、再認証にはATS再起動が必要です。\n\n{exception.Message}\n{exception.StackTrace}", "認証失敗 | 館浜ATS - ダイヤ運転会", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
                 if (result == DialogResult.Yes)
                 {
                     Authorize();
@@ -170,6 +195,15 @@ namespace TatehamaATS_v1.Network
                     Debug.WriteLine("Connected");
                     connected = true;
                     ConnectionStatusChanged?.Invoke(connected);
+                }
+                // 該当Hubにアクセスするためのロールが無いときのエラー 
+                catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Forbidden)
+                {
+                    Debug.WriteLine("Forbidden");
+                    connected = false;
+                    ConnectionStatusChanged?.Invoke(connected);
+                    var e = new NetworkAccessDenied(7, "通信部接続失敗", ex);
+                    AddExceptionAction.Invoke(e);
                 }
                 catch (Exception ex)
                 {
