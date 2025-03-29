@@ -25,13 +25,14 @@ namespace TatehamaATS_v1.OnboardDevice
         /// </summary>
         private static TimeSpan resetTime = TimeSpan.FromSeconds(3.5);
 
-        public bool RetsubanReset;
-        public bool RelayState;
-        public bool NetworkState;
-        public bool ATSReset;
-        public bool PowerReset;
-        private TimeSpan RelayUpdatedTime;
-        internal TrainCrewStateData TcData;
+        public bool RetsubanReset { get; set; }
+        public bool RelayState { get; set; }
+        public bool NetworkState { get; set; }
+        public bool ATSReset { get; set; }
+        public bool PowerReset { get; set; }
+        private TimeSpan RelayUpdatedTime { get; set; }
+        private TimeSpan NetworkUpdatedTime { get; set; }
+        internal TrainCrewStateData TcData { get; set; }
 
         /// <summary>
         /// 非常状態変更
@@ -79,6 +80,13 @@ namespace TatehamaATS_v1.OnboardDevice
                     if (DateTime.Now.TimeOfDay - RelayUpdatedTime > TimeSpan.FromSeconds(2) && NowGame)
                     {
                         var e = new RelayIOConnectionException(3, "継電部通信途絶2秒異常");
+                        RelayState = false;
+                        AddExceptionAction.Invoke(e);
+                    }
+                    if (DateTime.Now.TimeOfDay - NetworkUpdatedTime > TimeSpan.FromSeconds(2))
+                    {
+                        var e = new NetworkIOConnectionException(3, "地上装置通信途絶2秒異常");
+                        NetworkState = false;
                         AddExceptionAction.Invoke(e);
                     }
                     //リセット条件確認
@@ -104,7 +112,10 @@ namespace TatehamaATS_v1.OnboardDevice
                     var e = new LEDControlException(3, "", ex);
                     AddExceptionAction.Invoke(e);
                 }
-                await timer;
+                finally
+                {
+                    await timer;
+                }
             }
         }
 
@@ -214,6 +225,12 @@ namespace TatehamaATS_v1.OnboardDevice
         {
             TcData = tcData;
             RelayUpdatedTime = DateTime.Now.TimeOfDay;
+        }
+
+        internal void NetworkUpdate()
+        {
+            NetworkState = true;
+            NetworkUpdatedTime = DateTime.Now.TimeOfDay;
         }
     }
 }
