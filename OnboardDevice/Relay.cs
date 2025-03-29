@@ -51,7 +51,6 @@ namespace TatehamaATS_v1.OnboardDevice
         // データ関連フィールド
         private string _command = "DataRequest";
         private string[] _request = { "tconlyontrain" };
-        //all仮設定　必要な分に後で絞る  tconlyontrain?                   
 
         // プロパティ                                                                        
         public TrainCrewStateData TcData { get; private set; } = new TrainCrewStateData();
@@ -537,14 +536,14 @@ namespace TatehamaATS_v1.OnboardDevice
             }
         }
 
-        public void SetEB(bool State)
+        public void SetEB(bool State, bool force = false)
         {
             if (State)
             {
                 TrainCrewInput.SetATO_Notch(-8);
                 brake = -8;
             }
-            else if (brake == -8 && !State)
+            else if ((brake == -8 || force) && !State)
             {
                 TrainCrewInput.SetATO_Notch(0);
                 brake = 0;
