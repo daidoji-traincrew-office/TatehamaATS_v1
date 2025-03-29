@@ -8,6 +8,7 @@ namespace TatehamaATS_v1.Network
     using System.Diagnostics;
     using System.Net;
     using System.Net.WebSockets;
+    using System.Text.RegularExpressions;
     using TatehamaATS_v1.Exceptions;
     using TrainCrewAPI;
 
@@ -51,7 +52,14 @@ namespace TatehamaATS_v1.Network
         /// <summary>
         /// 信号制御情報変化
         /// </summary>
-        internal event Action<DataFromServer> ServerDataUpdate;
+        internal event Action<DataFromServer, bool> ServerDataUpdate;
+
+        /// <summary>
+        /// 列番上限不一致情報変化
+        /// </summary>
+        internal event Action<bool> RetsubanInOutStatusChanged;
+
+        private bool previousStatus;
 
         public Network(OpenIddictClientService service)
         {
@@ -62,6 +70,7 @@ namespace TatehamaATS_v1.Network
             IsBougo = false;
             SendData = new DataToServer();
             SendDataUpdate();
+            previousStatus = false;
         }
 
         public void TcDataUpdate(TrainCrewStateData trainCrewStateData)
@@ -310,12 +319,24 @@ namespace TatehamaATS_v1.Network
         {
             try
             {
+                bool currentStatus = IsOddTrainNumber(OverrideDiaName) != IsOddTrainNumber(TcData.myTrainData.diaName);
+
+                if (currentStatus)
+                {
+                    //上下線不一致のため、強制Rとするが、在線情報は送信したいので、処理そのものは続行
+                    RetsubanInOutStatusChanged.Invoke(true);
+                }
+                else if (!currentStatus && currentStatus != previousStatus)
+                {
+                    RetsubanInOutStatusChanged.Invoke(false);
+                }
+                previousStatus = currentStatus;
                 Debug.WriteLine($"{SendData}");
                 if (!(TcData.gameScreen == GameScreen.MainGame || TcData.gameScreen == GameScreen.MainGame_Pause)) return;
                 DataFromServer DataFromServer = await connection.InvokeAsync<DataFromServer>("SendData_ATS", SendData);
                 //    Debug.WriteLine("受信");
                 Debug.WriteLine(DataFromServer.ToString());
-                ServerDataUpdate?.Invoke(DataFromServer);
+                ServerDataUpdate?.Invoke(DataFromServer, currentStatus);
             }
             catch (InvalidOperationException ex)
             {
@@ -326,6 +347,25 @@ namespace TatehamaATS_v1.Network
             {
                 var e = new NetworkDataException(7, "", ex);
                 AddExceptionAction.Invoke(e);
+            }
+        }
+
+        /// <summary>
+        /// 列番が奇数か偶数かを判定する
+        /// </summary>
+        /// <param name="trainNumber">列番</param>
+        /// <returns>奇数ならtrue、偶数ならfalse</returns>
+        private bool IsOddTrainNumber(string trainNumber)
+        {
+            try
+            {
+                var lastDiaNumber = trainNumber.Last(char.IsDigit) - '0';
+                var isUp = lastDiaNumber % 2 == 0;
+                return isUp;
+            }
+            catch (Exception)
+            {
+                throw new ArgumentException("列番が無効です。");
             }
         }
 

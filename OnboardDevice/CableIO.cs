@@ -104,6 +104,7 @@ namespace TatehamaATS_v1.OnboardDevice
             Network.AddExceptionAction += AddException;
             Network.ServerDataUpdate += ServerDataUpdate;
             Network.ConnectionStatusChanged += NetworkStatesChenged;
+            Network.RetsubanInOutStatusChanged += ForceStopSignal;
 
             Relay = new Relay();
             Relay.AddExceptionAction += AddException;
@@ -176,9 +177,9 @@ namespace TatehamaATS_v1.OnboardDevice
             {
                 isATSReadyChenge?.Invoke(exceptionCodes.Count == 0);
                 ControlLED.ExceptionCodes = exceptionCodes;
-                isRelayChenge?.Invoke(ContainsPartialMatch(exceptionCodes, "5C") || ContainsPartialMatch(exceptionCodes, "58"));
-                isTransferChenge?.Invoke(ContainsPartialMatch(exceptionCodes, "6D") || ContainsPartialMatch(exceptionCodes, "68"));
-                isNetworkChenge?.Invoke(ContainsPartialMatch(exceptionCodes, "7E") || ContainsPartialMatch(exceptionCodes, "78"));
+                isRelayChenge?.Invoke(ContainsPartialMatch(exceptionCodes, "5C") || ContainsPartialMatch(exceptionCodes, "58") || ContainsPartialMatch(exceptionCodes, "95"));
+                isTransferChenge?.Invoke(ContainsPartialMatch(exceptionCodes, "6D") || ContainsPartialMatch(exceptionCodes, "68") || ContainsPartialMatch(exceptionCodes, "96"));
+                isNetworkChenge?.Invoke(ContainsPartialMatch(exceptionCodes, "7E") || ContainsPartialMatch(exceptionCodes, "78") || ContainsPartialMatch(exceptionCodes, "97"));
             }
             else
             {
@@ -294,17 +295,21 @@ namespace TatehamaATS_v1.OnboardDevice
         /// 信号制御情報指令線
         /// </summary>
         /// <param name="dataFromServer"></param>
-        internal void ServerDataUpdate(DataFromServer dataFromServer)
+        internal void ServerDataUpdate(DataFromServer dataFromServer, bool ForceStop)
         {
-            var signalDataList = new List<SignalData>(dataFromServer.NextSignalData);
-            signalDataList.AddRange(dataFromServer.DoubleNextSignalData);
-            Relay.SignalSet(signalDataList);
+            InspectionRecord.NetworkUpdate();
             foreach (var item in dataFromServer.EmergencyLightDatas)
             {
                 Relay.EMSet(item);
             }
             OtherBougoState = dataFromServer.BougoState;
             Speaker.ChengeBougoState(MyBougoState || OtherBougoState);
+            if (!ForceStop)
+            {
+                var signalDataList = new List<SignalData>(dataFromServer.NextSignalData);
+                signalDataList.AddRange(dataFromServer.DoubleNextSignalData);
+                Relay.SignalSet(signalDataList);
+            }
         }
 
         /// <summary>
@@ -340,6 +345,14 @@ namespace TatehamaATS_v1.OnboardDevice
         internal void RetsubanSet(string Retsuban)
         {
             Network.OverrideDiaName = Retsuban;
+        }
+
+        /// <summary>
+        /// 強制前方停止司令線
+        /// </summary>
+        internal void ForceStopSignal(bool IsStop)
+        {
+            Relay?.ForceStopSignal(IsStop);
         }
     }
 }

@@ -165,6 +165,7 @@ namespace TatehamaATS_v1.OnboardDevice
         public Relay()
         {
             TrainCrewInput.Init();
+            TrainCrewInput.RequestData(DataRequest.Signal);
             _webSocket = new ClientWebSocket();
         }
 
@@ -174,16 +175,6 @@ namespace TatehamaATS_v1.OnboardDevice
         private void ProcessingReceiveData()
         {
             TrainCrewDataUpdated.Invoke(TcData);
-            // 必要情報の抜き出し    
-            //var nowOnTrack = new List<string>();
-            //foreach (var circuit in TcData.trackCircuitList)
-            //{
-            //    if (circuit.Last == TcData.myTrainData.diaName)
-            //    {
-            //        nowOnTrack.Add(circuit.Name);
-            //    }
-            //}
-            //Debug.WriteLine($"在線トラック：{string.Join(",", nowOnTrack)}");
         }
 
         /// <summary>
@@ -553,6 +544,22 @@ namespace TatehamaATS_v1.OnboardDevice
         public void ATSResetPush()
         {
             //Todo:ATS復帰入力
+        }
+
+        public void ForceStopSignal(bool IsStop)
+        {
+            TrainCrewInput.GetTrainState();
+            foreach (var signalData in TrainCrewInput.signals)
+            {
+                if (IsStop)
+                {
+                    _ = SendSingleCommand("SetSignalPhase", new string[] { signalData.name, Phase.R.ToString() });
+                }
+                else
+                {
+                    _ = SendSingleCommand("SetSignalPhase", new string[] { signalData.name, Phase.None.ToString() });
+                }
+            }
         }
     }
 }
