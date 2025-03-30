@@ -26,7 +26,6 @@ namespace TatehamaATS_v1.MainWindow
 
         private CableIO CableIO;
         private RetsubanWindow.RetsubanWindow retsubanWindow = new RetsubanWindow.RetsubanWindow();
-        private KokuchiWindow.KokuchiWindow kokuchiWindow = new KokuchiWindow.KokuchiWindow();
 
         //TopMost切替用
         private const int HOTKEY_ID = 1; // ホットキーID
@@ -227,14 +226,7 @@ namespace TatehamaATS_v1.MainWindow
 
         private void Image_Kokuchi_Click(object sender, EventArgs e)
         {
-            if (kokuchiWindow.Visible)
-            {
-                kokuchiWindow.Hide();
-            }
-            else
-            {
-                kokuchiWindow.Show();
-            }
+            CableIO.KokuchiWinChenge();
         }
         public void Application_ApplicationExit(object sender, EventArgs e)
         {

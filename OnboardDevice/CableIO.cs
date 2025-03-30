@@ -35,6 +35,11 @@ namespace TatehamaATS_v1.OnboardDevice
         ConsoleSpeaker Speaker;
 
         /// <summary>
+        /// 運転告知器
+        /// </summary>
+        KokuchiWindow.KokuchiWindow KokuchiWindow = new KokuchiWindow.KokuchiWindow();
+
+        /// <summary>
         /// ゲーム内時間
         /// </summary>
         static TimeSpan TC_Time;
@@ -115,6 +120,9 @@ namespace TatehamaATS_v1.OnboardDevice
             InspectionRecord.AddExceptionAction += AddException;
             InspectionRecord.ExceptionCodesChenge += ExceptionCodesChenge;
             InspectionRecord.EmBrakeStateUpdated += InspectionRecordEmBrakeStateChenge;
+
+            KokuchiWindow = new KokuchiWindow.KokuchiWindow();
+            KokuchiWindow.Hide();
 
             ControlLED.AddExceptionAction += AddException;
         }
@@ -270,6 +278,20 @@ namespace TatehamaATS_v1.OnboardDevice
                 ControlLED.LEDShow();
             }
         }
+        /// <summary>
+        /// 告知Win表示指示指令線
+        /// </summary>
+        internal void KokuchiWinChenge()
+        {
+            if (KokuchiWindow.Visible)
+            {
+                KokuchiWindow.Hide();
+            }
+            else
+            {
+                KokuchiWindow.Show();
+            }
+        }
 
         /// <summary>
         /// 継電部動作開始指令線
@@ -304,6 +326,7 @@ namespace TatehamaATS_v1.OnboardDevice
             }
             OtherBougoState = dataFromServer.BougoState;
             Speaker.ChengeBougoState(MyBougoState || OtherBougoState);
+            KokuchiWindow.SetData(dataFromServer.OperationNotificationData);
             if (!ForceStop)
             {
                 var signalDataList = new List<SignalData>(dataFromServer.NextSignalData);

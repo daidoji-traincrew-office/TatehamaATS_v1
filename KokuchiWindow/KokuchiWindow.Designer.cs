@@ -31,7 +31,9 @@
             components = new System.ComponentModel.Container();
             KokuchiLED = new PictureBox();
             timer1 = new System.Windows.Forms.Timer(components);
+            Transparency = new PictureBox();
             ((System.ComponentModel.ISupportInitialize)KokuchiLED).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)Transparency).BeginInit();
             SuspendLayout();
             // 
             // KokuchiLED
@@ -51,17 +53,31 @@
             timer1.Interval = 50;
             timer1.Tick += timer1_Tick;
             // 
+            // Transparency
+            // 
+            Transparency.BackgroundImage = ATSDisplay.LEDResource.Null;
+            Transparency.Image = KokuchiResource.Kokuchi_Transparency;
+            Transparency.Location = new Point(0, 0);
+            Transparency.Name = "Transparency";
+            Transparency.Size = new Size(369, 167);
+            Transparency.TabIndex = 1;
+            Transparency.TabStop = false;
+            Transparency.Visible = false;
+            // 
             // KokuchiWindow
             // 
             AutoScaleMode = AutoScaleMode.None;
             BackgroundImage = KokuchiResource.Kokuchi_Background;
             BackgroundImageLayout = ImageLayout.None;
             ClientSize = new Size(369, 167);
+            Controls.Add(Transparency);
             Controls.Add(KokuchiLED);
             FormBorderStyle = FormBorderStyle.FixedToolWindow;
             Name = "KokuchiWindow";
             Text = "運転告知器 | 館浜ATS - ダイヤ運転会";
+            FormClosing += KokuchiWindow_FormClosing;
             ((System.ComponentModel.ISupportInitialize)KokuchiLED).EndInit();
+            ((System.ComponentModel.ISupportInitialize)Transparency).EndInit();
             ResumeLayout(false);
         }
 
@@ -69,5 +85,6 @@
 
         private PictureBox KokuchiLED;
         private System.Windows.Forms.Timer timer1;
+        private PictureBox Transparency;
     }
 }

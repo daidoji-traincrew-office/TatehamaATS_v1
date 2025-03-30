@@ -15,7 +15,7 @@ namespace TatehamaATS_v1.KokuchiWindow
 {
     public partial class KokuchiWindow : Form
     {
-        KokuchiData KokuchiData;
+        OperationNotificationData KokuchiData;
         private Bitmap sourceImage;
         public bool ShowLED;
 
@@ -31,57 +31,82 @@ namespace TatehamaATS_v1.KokuchiWindow
             sourceImage = KokuchiResource.Kokuchi_LED;
             DisplayImageByPos(1, 154);
             TopMost = true;
-            BackColor = Color.Red;
+            BackColor = Color.Blue;
             TransparencyKey = BackColor;
             ShowLED = false;
         }
 
-        public void SetData(KokuchiData kokuchiData)
+        private void KokuchiWindow_FormClosing(object sender, FormClosingEventArgs e)
         {
-            KokuchiData = kokuchiData;
+            //閉じずに消す
+            Hide();
+            e.Cancel = true;
+        }
+
+        public void SetData(OperationNotificationData? kokuchiData)
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action<OperationNotificationData?>(SetData), kokuchiData);
+            }
+            else
+            {
+                if (kokuchiData != null)
+                {
+                    Transparency.Visible = false;
+                    KokuchiData = kokuchiData;
+                }
+                else
+                {
+                    Transparency.Visible = true;
+                }
+            }
         }
 
         /// <summary>
         /// 表示内容を変更する
         /// </summary>
-        private void SetLED(KokuchiData kokuchiData)
+        private void SetLED(OperationNotificationData kokuchiData)
         {
             try
             {
                 switch (kokuchiData.Type)
                 {
-                    case KokuchiType.None:
+                    case OperationNotificationType.None:
                         DisplayImageByPos(1, 1);
                         break;
-                    case KokuchiType.Yokushi:
+                    case OperationNotificationType.Yokushi:
                         DisplayImageByPos(1, 18);
                         break;
-                    case KokuchiType.Tsuuchi:
-                    case KokuchiType.TsuuchiKaijo:
+                    case OperationNotificationType.Tsuuchi:
+                    case OperationNotificationType.TsuuchiKaijo:
                         DisplayImageByPos(1, 35);
                         break;
-                    case KokuchiType.Shuppatsu:
+                    case OperationNotificationType.Shuppatsu:
                         DisplayImageByPos(1, 52);
                         break;
-                    case KokuchiType.Kaijo:
+                    case OperationNotificationType.Kaijo:
                         DisplayImageByPos(1, 69);
                         break;
-                    case KokuchiType.Tenmatsusho:
-                        if (kokuchiData.DisplayData == "MC")
+                    case OperationNotificationType.Tenmatsusho:
+                        if (kokuchiData.Content == "MC")
                         {
                             DisplayImageByPos(1, 86);
                         }
-                        else if (kokuchiData.DisplayData == "M")
+                        else if (kokuchiData.Content == "M")
                         {
                             DisplayImageByPos(1, 103);
                         }
-                        else if (kokuchiData.DisplayData == "C")
+                        else if (kokuchiData.Content == "C")
                         {
                             DisplayImageByPos(1, 120);
                         }
                         break;
-                    case KokuchiType.ShuppatsuJikoku:
-                        DisplayTimeImage(kokuchiData.DisplayData);
+                    case OperationNotificationType.ShuppatsuJikoku:
+                        DisplayTimeImage(kokuchiData.Content);
+                        break;
+                    case OperationNotificationType.Torikeshi:
+                        DisplayImageByPos(1, 137);
                         break;
                     default:
                         DisplayImageByPos(1, 171);
@@ -188,7 +213,7 @@ namespace TatehamaATS_v1.KokuchiWindow
         {
             if (ShowLED)
             {
-                if(this.BackgroundImage != null)
+                if (this.BackgroundImage != null)
                 {
                     this.BackgroundImage = null;
                     KokuchiLED.BackgroundImage = null;
@@ -207,19 +232,20 @@ namespace TatehamaATS_v1.KokuchiWindow
                     DisplayImageByPos(1, 154);
                     return;
                 }
-                var DeltaTime = (DateTime.Now - KokuchiData.OriginTime).TotalMilliseconds;
+                var DeltaTime = (DateTime.Now - KokuchiData.OperatedAt).TotalMilliseconds;
 
                 switch (KokuchiData.Type)
                 {
-                    case KokuchiType.None:
-                    case KokuchiType.Kaijo:
-                    case KokuchiType.Shuppatsu:
-                    case KokuchiType.ShuppatsuJikoku:
+                    case OperationNotificationType.None:
+                    case OperationNotificationType.Kaijo:
+                    case OperationNotificationType.Shuppatsu:
+                    case OperationNotificationType.ShuppatsuJikoku:
+                    case OperationNotificationType.Torikeshi:
                         //点滅しないやつ
                         SetLED(KokuchiData);
                         break;
-                    case KokuchiType.Yokushi:
-                    case KokuchiType.Tsuuchi:
+                    case OperationNotificationType.Yokushi:
+                    case OperationNotificationType.Tsuuchi:
                         //1000+500点滅
                         if (DeltaTime % 1500 < 1000)
                         {
@@ -230,7 +256,7 @@ namespace TatehamaATS_v1.KokuchiWindow
                             DisplayImageByPos(50, 171);
                         }
                         break;
-                    case KokuchiType.TsuuchiKaijo:
+                    case OperationNotificationType.TsuuchiKaijo:
                         if (DeltaTime < 5 * 1000)
                         {
                             //500+250点滅     
@@ -260,7 +286,7 @@ namespace TatehamaATS_v1.KokuchiWindow
                             DisplayImageByPos(50, 171);
                         }
                         break;
-                    case KokuchiType.Tenmatsusho:
+                    case OperationNotificationType.Tenmatsusho:
                         if (DeltaTime % 2000 < 1500)
                         {
                             //1500+500点滅   
@@ -280,7 +306,6 @@ namespace TatehamaATS_v1.KokuchiWindow
 
         private void KokuchiLED_Click(object sender, EventArgs e)
         {
-            SetData(new KokuchiData(KokuchiType.Tenmatsusho, "M", DateTime.Now));
         }
     }
 }

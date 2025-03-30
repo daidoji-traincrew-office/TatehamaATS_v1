@@ -93,6 +93,16 @@ namespace TatehamaATS_v1.KokuchiWindow {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
+        internal static System.Drawing.Bitmap Kokuchi_Transparency {
+            get {
+                object obj = ResourceManager.GetObject("Kokuchi_Transparency", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
         internal static System.Drawing.Bitmap KokuchiLED_Waku {
             get {
                 object obj = ResourceManager.GetObject("KokuchiLED_Waku", resourceCulture);
