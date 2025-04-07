@@ -64,7 +64,7 @@ jobs:
       - name: Set Zip File Name
         # ZIP_FILE_NAMEは、ビルドしたアプリケーションのファイル名を指定するための環境変数。ソフトによって変えると良さげ
         run: |
-          version=$(echo "${{ needs.calc_version.outputs.VERSION }}" | sed 's/./_/')
+          version=$(echo "${{ needs.calc_version.outputs.VERSION }}" | sed 's/\./_/')
           echo "ZIP_FILE_NAME=${{ env.APP_NAME }}_${version}${{ (matrix.dev && '-dev') || ''}}${{ (matrix.standalone && '-standalone') || '' }}.zip" >> $GITHUB_ENV
       - name: Checkout
         uses: actions/checkout@v4.2.2
