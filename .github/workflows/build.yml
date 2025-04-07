@@ -100,6 +100,8 @@ jobs:
   create_new_release:
     runs-on: ubuntu-latest
     name: "Create New Release"
+    permissions:
+      contents: write
     needs:
       - calc_version
       - build
