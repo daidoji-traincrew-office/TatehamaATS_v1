@@ -37,7 +37,7 @@
 
 	<ItemGroup>
 		<Reference Include="TrainCrewInput">
-			<HintPath>..\Tatehama_TASC\DLL\TrainCrewInput.dll</HintPath>
+			<HintPath>.\DLL\TrainCrewInput.dll</HintPath>
 			<Private>true</Private>
 		</Reference>
 	</ItemGroup>
