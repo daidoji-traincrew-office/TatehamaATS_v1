@@ -6,6 +6,10 @@
         public OperationNotificationType Type { get; set; }
         public string Content { get; set; }
         public DateTime OperatedAt { get; set; }
+        public override string ToString()
+        {
+            return $"{DisplayName}:{Type}:{Content}:{OperatedAt}";
+        }
     }
 
     public enum OperationNotificationType

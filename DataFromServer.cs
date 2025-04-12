@@ -24,13 +24,12 @@ namespace TatehamaATS_v1
     {
         public List<SignalData> NextSignalData { get; set; } = null;
         public List<SignalData> DoubleNextSignalData { get; set; } = null;
-        //進路表示の表示はTC本体実装待ち　未決定
         public bool BougoState { get; set; }
         public List<EmergencyLightData> EmergencyLightDatas { get; set; }
         public OperationNotificationData? OperationNotificationData { get; set; }
         public override string ToString()
         {
-            return $"BougoState:{BougoState}/{string.Join(",", NextSignalData)}/{string.Join(",", DoubleNextSignalData)}";
+            return $"BougoState:{BougoState}/{OperationNotificationData}/{string.Join(",", NextSignalData)}/{string.Join(",", DoubleNextSignalData)}";
         }
     }
 
