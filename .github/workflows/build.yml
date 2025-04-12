@@ -118,3 +118,4 @@ jobs:
           tag_name: ${{ needs.calc_version.outputs.VERSION }}
           make_latest: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
           files: out/* 
+          prerelease: ${{ github.event_name != 'push' || github.ref != 'refs/heads/master' }}
