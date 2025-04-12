@@ -377,5 +377,13 @@ namespace TatehamaATS_v1.OnboardDevice
         {
             Relay?.ForceStopSignal(IsStop);
         }
+
+        /// <summary>
+        /// サーバー強制再接続司令線
+        /// </summary>
+        internal void StartUpdateLoop()
+        {
+            Network.StartUpdateLoop();
+        }
     }
 }

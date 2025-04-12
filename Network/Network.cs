@@ -64,7 +64,7 @@ namespace TatehamaATS_v1.Network
         public Network(OpenIddictClientService service)
         {
             _service = service;
-            Task.Run(() => UpdateLoop());
+            StartUpdateLoop();
             OverrideDiaName = "9999";
             TcData = new TrainCrewStateData();
             IsBougo = false;
@@ -79,6 +79,25 @@ namespace TatehamaATS_v1.Network
             SendDataUpdate();
         }
 
+        public void StartUpdateLoop()
+        {
+            Task.Run(async () =>
+            {
+                while (true)
+                {
+                    try
+                    {
+                        await UpdateLoop();
+                    }
+                    catch (Exception ex)
+                    {
+                        var e = new NetworkCountaException(7, "UpdateLoop再起動", ex);
+                        AddExceptionAction.Invoke(e);
+                    }
+                }
+            });
+        }
+
         /// <summary>
         /// 定常ループ
         /// </summary>
@@ -89,14 +108,14 @@ namespace TatehamaATS_v1.Network
             {
                 var timer = Task.Delay(100);
                 await timer;
-                if (!connected)
-                {
-                    AddExceptionAction.Invoke(new NetworkConnectException(7, "未接続"));
-                    continue;
-                }
                 try
                 {
-                    SendData_to_Server();
+                    if (!connected)
+                    {
+                        AddExceptionAction.Invoke(new NetworkConnectException(7, "未接続"));
+                        continue;
+                    }
+                    await SendData_to_Server();
                 }
                 catch (Exception ex)
                 {
@@ -332,7 +351,7 @@ namespace TatehamaATS_v1.Network
                 }
                 previousStatus = currentStatus;
                 Debug.WriteLine($"{SendData}");
-                if (!(TcData.gameScreen == GameScreen.MainGame || TcData.gameScreen == GameScreen.MainGame_Pause)) return;
+                //if (!(TcData.gameScreen == GameScreen.MainGame || TcData.gameScreen == GameScreen.MainGame_Pause)) return;
                 DataFromServer DataFromServer = await connection.InvokeAsync<DataFromServer>("SendData_ATS", SendData);
                 //    Debug.WriteLine("受信");
                 Debug.WriteLine(DataFromServer.ToString());
