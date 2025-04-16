@@ -15,7 +15,7 @@ namespace TatehamaATS_v1.Network
     public class Network
     {
         public static HubConnection connection;
-        public static bool connected = false;
+        public static bool connected { get; set; } = false;
         private static string _token = "";
         private readonly OpenIddictClientService _service;
 
@@ -338,7 +338,14 @@ namespace TatehamaATS_v1.Network
         {
             try
             {
-                bool currentStatus = IsOddTrainNumber(OverrideDiaName) != IsOddTrainNumber(TcData.myTrainData.diaName);
+                bool currentStatus = true;
+                try 
+                {
+                    currentStatus = IsOddTrainNumber(OverrideDiaName) != IsOddTrainNumber(TcData.myTrainData.diaName);
+                }
+                catch
+                {
+                }
 
                 if (currentStatus)
                 {

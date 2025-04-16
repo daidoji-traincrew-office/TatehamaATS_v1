@@ -4,6 +4,7 @@ using TrainCrewAPI;
 
 namespace TatehamaATS_v1.OnboardDevice
 {
+    using Microsoft.AspNetCore.Routing;
     using System;
     using System.Diagnostics;
     using TatehamaATS_v1.Network;
@@ -135,6 +136,8 @@ namespace TatehamaATS_v1.OnboardDevice
             ATSPowerState = true;
             EmBrakeStateChenge();
             ExceptionCodesChenge(InspectionRecord.exceptions.Values.Select(e => e.ToCode()).ToList());
+            Relay?.SetOther(true);
+            Relay?.SetRouteMode(true);
         }
 
         /// <summary>
@@ -320,10 +323,7 @@ namespace TatehamaATS_v1.OnboardDevice
         internal void ServerDataUpdate(DataFromServer dataFromServer, bool ForceStop)
         {
             InspectionRecord.NetworkUpdate();
-            foreach (var item in dataFromServer.EmergencyLightDatas)
-            {
-                Relay.EMSet(item);
-            }
+            Relay.EMSet(dataFromServer.EmergencyLightDatas);
             OtherBougoState = dataFromServer.BougoState;
             Speaker.ChengeBougoState(MyBougoState || OtherBougoState);
             KokuchiWindow.SetData(dataFromServer.OperationNotificationData);
@@ -332,6 +332,7 @@ namespace TatehamaATS_v1.OnboardDevice
                 var signalDataList = new List<SignalData>(dataFromServer.NextSignalData);
                 signalDataList.AddRange(dataFromServer.DoubleNextSignalData);
                 Relay.SignalSet(signalDataList);
+                Relay.UpdateRoute(dataFromServer.RouteData);
             }
         }
 
@@ -368,6 +369,7 @@ namespace TatehamaATS_v1.OnboardDevice
         internal void RetsubanSet(string Retsuban)
         {
             Network.OverrideDiaName = Retsuban;
+            Relay.OverrideDiaName = Retsuban;
         }
 
         /// <summary>
