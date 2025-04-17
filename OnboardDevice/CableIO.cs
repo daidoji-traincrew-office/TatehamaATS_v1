@@ -325,7 +325,7 @@ namespace TatehamaATS_v1.OnboardDevice
                 Relay.EMSet(item);
             }
             OtherBougoState = dataFromServer.BougoState;
-            Speaker.ChengeBougoState(MyBougoState || OtherBougoState);
+            Speaker.ChengeBougoState(MyBougoState, OtherBougoState);
             KokuchiWindow.SetData(dataFromServer.OperationNotificationData);
             if (!ForceStop)
             {
@@ -351,7 +351,7 @@ namespace TatehamaATS_v1.OnboardDevice
         {
             MyBougoState = State;
             Network.IsBougo = State;
-            Speaker.ChengeBougoState(MyBougoState || OtherBougoState);
+            Speaker.ChengeBougoState(MyBougoState, OtherBougoState);
         }
 
         /// <summary>
