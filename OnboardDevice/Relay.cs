@@ -8,6 +8,10 @@ using System.Diagnostics;
 using System.Reflection;
 using TrainCrewAPI;
 using TrainCrew;
+using Microsoft.AspNetCore.Routing;
+using System.ComponentModel;
+using System.Configuration;
+using Microsoft.AspNetCore.Components.Routing;
 
 namespace TatehamaATS_v1.OnboardDevice
 {
@@ -61,6 +65,29 @@ namespace TatehamaATS_v1.OnboardDevice
         private int BeforeBrake = 0;
 
         private List<SignalData> SignalDatas = new List<SignalData>();
+        private List<Route> Routes = new List<Route>();
+
+        private Dictionary<string, string> StaNameById = new Dictionary<string, string>()
+        {
+            {"TH76","館浜"},
+            {"TH75","駒野"},
+            {"TH71","津崎"},
+            {"TH70","浜園"},
+            {"TH67","新野崎"},
+            {"TH66S","江ノ原信号場"},
+            {"TH65","大道寺"},
+            {"TH64","藤江"},
+            {"TH63","水越"},
+            {"TH62","高見沢"},
+            {"TH61","日野森"},
+            {"TH59","西赤山"},
+            {"TH58","赤山町"}
+        };
+
+        /// <summary>
+        /// 運転会列番
+        /// </summary>
+        internal string OverrideDiaName;
 
         // イベント
         internal event Action<TimeSpan> TC_TimeUpdated;
@@ -135,7 +162,7 @@ namespace TatehamaATS_v1.OnboardDevice
         /// <param name="requestValues"></param>
         /// <returns></returns>
         private static bool IsValidCommand(string requestValues) =>
-            new[] { "DataRequest", "SetEmergencyLight", "SetSignalPhase" }.Contains(requestValues);
+            new[] { "DataRequest", "SetEmergencyLight", "SetSignalPhase", "mode_req", "SetRoute", "DeleteRoute" }.Contains(requestValues);
 
         /// <summary>
         /// リクエストの検証
@@ -154,6 +181,12 @@ namespace TatehamaATS_v1.OnboardDevice
                     return requestValues.Length == 2 && (requestValues[1] == "true" || requestValues[1] == "false");
                 case "SetSignalPhase":
                     return requestValues.Length == 2 && (requestValues[1] == "None" || requestValues[1] == "R" || requestValues[1] == "YY" || requestValues[1] == "Y" || requestValues[1] == "YG" || requestValues[1] == "G");
+                case "mode_req":
+                    return requestValues.Length == 1 && (requestValues[0] == "hide_other" || requestValues[0] == "show_other" || requestValues[0] == "route_manual" || requestValues[0] == "route_auto");
+                case "SetRoute":
+                    return requestValues.Length == 5;
+                case "DeleteRoute":
+                    return requestValues.Length == 2;
                 default:
                     return false;
             }
@@ -164,6 +197,7 @@ namespace TatehamaATS_v1.OnboardDevice
         /// </summary>
         public Relay()
         {
+            OverrideDiaName = "9999";
             TrainCrewInput.Init();
             TrainCrewInput.RequestData(DataRequest.Signal);
             _webSocket = new ClientWebSocket();
@@ -175,6 +209,11 @@ namespace TatehamaATS_v1.OnboardDevice
         private void ProcessingReceiveData()
         {
             TrainCrewDataUpdated.Invoke(TcData);
+            if (TcData.gameScreen == TrainCrewAPI.GameScreen.MainGame_Loading)
+            {
+                SetRouteMode(true);
+                SetOther(true);
+            }
         }
 
         /// <summary>
@@ -309,9 +348,138 @@ namespace TatehamaATS_v1.OnboardDevice
             SignalDatas = signalDatas;
         }
 
-        internal void EMSet(EmergencyLightData emergencyLightData)
+        internal void EMSet(List<EmergencyLightData> emergencyLightDatas)
         {
-            SendSingleCommand("SetEmergencyLight", new string[] { emergencyLightData.Name, emergencyLightData.State ? "true" : "false" });
+            foreach (var emergencyLightData in emergencyLightDatas)
+            {
+                SendSingleCommand("SetEmergencyLight", new string[] { emergencyLightData.Name, emergencyLightData.State ? "true" : "false" });
+            }
+        }
+
+        internal void SetOther(bool isHide)
+        {
+            SendSingleCommand("mode_req", new string[] { isHide ? "hide_other" : "show_other" });
+        }
+
+        internal void SetRouteMode(bool isManual)
+        {
+            SendSingleCommand("mode_req", new string[] { isManual ? "route_manual" : "route_auto" });
+        }
+
+        internal void UpdateRoute(List<Route> routes)
+        {
+            // routes または Routes が null の場合は処理をスキップ
+            if (routes == null)
+            {
+                Debug.WriteLine("routes is null. Skipping UpdateRoute.");
+                return;
+            }
+
+            if (Routes == null)
+            {
+                Debug.WriteLine("Routes is null. Initializing empty list.");
+                Routes = new List<Route>();
+            }
+
+            // 保存した差分と比較し、増えた分はSetRoute、減った分はDeleteRouteを実行する
+            var addedRoutes = routes.Where(r => !Routes.Any(r2 => r2.TcName == r.TcName)).ToList();
+            var removedRoutes = Routes.Where(r => !routes.Any(r2 => r2.TcName == r.TcName)).ToList();
+
+            foreach (var route in addedRoutes)
+            {
+                SetRoute(route);
+            }
+            foreach (var route in removedRoutes)
+            {
+                DeleteRoute(route);
+            }
+
+            // 進路情報の更新
+            if (TcData.gameScreen == TrainCrewAPI.GameScreen.MainGame || TcData.gameScreen == TrainCrewAPI.GameScreen.MainGame_Pause)
+            {
+                Routes = routes;
+            }
+            else
+            {
+                Routes = new List<Route>();
+            }
+        }
+
+        private void SetRoute(Route route)
+        {
+            try
+            {
+                var r = route.TcName.Split('_').ToList();
+                // staID仮対応
+                var staName = StaNameById[r[0]] + "連動装置";
+                var routeName = r[1];
+                // Todo: 出発の場合は、列選表示とする。
+                var indicator = route.RouteType == RouteType.Arriving ? route.Indicator : TypeString(OverrideDiaName);
+                SendSingleCommand("SetRoute", [staName, routeName, indicator, TcData.myTrainData.diaName, "停車"]);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"{ex.Message}{ex.InnerException}");
+            }
+        }
+
+        private void DeleteRoute(Route route)
+        {
+            try
+            {
+                var r = route.TcName.Split('_').ToList();
+                // staID仮対応
+                var staName = StaNameById[r[0]] + "連動装置";
+                var routeName = r[1];
+                SendSingleCommand("DeleteRoute", [staName, routeName]);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"{ex.Message}{ex.InnerException}");
+            }
+        }
+
+
+        internal string TypeString(string Retsuban)
+        {
+            if (Retsuban == "9999")
+            {
+                return "";
+            }
+            if (Retsuban.Contains("溝月"))
+            {
+                return "回送";
+            }
+            if (Retsuban.StartsWith("回"))
+            {
+                return "回送";
+            }
+            if (Retsuban.StartsWith("試"))
+            {
+                return "回送";
+            }
+
+            if (Retsuban.Contains("A"))
+            {
+                return "特急";
+            }
+            if (Retsuban.Contains("K"))
+            {
+                return "快急";
+            }
+            if (Retsuban.Contains("B"))
+            {
+                return "急行";
+            }
+            if (Retsuban.Contains("C"))
+            {
+                return "準急";
+            }
+            if (int.TryParse(Retsuban, null, out _))
+            {
+                return "普通";
+            }
+            return "回送";
         }
 
         internal async Task SendSingleCommand(string command, string[] request)
@@ -466,6 +634,8 @@ namespace TatehamaATS_v1.OnboardDevice
         /// <returns></returns>
         private async Task CloseAsync()
         {
+            SetOther(false);
+            SetRouteMode(false);
             if (_webSocket != null && _webSocket.State == WebSocketState.Open)
             {
                 // 正常に接続を閉じる
