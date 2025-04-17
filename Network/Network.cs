@@ -55,6 +55,11 @@ namespace TatehamaATS_v1.Network
         internal event Action<DataFromServer, bool> ServerDataUpdate;
 
         /// <summary>
+        /// 通信部疎通確認
+        /// </summary>
+        internal event Action NetworkWorking;
+
+        /// <summary>
         /// 列番上限不一致情報変化
         /// </summary>
         internal event Action<bool> RetsubanInOutStatusChanged;
@@ -362,14 +367,14 @@ namespace TatehamaATS_v1.Network
                 if (TcData.gameScreen == GameScreen.MainGame || TcData.gameScreen == GameScreen.MainGame_Pause)
                 {
                     DataFromServer = await connection.InvokeAsync<DataFromServer>("SendData_ATS", SendData);
+                    //    Debug.WriteLine("受信");
+                    //Debug.WriteLine(DataFromServer.ToString());
+                    ServerDataUpdate?.Invoke(DataFromServer, currentStatus);
                 }
                 else
                 {
                     DataFromServer = await connection.InvokeAsync<DataFromServer>("SendData_ATS", SendData);
                 }
-                //    Debug.WriteLine("受信");
-                //Debug.WriteLine(DataFromServer.ToString());
-                ServerDataUpdate?.Invoke(DataFromServer, currentStatus);
             }
             catch (InvalidOperationException ex)
             {
