@@ -107,6 +107,7 @@ namespace TatehamaATS_v1.OnboardDevice
 
             Network = new Network(service);
             Network.AddExceptionAction += AddException;
+            Network.NetworkWorking += NetworkWorking;
             Network.ServerDataUpdate += ServerDataUpdate;
             Network.ConnectionStatusChanged += NetworkStatesChenged;
             Network.RetsubanInOutStatusChanged += ForceStopSignal;
@@ -126,6 +127,7 @@ namespace TatehamaATS_v1.OnboardDevice
 
             ControlLED.AddExceptionAction += AddException;
         }
+
 
         /// <summary>
         /// ATS電源入指令線
@@ -311,6 +313,14 @@ namespace TatehamaATS_v1.OnboardDevice
         {
             Console.WriteLine(exception.ToString());
             InspectionRecord?.AddException(exception);
+        }
+
+        /// <summary>
+        /// 通信部疎通指令線
+        /// </summary>
+        private void NetworkWorking()
+        {
+            InspectionRecord.NetworkUpdate();
         }
 
         /// <summary>

@@ -55,6 +55,11 @@ namespace TatehamaATS_v1.Network
         internal event Action<DataFromServer, bool> ServerDataUpdate;
 
         /// <summary>
+        /// 通信部疎通確認
+        /// </summary>
+        internal event Action NetworkWorking;
+
+        /// <summary>
         /// 列番上限不一致情報変化
         /// </summary>
         internal event Action<bool> RetsubanInOutStatusChanged;
@@ -338,7 +343,14 @@ namespace TatehamaATS_v1.Network
         {
             try
             {
-                bool currentStatus = IsOddTrainNumber(OverrideDiaName) != IsOddTrainNumber(TcData.myTrainData.diaName);
+                bool currentStatus = true;
+                try
+                {
+                    currentStatus = IsOddTrainNumber(OverrideDiaName) != IsOddTrainNumber(TcData.myTrainData.diaName);
+                }
+                catch
+                {
+                }
 
                 if (currentStatus)
                 {
@@ -350,12 +362,19 @@ namespace TatehamaATS_v1.Network
                     RetsubanInOutStatusChanged.Invoke(false);
                 }
                 previousStatus = currentStatus;
-                Debug.WriteLine($"{SendData}");
-                //if (!(TcData.gameScreen == GameScreen.MainGame || TcData.gameScreen == GameScreen.MainGame_Pause)) return;
-                DataFromServer DataFromServer = await connection.InvokeAsync<DataFromServer>("SendData_ATS", SendData);
-                //    Debug.WriteLine("受信");
-                Debug.WriteLine(DataFromServer.ToString());
-                ServerDataUpdate?.Invoke(DataFromServer, currentStatus);
+                //Debug.WriteLine($"{SendData}");
+                DataFromServer DataFromServer;
+                if (TcData.gameScreen == GameScreen.MainGame || TcData.gameScreen == GameScreen.MainGame_Pause)
+                {
+                    DataFromServer = await connection.InvokeAsync<DataFromServer>("SendData_ATS", SendData);
+                    //    Debug.WriteLine("受信");
+                    //Debug.WriteLine(DataFromServer.ToString());
+                    ServerDataUpdate?.Invoke(DataFromServer, currentStatus);
+                }
+                else
+                {
+                    DataFromServer = await connection.InvokeAsync<DataFromServer>("SendData_ATS", SendData);
+                }
             }
             catch (InvalidOperationException ex)
             {
