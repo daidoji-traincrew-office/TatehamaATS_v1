@@ -338,7 +338,14 @@ namespace TatehamaATS_v1.Network
         {
             try
             {
-                bool currentStatus = IsOddTrainNumber(OverrideDiaName) != IsOddTrainNumber(TcData.myTrainData.diaName);
+                bool currentStatus = true;
+                try
+                {
+                    currentStatus = IsOddTrainNumber(OverrideDiaName) != IsOddTrainNumber(TcData.myTrainData.diaName);
+                }
+                catch
+                {
+                }
 
                 if (currentStatus)
                 {
