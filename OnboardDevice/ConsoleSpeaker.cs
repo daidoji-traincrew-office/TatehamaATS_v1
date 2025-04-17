@@ -13,6 +13,7 @@ namespace TatehamaATS_v1.OnboardDevice
     {
         AudioManager AudioManager;
         AudioWrapper Bougo;
+        AudioWrapper BougoOther;
         int Mizotsuki;
         AudioWrapper Mizotsuki1;
         AudioWrapper Mizotsuki2;
@@ -30,6 +31,7 @@ namespace TatehamaATS_v1.OnboardDevice
             {
                 AudioManager = new AudioManager();
                 Bougo = AudioManager.AddAudio("sound/bougo.wav", 1.0f);
+                BougoOther = AudioManager.AddAudio("sound/bougoOther.wav", 1.0f);
                 Mizotsuki1 = AudioManager.AddAudio("sound/Mizotsuki1.wav", 1.0f);
                 Mizotsuki2 = AudioManager.AddAudio("sound/Mizotsuki2.wav", 1.0f);
             }
@@ -44,15 +46,22 @@ namespace TatehamaATS_v1.OnboardDevice
             }
         }
 
-        public void ChengeBougoState(bool State)
+        public void ChengeBougoState(bool State, bool OtherState)
         {
             if (State)
             {
                 Bougo?.PlayLoop(1.0f);
+                BougoOther?.Stop();
+            }
+            else if (OtherState)
+            {
+                Bougo?.Stop();
+                BougoOther?.PlayLoop(1.0f);
             }
             else
             {
                 Bougo?.Stop();
+                BougoOther?.Stop();
             }
         }
 

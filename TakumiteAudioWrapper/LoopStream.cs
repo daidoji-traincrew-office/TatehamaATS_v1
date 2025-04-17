@@ -26,38 +26,25 @@ namespace TakumiteAudioWrapper
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            if (_sourceStream == null)
-                return 0;
+            int totalBytesRead = 0;
 
-            try
+            while (totalBytesRead < count)
             {
-                int bytesRead = _sourceStream.Read(buffer, offset, count);
+                // 現在のストリームからデータを読み取る
+                int bytesRead = _sourceStream.Read(buffer, offset + totalBytesRead, count - totalBytesRead);
+
                 if (bytesRead == 0)
                 {
+                    // ストリームの終端に到達した場合、始端に戻る
                     _sourceStream.Position = 0;
-                    bytesRead = _sourceStream.Read(buffer, offset, count);
                 }
-
-                // 音量調整
-                for (int i = 0; i < bytesRead; i += 2)
+                else
                 {
-                    short sample = (short)(buffer[offset + i] | (buffer[offset + i + 1] << 8));
-                    sample = (short)Math.Clamp(sample * Volume, short.MinValue, short.MaxValue);
-                    buffer[offset + i] = (byte)(sample & 0xFF);
-                    buffer[offset + i + 1] = (byte)((sample >> 8) & 0xFF);
+                    totalBytesRead += bytesRead;
                 }
+            }
 
-                return bytesRead;
-            }
-            catch (ObjectDisposedException)
-            {
-                return 0;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error during reading: {ex.Message}");
-                return 0;
-            }
+            return totalBytesRead;
         }
 
         protected override void Dispose(bool disposing)
