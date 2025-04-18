@@ -108,6 +108,7 @@ namespace TatehamaATS_v1.OnboardDevice
 
             Network = new Network(service);
             Network.AddExceptionAction += AddException;
+            Network.NetworkWorking += NetworkWorking;
             Network.ServerDataUpdate += ServerDataUpdate;
             Network.ConnectionStatusChanged += NetworkStatesChenged;
             Network.RetsubanInOutStatusChanged += ForceStopSignal;
@@ -127,6 +128,7 @@ namespace TatehamaATS_v1.OnboardDevice
 
             ControlLED.AddExceptionAction += AddException;
         }
+
 
         /// <summary>
         /// ATS電源入指令線
@@ -317,6 +319,14 @@ namespace TatehamaATS_v1.OnboardDevice
         }
 
         /// <summary>
+        /// 通信部疎通指令線
+        /// </summary>
+        private void NetworkWorking()
+        {
+            InspectionRecord.NetworkUpdate();
+        }
+
+        /// <summary>
         /// 信号制御情報指令線
         /// </summary>
         /// <param name="dataFromServer"></param>
@@ -325,7 +335,7 @@ namespace TatehamaATS_v1.OnboardDevice
             InspectionRecord.NetworkUpdate();
             Relay.EMSet(dataFromServer.EmergencyLightDatas);
             OtherBougoState = dataFromServer.BougoState;
-            Speaker.ChengeBougoState(MyBougoState || OtherBougoState);
+            Speaker.ChengeBougoState(MyBougoState, OtherBougoState);
             KokuchiWindow.SetData(dataFromServer.OperationNotificationData);
             if (!ForceStop)
             {
@@ -352,7 +362,7 @@ namespace TatehamaATS_v1.OnboardDevice
         {
             MyBougoState = State;
             Network.IsBougo = State;
-            Speaker.ChengeBougoState(MyBougoState || OtherBougoState);
+            Speaker.ChengeBougoState(MyBougoState, OtherBougoState);
         }
 
         /// <summary>
