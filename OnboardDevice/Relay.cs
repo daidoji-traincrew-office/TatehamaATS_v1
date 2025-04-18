@@ -412,7 +412,10 @@ namespace TatehamaATS_v1.OnboardDevice
                 var r = route.TcName.Split('_').ToList();
                 // staID仮対応
                 var staName = StaNameById[r[0]] + "連動装置";
-                var routeName = r[1];
+
+                // 末尾が "S[A-Z]" または "T[A-Z]" の場合に "[A-Z]" の部分だけを残す
+                var routeName = System.Text.RegularExpressions.Regex.Replace(r[1], @"[ST]([A-Z])$", "$1");
+
                 // Todo: 出発の場合は、列選表示とする。
                 var indicator = route.RouteType == RouteType.Arriving ? route.Indicator : TypeString(OverrideDiaName);
                 SendSingleCommand("SetRoute", [staName, routeName, indicator, TcData.myTrainData.diaName, "停車"]);
@@ -430,7 +433,10 @@ namespace TatehamaATS_v1.OnboardDevice
                 var r = route.TcName.Split('_').ToList();
                 // staID仮対応
                 var staName = StaNameById[r[0]] + "連動装置";
-                var routeName = r[1];
+
+                // 末尾が "S[A-Z]" または "T[A-Z]" の場合に "[A-Z]" の部分だけを残す
+                var routeName = System.Text.RegularExpressions.Regex.Replace(r[1], @"[ST]([A-Z])$", "$1");
+
                 SendSingleCommand("DeleteRoute", [staName, routeName]);
             }
             catch (Exception ex)
