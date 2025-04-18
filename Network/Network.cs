@@ -373,7 +373,7 @@ namespace TatehamaATS_v1.Network
                 }
                 else
                 {
-                    DataFromServer = await connection.InvokeAsync<DataFromServer>("SendData_ATS", SendData);
+                    NetworkWorking?.Invoke();
                 }
             }
             catch (InvalidOperationException ex)
