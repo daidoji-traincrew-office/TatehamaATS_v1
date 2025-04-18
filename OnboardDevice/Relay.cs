@@ -467,11 +467,11 @@ namespace TatehamaATS_v1.OnboardDevice
 
             if (Retsuban.Contains("A"))
             {
-                return "特急";
+                return "A特";
             }
             if (Retsuban.Contains("K"))
             {
-                return "快急";
+                return "快速急行";
             }
             if (Retsuban.Contains("B"))
             {
