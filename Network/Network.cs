@@ -344,28 +344,33 @@ namespace TatehamaATS_v1.Network
             try
             {
                 bool currentStatus = true;
-                try
+                if (TcData == null)
                 {
-                    currentStatus = IsOddTrainNumber(OverrideDiaName) != IsOddTrainNumber(TcData.myTrainData.diaName);
+                    NetworkWorking?.Invoke();
+                    return;
                 }
-                catch
-                {
-                }
-
-                if (currentStatus)
-                {
-                    //上下線不一致のため、強制Rとするが、在線情報は送信したいので、処理そのものは続行
-                    RetsubanInOutStatusChanged.Invoke(true);
-                }
-                else if (!currentStatus && currentStatus != previousStatus)
-                {
-                    RetsubanInOutStatusChanged.Invoke(false);
-                }
-                previousStatus = currentStatus;
-                //Debug.WriteLine($"{SendData}");
-                DataFromServer DataFromServer;
                 if (TcData.gameScreen == GameScreen.MainGame || TcData.gameScreen == GameScreen.MainGame_Pause)
                 {
+                    try
+                    {
+                        currentStatus = IsOddTrainNumber(OverrideDiaName) != IsOddTrainNumber(TcData.myTrainData.diaName);
+                    }
+                    catch
+                    {
+                    }
+
+                    if (currentStatus)
+                    {
+                        //上下線不一致のため、強制Rとするが、在線情報は送信したいので、処理そのものは続行
+                        RetsubanInOutStatusChanged.Invoke(true);
+                    }
+                    else if (!currentStatus && currentStatus != previousStatus)
+                    {
+                        RetsubanInOutStatusChanged.Invoke(false);
+                    }
+                    previousStatus = currentStatus;
+                    //Debug.WriteLine($"{SendData}");
+                    DataFromServer DataFromServer;
                     DataFromServer = await connection.InvokeAsync<DataFromServer>("SendData_ATS", SendData);
                     //    Debug.WriteLine("受信");
                     //Debug.WriteLine(DataFromServer.ToString());
@@ -373,7 +378,7 @@ namespace TatehamaATS_v1.Network
                 }
                 else
                 {
-                    DataFromServer = await connection.InvokeAsync<DataFromServer>("SendData_ATS", SendData);
+                    NetworkWorking?.Invoke();
                 }
             }
             catch (InvalidOperationException ex)
