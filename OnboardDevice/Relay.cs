@@ -412,9 +412,28 @@ namespace TatehamaATS_v1.OnboardDevice
                 var r = route.TcName.Split('_').ToList();
                 // staID仮対応
                 var staName = StaNameById[r[0]] + "連動装置";
-                var routeName = r[1];
+
+                // 末尾が "S[A-Z]" または "T[A-Z]" の場合に "[A-Z]" の部分だけを残す
+                var routeName = System.Text.RegularExpressions.Regex.Replace(r[1], @"[ST]([A-Z])$", "$1");
+
                 // Todo: 出発の場合は、列選表示とする。
-                var indicator = route.RouteType == RouteType.Arriving ? route.Indicator : TypeString(OverrideDiaName);
+                string indicator;
+                switch (route.RouteType)
+                {
+                    case RouteType.Arriving:
+                    case RouteType.SwitchSignal:
+                    case RouteType.SwitchRoute:
+                    case RouteType.Guide:
+                        indicator = route.Indicator;
+                        break;
+                    case RouteType.Departure:
+                        indicator = TypeString(OverrideDiaName);
+                        break;
+                    default:
+                        indicator = "";
+                        break;
+                }
+                
                 SendSingleCommand("SetRoute", [staName, routeName, indicator, TcData.myTrainData.diaName, "停車"]);
             }
             catch (Exception ex)
@@ -430,7 +449,10 @@ namespace TatehamaATS_v1.OnboardDevice
                 var r = route.TcName.Split('_').ToList();
                 // staID仮対応
                 var staName = StaNameById[r[0]] + "連動装置";
-                var routeName = r[1];
+
+                // 末尾が "S[A-Z]" または "T[A-Z]" の場合に "[A-Z]" の部分だけを残す
+                var routeName = System.Text.RegularExpressions.Regex.Replace(r[1], @"[ST]([A-Z])$", "$1");
+
                 SendSingleCommand("DeleteRoute", [staName, routeName]);
             }
             catch (Exception ex)
@@ -461,11 +483,11 @@ namespace TatehamaATS_v1.OnboardDevice
 
             if (Retsuban.Contains("A"))
             {
-                return "特急";
+                return "A特";
             }
             if (Retsuban.Contains("K"))
             {
-                return "快急";
+                return "快速急行";
             }
             if (Retsuban.Contains("B"))
             {
