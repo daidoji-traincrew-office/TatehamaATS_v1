@@ -417,7 +417,23 @@ namespace TatehamaATS_v1.OnboardDevice
                 var routeName = System.Text.RegularExpressions.Regex.Replace(r[1], @"[ST]([A-Z])$", "$1");
 
                 // Todo: 出発の場合は、列選表示とする。
-                var indicator = route.RouteType == RouteType.Arriving ? route.Indicator : TypeString(OverrideDiaName);
+                string indicator;
+                switch (route.RouteType)
+                {
+                    case RouteType.Arriving:
+                    case RouteType.SwitchSignal:
+                    case RouteType.SwitchRoute:
+                    case RouteType.Guide:
+                        indicator = route.Indicator;
+                        break;
+                    case RouteType.Departure:
+                        indicator = TypeString(OverrideDiaName);
+                        break;
+                    default:
+                        indicator = "";
+                        break;
+                }
+                
                 SendSingleCommand("SetRoute", [staName, routeName, indicator, TcData.myTrainData.diaName, "停車"]);
             }
             catch (Exception ex)
