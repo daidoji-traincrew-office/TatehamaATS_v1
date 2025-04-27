@@ -67,6 +67,11 @@ namespace TatehamaATS_v1.OnboardDevice
         private List<SignalData> SignalDatas = new List<SignalData>();
         private List<Route> Routes = new List<Route>();
 
+        // 大道寺XT返し仮対応
+        private bool TH64_12RT = false;
+        private bool TH64_15LT = false;
+        private bool DFxT = false;
+
         private Dictionary<string, string> StaNameById = new Dictionary<string, string>()
         {
             {"TH76","館浜"},
@@ -214,6 +219,18 @@ namespace TatehamaATS_v1.OnboardDevice
                 SetRouteMode(true);
                 SetOther(true);
             }
+            // 藤江→大道寺XT関係
+            TH64_12RT = TcData.trackCircuitList.Any(x => x.Name == "TH64_12RT");
+            TH64_15LT = TcData.trackCircuitList.Any(x => x.Name == "TH64_15LT");
+
+            DFxT = TcData.trackCircuitList.Any(x => x.Name == "DF1T") ||
+                TcData.trackCircuitList.Any(x => x.Name == "DF2T") ||
+                TcData.trackCircuitList.Any(x => x.Name == "TH64_21T") ||
+                TcData.trackCircuitList.Any(x => x.Name == "TH64_12LT") ||
+                TcData.trackCircuitList.Any(x => x.Name == "TH64_13LT");
+
+
+
         }
 
         /// <summary>
@@ -333,6 +350,23 @@ namespace TatehamaATS_v1.OnboardDevice
 
         internal void SignalSet(List<SignalData> signalDatas)
         {
+            if (DFxT)
+            {
+                var signal = signalDatas.Find(x => x.Name == "大道寺下り場内13LC");
+                if (signal != null) signal.phase = Phase.Y;
+            }
+
+            if (DFxT)
+            {
+                var signal = signalDatas.Find(x => x.Name == "下り閉塞171");
+                if (signal != null) signal.phase = Phase.G;
+            }
+
+            if (DFxT)
+            {
+                var signal = signalDatas.Find(x => x.Name == "下り閉塞177");
+                if (signal != null) signal.phase = Phase.G;
+            }
             foreach (var signalData in signalDatas)
             {
                 _ = SendSingleCommand("SetSignalPhase", new string[] { signalData.Name, signalData.phase.ToString() });
@@ -368,6 +402,10 @@ namespace TatehamaATS_v1.OnboardDevice
 
         internal void UpdateRoute(List<Route> routes)
         {
+            if (TH64_12RT) routes.Add(new Route() { TcName = "TH64_12L", RouteType = RouteType.Departure });
+            if (TH64_15LT) routes.Add(new Route() { TcName = "TH64_13L", RouteType = RouteType.Departure });
+            if (DFxT) routes.Add(new Route() { TcName = "TH65_13LSC", RouteType = RouteType.Arriving, Indicator = "3" });
+            if (DFxT) routes.Add(new Route() { TcName = "TH65_11L", RouteType = RouteType.Arriving, Indicator = "" });
             // routes または Routes が null の場合は処理をスキップ
             if (routes == null)
             {
@@ -433,7 +471,7 @@ namespace TatehamaATS_v1.OnboardDevice
                         indicator = "";
                         break;
                 }
-                
+
                 SendSingleCommand("SetRoute", [staName, routeName, indicator, TcData.myTrainData.diaName, "停車"]);
             }
             catch (Exception ex)
