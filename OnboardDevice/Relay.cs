@@ -66,6 +66,7 @@ namespace TatehamaATS_v1.OnboardDevice
 
         private List<SignalData> SignalDatas = new List<SignalData>();
         private List<Route> Routes = new List<Route>();
+        private int RouteCounta = 0;
 
         // 大道寺XT返し仮対応
         private bool TH64_12RT = false;
@@ -426,9 +427,11 @@ namespace TatehamaATS_v1.OnboardDevice
             foreach (var route in addedRoutes)
             {
                 SetRoute(route);
+                SetRoute(route);
             }
             foreach (var route in removedRoutes)
             {
+                DeleteRoute(route);
                 DeleteRoute(route);
             }
 
