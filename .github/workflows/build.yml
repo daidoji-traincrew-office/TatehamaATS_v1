@@ -116,7 +116,7 @@ jobs:
           tag_name: ${{ needs.calc_version.outputs.VERSION }}
           make_latest: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
           files: |
-            out/*.zip
+            out/*[!(-dev|-standalone|-dev-standalone)].zip
             out/*-dev.zip
             out/*-standalone.zip
             out/*-dev-standalone.zip
