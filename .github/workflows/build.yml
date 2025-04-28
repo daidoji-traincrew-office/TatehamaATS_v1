@@ -59,7 +59,7 @@ jobs:
       matrix:
         standalone: [ true, false ]
         # 接続先をProdにしたバージョンを作成する場合は、リストにfalseを追加する
-        dev: [ true ]
+        dev: [ false, true ]
     steps:
       - name: Set Zip File Name
         # ZIP_FILE_NAMEは、ビルドしたアプリケーションのファイル名を指定するための環境変数。ソフトによって変えると良さげ
