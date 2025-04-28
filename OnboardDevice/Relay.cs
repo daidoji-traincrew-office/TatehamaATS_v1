@@ -68,11 +68,6 @@ namespace TatehamaATS_v1.OnboardDevice
         private List<Route> Routes = new List<Route>();
         private int RouteCounta = 0;
 
-        // 大道寺XT返し仮対応
-        private bool TH64_12RT = false;
-        private bool TH64_15LT = false;
-        private bool DFxT = false;
-
         private Dictionary<string, string> StaNameById = new Dictionary<string, string>()
         {
             {"TH76","館浜"},
@@ -220,18 +215,6 @@ namespace TatehamaATS_v1.OnboardDevice
                 SetRouteMode(true);
                 SetOther(true);
             }
-            // 藤江→大道寺XT関係
-            TH64_12RT = TcData.trackCircuitList.Any(x => x.Name == "TH64_12RT");
-            TH64_15LT = TcData.trackCircuitList.Any(x => x.Name == "TH64_15LT");
-
-            DFxT = TcData.trackCircuitList.Any(x => x.Name == "DF1T") ||
-                TcData.trackCircuitList.Any(x => x.Name == "DF2T") ||
-                TcData.trackCircuitList.Any(x => x.Name == "TH64_21T") ||
-                TcData.trackCircuitList.Any(x => x.Name == "TH64_12LT") ||
-                TcData.trackCircuitList.Any(x => x.Name == "TH64_13LT");
-
-
-
         }
 
         /// <summary>
