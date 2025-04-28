@@ -92,7 +92,7 @@ jobs:
           zip -r ../${{ env.ZIP_FILE_NAME }} .
       - name: Append to File List
         run: |
-          echo "${{ env.ZIP_FILE_NAME }}" >> file_list.txt
+          echo "${{ env.ZIP_FILE_NAME }}" >> $GITHUB_WORKSPACE/file_list.txt
       - name: Upload Artifact
         uses: actions/upload-artifact@v4.6.2
         with:
@@ -115,7 +115,7 @@ jobs:
       - name: Read File List
         id: read_file_list
         run: |
-          files=$(cat file_list.txt)
+          files=$(cat $GITHUB_WORKSPACE/file_list.txt)
           echo "FILES=$files" >> $GITHUB_ENV
       - name: Create New Release
         id: create_release
