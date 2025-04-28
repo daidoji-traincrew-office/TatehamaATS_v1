@@ -119,5 +119,5 @@ jobs:
             out/*.zip
             out/*-dev.zip
             out/*-standalone.zip
-            out/*-standalone-dev.zip
+            out/*-dev-standalone.zip
           prerelease: ${{ github.event_name != 'push' || github.ref != 'refs/heads/master' }}
