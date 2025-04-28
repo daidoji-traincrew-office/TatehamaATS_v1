@@ -334,23 +334,6 @@ namespace TatehamaATS_v1.OnboardDevice
 
         internal void SignalSet(List<SignalData> signalDatas)
         {
-            if (DFxT)
-            {
-                var signal = signalDatas.Find(x => x.Name == "大道寺下り場内13LC");
-                if (signal != null) signal.phase = Phase.Y;
-            }
-
-            if (DFxT)
-            {
-                var signal = signalDatas.Find(x => x.Name == "下り閉塞171");
-                if (signal != null) signal.phase = Phase.G;
-            }
-
-            if (DFxT)
-            {
-                var signal = signalDatas.Find(x => x.Name == "下り閉塞177");
-                if (signal != null) signal.phase = Phase.G;
-            }
             foreach (var signalData in signalDatas)
             {
                 _ = SendSingleCommand("SetSignalPhase", new string[] { signalData.Name, signalData.phase.ToString() });
@@ -386,10 +369,6 @@ namespace TatehamaATS_v1.OnboardDevice
 
         internal void UpdateRoute(List<Route> routes)
         {
-            if (TH64_12RT) routes.Add(new Route() { TcName = "TH64_12L", RouteType = RouteType.Departure });
-            if (TH64_15LT) routes.Add(new Route() { TcName = "TH64_13L", RouteType = RouteType.Departure });
-            if (DFxT) routes.Add(new Route() { TcName = "TH65_13LSC", RouteType = RouteType.Arriving, Indicator = "3" });
-            if (DFxT) routes.Add(new Route() { TcName = "TH65_11L", RouteType = RouteType.Arriving, Indicator = "" });
             // routes または Routes が null の場合は処理をスキップ
             if (routes == null)
             {
