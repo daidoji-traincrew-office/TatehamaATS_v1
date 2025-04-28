@@ -90,6 +90,9 @@ jobs:
         run: |
           cd out
           zip -r ../${{ env.ZIP_FILE_NAME }} .
+      - name: Append to File List
+        run: |
+          echo "${{ env.ZIP_FILE_NAME }}" >> file_list.txt
       - name: Upload Artifact
         uses: actions/upload-artifact@v4.6.2
         with:
@@ -109,15 +112,16 @@ jobs:
         with:
           path: 'out'
           merge-multiple: 'true'
+      - name: Read File List
+        id: read_file_list
+        run: |
+          files=$(cat file_list.txt)
+          echo "FILES=$files" >> $GITHUB_ENV
       - name: Create New Release
         id: create_release
         uses: softprops/action-gh-release@v2.2.1
         with:
           tag_name: ${{ needs.calc_version.outputs.VERSION }}
           make_latest: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
-          files: |
-            out/*[!(-dev|-standalone|-dev-standalone)].zip
-            out/*-dev.zip
-            out/*-standalone.zip
-            out/*-dev-standalone.zip
+          files: ${{ env.FILES }}
           prerelease: ${{ github.event_name != 'push' || github.ref != 'refs/heads/master' }}
