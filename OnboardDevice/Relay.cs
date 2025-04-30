@@ -54,7 +54,7 @@ namespace TatehamaATS_v1.OnboardDevice
 
         // データ関連フィールド
         private string _command = "DataRequest";
-        private string[] _request = { "tconlyontrain" };
+        private string[] _request = { "tconlyontrain", "interlock" };
 
         // プロパティ                                                                        
         public TrainCrewStateData TcData { get; private set; } = new TrainCrewStateData();
@@ -65,7 +65,8 @@ namespace TatehamaATS_v1.OnboardDevice
         private int BeforeBrake = 0;
 
         private List<SignalData> SignalDatas = new List<SignalData>();
-        private List<Route> Routes = new List<Route>();
+        private List<Route> ServerRoutes = new List<Route>();
+        private List<Route> TrainCrewRoutes = new List<Route>();
         private int RouteCounta = 0;
 
         // 大道寺XT返し仮対応
@@ -220,18 +221,40 @@ namespace TatehamaATS_v1.OnboardDevice
                 SetRouteMode(true);
                 SetOther(true);
             }
-            // 藤江→大道寺XT関係
-            TH64_12RT = TcData.trackCircuitList.Any(x => x.Name == "TH64_12RT");
-            TH64_15LT = TcData.trackCircuitList.Any(x => x.Name == "TH64_15LT");
+            // TrainCrewRoutesにTcData.interlockDataListから展開した進路情報を格納する
+            TrainCrewRoutes = ConvertToRoutes(TcData.interlockDataList);
+        }
 
-            DFxT = TcData.trackCircuitList.Any(x => x.Name == "DF1T") ||
-                TcData.trackCircuitList.Any(x => x.Name == "DF2T") ||
-                TcData.trackCircuitList.Any(x => x.Name == "TH64_21T") ||
-                TcData.trackCircuitList.Any(x => x.Name == "TH64_12LT") ||
-                TcData.trackCircuitList.Any(x => x.Name == "TH64_13LT");
+        /// <summary>
+        /// InterlockDataのリストをRouteのリストに変換します。
+        /// </summary>
+        /// <param name="interlockDataList">InterlockDataのリスト</param>
+        /// <returns>Routeのリスト</returns>
+        public List<Route> ConvertToRoutes(List<InterlockData> interlockDataList)
+        {
+            var routes = new List<Route>();
 
+            foreach (var interlockData in interlockDataList)
+            {
+                foreach (var interlockRoute in interlockData.routes)
+                {
+                    // StaNameByIdを逆向きに使用して、interlockData.Nameを駅IDにする
+                    // interlockData.Nameには"連動装置"が末尾に含まれているため、削除してから検索する
+                    var stationId = StaNameById.FirstOrDefault(x => x.Value == interlockData.Name.Replace("連動装置", "")).Key;
+                    var route = new Route
+                    {
 
+                        TcName = $"{stationId}_{interlockRoute.Name}",
+                        RouteType = RouteType.SwitchRoute,
+                        Indicator = "",
+                        RouteState = null
+                    };
 
+                    routes.Add(route);
+                }
+            }
+
+            return routes;
         }
 
         /// <summary>
@@ -403,10 +426,6 @@ namespace TatehamaATS_v1.OnboardDevice
 
         internal void UpdateRoute(List<Route> routes)
         {
-            if (TH64_12RT) routes.Add(new Route() { TcName = "TH64_12L", RouteType = RouteType.Departure });
-            if (TH64_15LT) routes.Add(new Route() { TcName = "TH64_13L", RouteType = RouteType.Departure });
-            if (DFxT) routes.Add(new Route() { TcName = "TH65_13LSC", RouteType = RouteType.Arriving, Indicator = "3" });
-            if (DFxT) routes.Add(new Route() { TcName = "TH65_11L", RouteType = RouteType.Arriving, Indicator = "" });
             // routes または Routes が null の場合は処理をスキップ
             if (routes == null)
             {
@@ -414,35 +433,31 @@ namespace TatehamaATS_v1.OnboardDevice
                 return;
             }
 
-            if (Routes == null)
+            if (TrainCrewRoutes == null)
             {
-                Debug.WriteLine("Routes is null. Initializing empty list.");
-                Routes = new List<Route>();
+                Debug.WriteLine("ServerRoutes is null. Initializing empty list.");
+                TrainCrewRoutes = new List<Route>();
             }
 
+            // TrainCrewRoutesの設定内容を項目ごとにDebug出力
+            Debug.WriteLine("TrainCrewRoutes:");
+            foreach (var route in TrainCrewRoutes)
+            {
+                Debug.WriteLine($"  TcName: {route.TcName}");
+            }
+
+
             // 保存した差分と比較し、増えた分はSetRoute、減った分はDeleteRouteを実行する
-            var addedRoutes = routes.Where(r => !Routes.Any(r2 => r2.TcName == r.TcName)).ToList();
-            var removedRoutes = Routes.Where(r => !routes.Any(r2 => r2.TcName == r.TcName)).ToList();
+            var addedRoutes = routes.Where(r => !TrainCrewRoutes.Any(r2 => r2.TcName == r.TcName)).ToList();
+            var removedRoutes = TrainCrewRoutes.Where(r => !routes.Any(r2 => r2.TcName == r.TcName)).ToList();
 
             foreach (var route in addedRoutes)
             {
-                SetRoute(route);
                 SetRoute(route);
             }
             foreach (var route in removedRoutes)
             {
                 DeleteRoute(route);
-                DeleteRoute(route);
-            }
-
-            // 進路情報の更新
-            if (TcData.gameScreen == TrainCrewAPI.GameScreen.MainGame || TcData.gameScreen == TrainCrewAPI.GameScreen.MainGame_Pause)
-            {
-                Routes = routes;
-            }
-            else
-            {
-                Routes = new List<Route>();
             }
         }
 
@@ -679,6 +694,12 @@ namespace TatehamaATS_v1.OnboardDevice
                             var e = new TransponderInfoAbnormal(5, "BeaconData作成失敗");
                             AddExceptionAction.Invoke(e);
                         }
+                    }
+                    else if (baseData.type == "APIMessage")
+                    {
+                        // Data_Base.DataをAPIMessage型にデシリアライズ
+                        var _APIMessage = JsonConvert.DeserializeObject<APIMessage>(baseData.data.ToString());
+                        Debug.WriteLine($"☆API応答：{_APIMessage.title}：{_APIMessage.message}");
                     }
                     else
                     {
