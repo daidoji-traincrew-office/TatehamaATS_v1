@@ -72,6 +72,8 @@
             Lamp_Car = new PictureBox();
             Time_s1 = new PictureBox();
             ClockTimer = new System.Windows.Forms.Timer(components);
+            Button_Y = new PictureBox();
+            Button_Z = new PictureBox();
             ((System.ComponentModel.ISupportInitialize)Retsuban_4).BeginInit();
             ((System.ComponentModel.ISupportInitialize)Retsuban_3).BeginInit();
             ((System.ComponentModel.ISupportInitialize)Retsuban_2).BeginInit();
@@ -114,6 +116,8 @@
             ((System.ComponentModel.ISupportInitialize)Lamp_Time).BeginInit();
             ((System.ComponentModel.ISupportInitialize)Lamp_Car).BeginInit();
             ((System.ComponentModel.ISupportInitialize)Time_s1).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)Button_Y).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)Button_Z).BeginInit();
             SuspendLayout();
             // 
             // Retsuban_4
@@ -612,6 +616,30 @@
             ClockTimer.Interval = 10;
             ClockTimer.Tick += ClockTimer_Tick;
             // 
+            // Button_Y
+            // 
+            Button_Y.BackColor = Color.Transparent;
+            Button_Y.BackgroundImage = RetsubanResource.Button_Y;
+            Button_Y.BackgroundImageLayout = ImageLayout.None;
+            Button_Y.Location = new Point(450, 310);
+            Button_Y.Name = "Button_Y";
+            Button_Y.Size = new Size(30, 30);
+            Button_Y.TabIndex = 12;
+            Button_Y.TabStop = false;
+            Button_Y.MouseDown += Button_Y_Click;
+            // 
+            // Button_Z
+            // 
+            Button_Z.BackColor = Color.Transparent;
+            Button_Z.BackgroundImage = RetsubanResource.Button_Z;
+            Button_Z.BackgroundImageLayout = ImageLayout.None;
+            Button_Z.Location = new Point(450, 345);
+            Button_Z.Name = "Button_Z";
+            Button_Z.Size = new Size(30, 30);
+            Button_Z.TabIndex = 12;
+            Button_Z.TabStop = false;
+            Button_Z.MouseDown += Button_Z_Click;
+            // 
             // RetsubanWindow
             // 
             AutoScaleMode = AutoScaleMode.None;
@@ -632,6 +660,8 @@
             Controls.Add(Button_8);
             Controls.Add(Button_K);
             Controls.Add(Button_2);
+            Controls.Add(Button_Z);
+            Controls.Add(Button_Y);
             Controls.Add(Button_X);
             Controls.Add(Button_RetsuSet);
             Controls.Add(Button_C);
@@ -705,6 +735,8 @@
             ((System.ComponentModel.ISupportInitialize)Lamp_Time).EndInit();
             ((System.ComponentModel.ISupportInitialize)Lamp_Car).EndInit();
             ((System.ComponentModel.ISupportInitialize)Time_s1).EndInit();
+            ((System.ComponentModel.ISupportInitialize)Button_Y).EndInit();
+            ((System.ComponentModel.ISupportInitialize)Button_Z).EndInit();
             ResumeLayout(false);
         }
 
@@ -753,5 +785,7 @@
         private PictureBox Lamp_Car;
         private PictureBox Time_s1;
         private System.Windows.Forms.Timer ClockTimer;
+        private PictureBox Button_Y;
+        private PictureBox Button_Z;
     }
 }

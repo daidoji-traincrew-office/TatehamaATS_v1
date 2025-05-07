@@ -83,6 +83,26 @@ namespace TatehamaATS_v1.RetsubanWindow {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
+        internal static System.Drawing.Bitmap _16dot_AY {
+            get {
+                object obj = ResourceManager.GetObject("_16dot_AY", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.Drawing.Bitmap _16dot_AZ {
+            get {
+                object obj = ResourceManager.GetObject("_16dot_AZ", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
         internal static System.Drawing.Bitmap _16dot_B {
             get {
                 object obj = ResourceManager.GetObject("_16dot_B", resourceCulture);
@@ -103,6 +123,26 @@ namespace TatehamaATS_v1.RetsubanWindow {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
+        internal static System.Drawing.Bitmap _16dot_BY {
+            get {
+                object obj = ResourceManager.GetObject("_16dot_BY", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.Drawing.Bitmap _16dot_BZ {
+            get {
+                object obj = ResourceManager.GetObject("_16dot_BZ", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
         internal static System.Drawing.Bitmap _16dot_C {
             get {
                 object obj = ResourceManager.GetObject("_16dot_C", resourceCulture);
@@ -116,6 +156,26 @@ namespace TatehamaATS_v1.RetsubanWindow {
         internal static System.Drawing.Bitmap _16dot_CX {
             get {
                 object obj = ResourceManager.GetObject("_16dot_CX", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.Drawing.Bitmap _16dot_CY {
+            get {
+                object obj = ResourceManager.GetObject("_16dot_CY", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.Drawing.Bitmap _16dot_CZ {
+            get {
+                object obj = ResourceManager.GetObject("_16dot_CZ", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -146,6 +206,26 @@ namespace TatehamaATS_v1.RetsubanWindow {
         internal static System.Drawing.Bitmap _16dot_KX {
             get {
                 object obj = ResourceManager.GetObject("_16dot_KX", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.Drawing.Bitmap _16dot_KY {
+            get {
+                object obj = ResourceManager.GetObject("_16dot_KY", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.Drawing.Bitmap _16dot_KZ {
+            get {
+                object obj = ResourceManager.GetObject("_16dot_KZ", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -186,6 +266,26 @@ namespace TatehamaATS_v1.RetsubanWindow {
         internal static System.Drawing.Bitmap _16dot_X {
             get {
                 object obj = ResourceManager.GetObject("_16dot_X", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.Drawing.Bitmap _16dot_Y {
+            get {
+                object obj = ResourceManager.GetObject("_16dot_Y", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.Drawing.Bitmap _16dot_Z {
+            get {
+                object obj = ResourceManager.GetObject("_16dot_Z", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -556,6 +656,26 @@ namespace TatehamaATS_v1.RetsubanWindow {
         internal static System.Drawing.Bitmap Button_X {
             get {
                 object obj = ResourceManager.GetObject("Button_X", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.Drawing.Bitmap Button_Y {
+            get {
+                object obj = ResourceManager.GetObject("Button_Y", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.Drawing.Bitmap Button_Z {
+            get {
+                object obj = ResourceManager.GetObject("Button_Z", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
