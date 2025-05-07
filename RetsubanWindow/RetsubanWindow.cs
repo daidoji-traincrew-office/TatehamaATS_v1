@@ -172,8 +172,8 @@ namespace TatehamaATS_v1.RetsubanWindow
         /// </summary>
         private void RetsubanDrawing()
         {
-            // 正規表現パターンの定義
-            var pattern = @"([回試臨]?)([0-9]{0,4})(A|B|C|K|X|AX|BX|CX|KX)?$";
+            // 正規表現パターンの定義                                                       
+            var pattern = @"^(回|試|臨)?([0-9]{0,4})(A|B|C|K|X|Y|Z|AX|BX|CX|KX|AY|BY|CY|KY|AZ|BZ|CZ|KZ)?$";
             var match = Regex.Match(NewRetsuban, pattern);
 
 
@@ -214,45 +214,68 @@ namespace TatehamaATS_v1.RetsubanWindow
                 // Tailに画像を描画
                 // 描画処理: tail画像をTail領域に配置
                 //接尾文字
-                if (tail == "A")
+                switch (tail)
                 {
-                    Retsuban_Tail.Image = RetsubanResource._16dot_A;
-                }
-                else if (tail == "B")
-                {
-                    Retsuban_Tail.Image = RetsubanResource._16dot_B;
-                }
-                else if (tail == "C")
-                {
-                    Retsuban_Tail.Image = RetsubanResource._16dot_C;
-                }
-                else if (tail == "K")
-                {
-                    Retsuban_Tail.Image = RetsubanResource._16dot_K;
-                }
-                else if (tail == "X")
-                {
-                    Retsuban_Tail.Image = RetsubanResource._16dot_X;
-                }
-                else if (tail == "AX")
-                {
-                    Retsuban_Tail.Image = RetsubanResource._16dot_AX;
-                }
-                else if (tail == "BX")
-                {
-                    Retsuban_Tail.Image = RetsubanResource._16dot_BX;
-                }
-                else if (tail == "CX")
-                {
-                    Retsuban_Tail.Image = RetsubanResource._16dot_CX;
-                }
-                else if (tail == "KX")
-                {
-                    Retsuban_Tail.Image = RetsubanResource._16dot_KX;
-                }
-                else
-                {
-                    Retsuban_Tail.Image = RetsubanResource._16dot_Null;
+                    case "A":
+                        Retsuban_Tail.Image = RetsubanResource._16dot_A;
+                        break;
+                    case "B":
+                        Retsuban_Tail.Image = RetsubanResource._16dot_B;
+                        break;
+                    case "C":
+                        Retsuban_Tail.Image = RetsubanResource._16dot_C;
+                        break;
+                    case "K":
+                        Retsuban_Tail.Image = RetsubanResource._16dot_K;
+                        break;
+                    case "X":
+                        Retsuban_Tail.Image = RetsubanResource._16dot_X;
+                        break;
+                    case "Y":
+                        Retsuban_Tail.Image = RetsubanResource._16dot_Y;
+                        break;
+                    case "Z":
+                        Retsuban_Tail.Image = RetsubanResource._16dot_Z;
+                        break;
+                    case "AX":
+                        Retsuban_Tail.Image = RetsubanResource._16dot_AX;
+                        break;
+                    case "BX":
+                        Retsuban_Tail.Image = RetsubanResource._16dot_BX;
+                        break;
+                    case "CX":
+                        Retsuban_Tail.Image = RetsubanResource._16dot_CX;
+                        break;
+                    case "KX":
+                        Retsuban_Tail.Image = RetsubanResource._16dot_KX;
+                        break;
+                    case "AY":
+                        Retsuban_Tail.Image = RetsubanResource._16dot_AY;
+                        break;
+                    case "BY":
+                        Retsuban_Tail.Image = RetsubanResource._16dot_BY;
+                        break;
+                    case "CY":
+                        Retsuban_Tail.Image = RetsubanResource._16dot_CY;
+                        break;
+                    case "KY":
+                        Retsuban_Tail.Image = RetsubanResource._16dot_KY;
+                        break;
+                    case "AZ":
+                        Retsuban_Tail.Image = RetsubanResource._16dot_AZ;
+                        break;
+                    case "BZ":
+                        Retsuban_Tail.Image = RetsubanResource._16dot_BZ;
+                        break;
+                    case "CZ":
+                        Retsuban_Tail.Image = RetsubanResource._16dot_CZ;
+                        break;
+                    case "KZ":
+                        Retsuban_Tail.Image = RetsubanResource._16dot_KZ;
+                        break;
+                    default:
+                        Retsuban_Tail.Image = RetsubanResource._16dot_Null;
+                        break;
                 }
             }
         }
@@ -389,6 +412,40 @@ namespace TatehamaATS_v1.RetsubanWindow
                 if (Regex.IsMatch(NewRetsuban, pattern))
                 {
                     NewRetsuban += "X";
+                    beep1.PlayOnce(1.0f);
+                    RetsubanDrawing();
+                    retsubanMode = RetsubanMode.RetsubanTail;
+                }
+            }
+        }
+
+        private void Button_Y_Click(object sender, MouseEventArgs e)
+        {
+            Debug.WriteLine("押下：Y");
+            if (retsubanMode == RetsubanMode.RetsubanDigit || retsubanMode == RetsubanMode.RetsubanTail)
+            {
+                var pattern = @"(回|試|臨)?([0-9]{3,4})(A|B|C|K)?$";
+                // 正規表現パターンの定義
+                if (Regex.IsMatch(NewRetsuban, pattern))
+                {
+                    NewRetsuban += "Y";
+                    beep1.PlayOnce(1.0f);
+                    RetsubanDrawing();
+                    retsubanMode = RetsubanMode.RetsubanTail;
+                }
+            }
+        }
+
+        private void Button_Z_Click(object sender, MouseEventArgs e)
+        {
+            Debug.WriteLine("押下：Z");
+            if (retsubanMode == RetsubanMode.RetsubanDigit || retsubanMode == RetsubanMode.RetsubanTail)
+            {
+                var pattern = @"(回|試|臨)?([0-9]{3,4})(A|B|C|K)?$";
+                // 正規表現パターンの定義
+                if (Regex.IsMatch(NewRetsuban, pattern))
+                {
+                    NewRetsuban += "Z";
                     beep1.PlayOnce(1.0f);
                     RetsubanDrawing();
                     retsubanMode = RetsubanMode.RetsubanTail;
@@ -571,7 +628,7 @@ namespace TatehamaATS_v1.RetsubanWindow
 
             if (retsubanMode == RetsubanMode.RetsubanDigit || retsubanMode == RetsubanMode.RetsubanTail)
             {
-                var pattern = @"^(回|試|臨)?([0-9]{3,4})(A|B|C|K|X|AX|BX|CX|KX)?$";
+                var pattern = @"^(回|試|臨)?([0-9]{3,4})(A|B|C|K|X|Y|Z|AX|BX|CX|KX|AY|BY|CY|KY|AZ|BZ|CZ|KZ)?$";
                 // 正規表現パターンの定義
                 if (Regex.IsMatch(NewRetsuban, pattern))
                 {
