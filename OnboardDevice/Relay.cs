@@ -169,7 +169,7 @@ namespace TatehamaATS_v1.OnboardDevice
         /// <param name="requestValues"></param>
         /// <returns></returns>
         private static bool IsValidCommand(string requestValues) =>
-            new[] { "DataRequest", "SetEmergencyLight", "SetSignalPhase", "mode_req", "SetRoute", "DeleteRoute" }.Contains(requestValues);
+            new[] { "DataRequest", "SetEmergencyLight", "SetSignalPhase", "mode_req", "SetRoute", "DeleteRoute", "DeleteRoute2" }.Contains(requestValues);
 
         /// <summary>
         /// リクエストの検証
@@ -193,6 +193,7 @@ namespace TatehamaATS_v1.OnboardDevice
                 case "SetRoute":
                     return requestValues.Length == 5;
                 case "DeleteRoute":
+                case "DeleteRoute2":
                     return requestValues.Length == 2;
                 default:
                     return false;
@@ -448,8 +449,8 @@ namespace TatehamaATS_v1.OnboardDevice
 
 
             // 保存した差分と比較し、増えた分はSetRoute、減った分はDeleteRouteを実行する
-            var addedRoutes = routes.Where(r => !TrainCrewRoutes.Any(r2 => r2.TcName == r.TcName)).ToList();
-            var removedRoutes = TrainCrewRoutes.Where(r => !routes.Any(r2 => r2.TcName == r.TcName)).ToList();
+            var addedRoutes = routes.Where(r => !TrainCrewRoutes.Any(r2 => r2.TcName == System.Text.RegularExpressions.Regex.Replace(r.TcName, @"[ST]([A-Z])$", "$1"))).ToList();
+            var removedRoutes = TrainCrewRoutes.Where(r => !routes.Any(r2 => System.Text.RegularExpressions.Regex.Replace(r2.TcName, @"[ST]([A-Z])$", "$1") == r.TcName)).ToList();
 
             foreach (var route in addedRoutes)
             {
@@ -489,7 +490,7 @@ namespace TatehamaATS_v1.OnboardDevice
                         indicator = "";
                         break;
                 }
-
+                Debug.WriteLine($"☆API送信: SetRoute/{route.TcName}");
                 SendSingleCommand("SetRoute", [staName, routeName, indicator, TcData.myTrainData.diaName, "停車"]);
             }
             catch (Exception ex)
@@ -509,7 +510,8 @@ namespace TatehamaATS_v1.OnboardDevice
                 // 末尾が "S[A-Z]" または "T[A-Z]" の場合に "[A-Z]" の部分だけを残す
                 var routeName = System.Text.RegularExpressions.Regex.Replace(r[1], @"[ST]([A-Z])$", "$1");
 
-                SendSingleCommand("DeleteRoute", [staName, routeName]);
+                Debug.WriteLine($"☆API送信: DeleteRoute2/{route.TcName}");
+                SendSingleCommand("DeleteRoute2", [staName, routeName]);
             }
             catch (Exception ex)
             {
