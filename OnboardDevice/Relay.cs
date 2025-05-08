@@ -54,7 +54,7 @@ namespace TatehamaATS_v1.OnboardDevice
 
         // データ関連フィールド
         private string _command = "DataRequest";
-        private string[] _request = { "tconlyontrain" };
+        private string[] _request = { "tconlyontrain", "interlock" };
 
         // プロパティ                                                                        
         public TrainCrewStateData TcData { get; private set; } = new TrainCrewStateData();
@@ -65,7 +65,8 @@ namespace TatehamaATS_v1.OnboardDevice
         private int BeforeBrake = 0;
 
         private List<SignalData> SignalDatas = new List<SignalData>();
-        private List<Route> Routes = new List<Route>();
+        private List<Route> ServerRoutes = new List<Route>();
+        private List<Route> TrainCrewRoutes = new List<Route>();
         private int RouteCounta = 0;
 
         private Dictionary<string, string> StaNameById = new Dictionary<string, string>()
@@ -163,7 +164,7 @@ namespace TatehamaATS_v1.OnboardDevice
         /// <param name="requestValues"></param>
         /// <returns></returns>
         private static bool IsValidCommand(string requestValues) =>
-            new[] { "DataRequest", "SetEmergencyLight", "SetSignalPhase", "mode_req", "SetRoute", "DeleteRoute" }.Contains(requestValues);
+            new[] { "DataRequest", "SetEmergencyLight", "SetSignalPhase", "mode_req", "SetRoute", "DeleteRoute", "DeleteRoute2" }.Contains(requestValues);
 
         /// <summary>
         /// リクエストの検証
@@ -187,6 +188,7 @@ namespace TatehamaATS_v1.OnboardDevice
                 case "SetRoute":
                     return requestValues.Length == 5;
                 case "DeleteRoute":
+                case "DeleteRoute2":
                     return requestValues.Length == 2;
                 default:
                     return false;
@@ -215,6 +217,40 @@ namespace TatehamaATS_v1.OnboardDevice
                 SetRouteMode(true);
                 SetOther(true);
             }
+            // TrainCrewRoutesにTcData.interlockDataListから展開した進路情報を格納する
+            TrainCrewRoutes = ConvertToRoutes(TcData.interlockDataList);
+        }
+
+        /// <summary>
+        /// InterlockDataのリストをRouteのリストに変換します。
+        /// </summary>
+        /// <param name="interlockDataList">InterlockDataのリスト</param>
+        /// <returns>Routeのリスト</returns>
+        public List<Route> ConvertToRoutes(List<InterlockData> interlockDataList)
+        {
+            var routes = new List<Route>();
+
+            foreach (var interlockData in interlockDataList)
+            {
+                foreach (var interlockRoute in interlockData.routes)
+                {
+                    // StaNameByIdを逆向きに使用して、interlockData.Nameを駅IDにする
+                    // interlockData.Nameには"連動装置"が末尾に含まれているため、削除してから検索する
+                    var stationId = StaNameById.FirstOrDefault(x => x.Value == interlockData.Name.Replace("連動装置", "")).Key;
+                    var route = new Route
+                    {
+
+                        TcName = $"{stationId}_{interlockRoute.Name}",
+                        RouteType = RouteType.SwitchRoute,
+                        Indicator = "",
+                        RouteState = null
+                    };
+
+                    routes.Add(route);
+                }
+            }
+
+            return routes;
         }
 
         /// <summary>
@@ -376,35 +412,31 @@ namespace TatehamaATS_v1.OnboardDevice
                 return;
             }
 
-            if (Routes == null)
+            if (TrainCrewRoutes == null)
             {
-                Debug.WriteLine("Routes is null. Initializing empty list.");
-                Routes = new List<Route>();
+                Debug.WriteLine("ServerRoutes is null. Initializing empty list.");
+                TrainCrewRoutes = new List<Route>();
             }
 
+            // TrainCrewRoutesの設定内容を項目ごとにDebug出力
+            Debug.WriteLine("TrainCrewRoutes:");
+            foreach (var route in TrainCrewRoutes)
+            {
+                Debug.WriteLine($"  TcName: {route.TcName}");
+            }
+
+
             // 保存した差分と比較し、増えた分はSetRoute、減った分はDeleteRouteを実行する
-            var addedRoutes = routes.Where(r => !Routes.Any(r2 => r2.TcName == r.TcName)).ToList();
-            var removedRoutes = Routes.Where(r => !routes.Any(r2 => r2.TcName == r.TcName)).ToList();
+            var addedRoutes = routes.Where(r => !TrainCrewRoutes.Any(r2 => r2.TcName == System.Text.RegularExpressions.Regex.Replace(r.TcName, @"[ST]([A-Z])$", "$1"))).ToList();
+            var removedRoutes = TrainCrewRoutes.Where(r => !routes.Any(r2 => System.Text.RegularExpressions.Regex.Replace(r2.TcName, @"[ST]([A-Z])$", "$1") == r.TcName)).ToList();
 
             foreach (var route in addedRoutes)
             {
-                SetRoute(route);
                 SetRoute(route);
             }
             foreach (var route in removedRoutes)
             {
                 DeleteRoute(route);
-                DeleteRoute(route);
-            }
-
-            // 進路情報の更新
-            if (TcData.gameScreen == TrainCrewAPI.GameScreen.MainGame || TcData.gameScreen == TrainCrewAPI.GameScreen.MainGame_Pause)
-            {
-                Routes = routes;
-            }
-            else
-            {
-                Routes = new List<Route>();
             }
         }
 
@@ -436,7 +468,7 @@ namespace TatehamaATS_v1.OnboardDevice
                         indicator = "";
                         break;
                 }
-
+                Debug.WriteLine($"☆API送信: SetRoute/{route.TcName}");
                 SendSingleCommand("SetRoute", [staName, routeName, indicator, TcData.myTrainData.diaName, "停車"]);
             }
             catch (Exception ex)
@@ -456,7 +488,8 @@ namespace TatehamaATS_v1.OnboardDevice
                 // 末尾が "S[A-Z]" または "T[A-Z]" の場合に "[A-Z]" の部分だけを残す
                 var routeName = System.Text.RegularExpressions.Regex.Replace(r[1], @"[ST]([A-Z])$", "$1");
 
-                SendSingleCommand("DeleteRoute", [staName, routeName]);
+                Debug.WriteLine($"☆API送信: DeleteRoute2/{route.TcName}");
+                SendSingleCommand("DeleteRoute2", [staName, routeName]);
             }
             catch (Exception ex)
             {
@@ -641,6 +674,12 @@ namespace TatehamaATS_v1.OnboardDevice
                             var e = new TransponderInfoAbnormal(5, "BeaconData作成失敗");
                             AddExceptionAction.Invoke(e);
                         }
+                    }
+                    else if (baseData.type == "APIMessage")
+                    {
+                        // Data_Base.DataをAPIMessage型にデシリアライズ
+                        var _APIMessage = JsonConvert.DeserializeObject<APIMessage>(baseData.data.ToString());
+                        Debug.WriteLine($"☆API応答：{_APIMessage.title}：{_APIMessage.message}");
                     }
                     else
                     {
