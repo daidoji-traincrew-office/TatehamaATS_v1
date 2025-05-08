@@ -69,11 +69,6 @@ namespace TatehamaATS_v1.OnboardDevice
         private List<Route> TrainCrewRoutes = new List<Route>();
         private int RouteCounta = 0;
 
-        // 大道寺XT返し仮対応
-        private bool TH64_12RT = false;
-        private bool TH64_15LT = false;
-        private bool DFxT = false;
-
         private Dictionary<string, string> StaNameById = new Dictionary<string, string>()
         {
             {"TH76","館浜"},
@@ -375,23 +370,6 @@ namespace TatehamaATS_v1.OnboardDevice
 
         internal void SignalSet(List<SignalData> signalDatas)
         {
-            if (DFxT)
-            {
-                var signal = signalDatas.Find(x => x.Name == "大道寺下り場内13LC");
-                if (signal != null) signal.phase = Phase.Y;
-            }
-
-            if (DFxT)
-            {
-                var signal = signalDatas.Find(x => x.Name == "下り閉塞171");
-                if (signal != null) signal.phase = Phase.G;
-            }
-
-            if (DFxT)
-            {
-                var signal = signalDatas.Find(x => x.Name == "下り閉塞177");
-                if (signal != null) signal.phase = Phase.G;
-            }
             foreach (var signalData in signalDatas)
             {
                 _ = SendSingleCommand("SetSignalPhase", new string[] { signalData.Name, signalData.phase.ToString() });
