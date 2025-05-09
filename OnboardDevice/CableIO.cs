@@ -41,6 +41,11 @@ namespace TatehamaATS_v1.OnboardDevice
         KokuchiWindow.KokuchiWindow KokuchiWindow = new KokuchiWindow.KokuchiWindow();
 
         /// <summary>
+        /// 試験用ウィンドウ
+        /// </summary>
+        TestWindow.TestWindow TestWindow = new TestWindow.TestWindow();
+
+        /// <summary>
         /// ゲーム内時間
         /// </summary>
         static TimeSpan TC_Time;
@@ -126,6 +131,9 @@ namespace TatehamaATS_v1.OnboardDevice
             KokuchiWindow = new KokuchiWindow.KokuchiWindow();
             KokuchiWindow.Hide();
 
+            TestWindow = new TestWindow.TestWindow();
+            KokuchiWindow.Hide();
+
             ControlLED.AddExceptionAction += AddException;
         }
 
@@ -178,6 +186,7 @@ namespace TatehamaATS_v1.OnboardDevice
                 isKyokan = nowKyokan;
             }
             Network.TcDataUpdate(TcData);
+            TestWindow?.UpdataData(TcData);
         }
 
         /// <summary>
@@ -295,6 +304,21 @@ namespace TatehamaATS_v1.OnboardDevice
             else
             {
                 KokuchiWindow.Show();
+            }
+        }
+
+        /// <summary>
+        /// 告知Win表示指示指令線
+        /// </summary>
+        internal void TestWinChenge()
+        {
+            if (TestWindow.Visible)
+            {
+                TestWindow.Hide();
+            }
+            else
+            {
+                TestWindow.Show();
             }
         }
 
