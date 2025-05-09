@@ -71,7 +71,6 @@ namespace TatehamaATS_v1.TestWindow
                 }
                 BeforeBrake = nowBrake;
             }
-            UpdatePrint(tcData.nowTime.ToTimeSpan(), tcData.myTrainData.nextUIDistance);
         }
         private void UpdatePrint(TimeSpan nowTime, float meter)
         {
