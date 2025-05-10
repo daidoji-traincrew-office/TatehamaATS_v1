@@ -19,6 +19,7 @@ namespace TatehamaATS_v1.TestWindow
         private int AddBrake;
         private int BeforeBrake;
         private bool isAdd;
+        private bool isOpen;
         public TestWindow()
         {
             TopMost = true;
@@ -37,12 +38,13 @@ namespace TatehamaATS_v1.TestWindow
             }
             else
             {
-                if (!Run)
+                if (!Run && tcData.myTrainData.Speed != 0)
                 {
                     Run = true;
                     StartTime = tcData.nowTime.ToTimeSpan();
                     HidePrint();
                 }
+
                 var nowBrake = tcData.myTrainData.Bnotch;
                 if (BeforeBrake > nowBrake)
                 {
@@ -61,14 +63,17 @@ namespace TatehamaATS_v1.TestWindow
                             AddBrake++;
                         }
                     }
+
                     isAdd = true;
                 }
+
                 if (tcData.myTrainData.nextUIDistance > 700 || tcData.myTrainData.speedLimit - tcData.myTrainData.Speed < 5)
                 {
                     YurumegoBrake = 0;
                     AddBrake = 0;
                     isAdd = true;
                 }
+
                 BeforeBrake = nowBrake;
             }
         }
