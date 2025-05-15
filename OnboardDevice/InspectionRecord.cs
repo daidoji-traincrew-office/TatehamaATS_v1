@@ -83,7 +83,7 @@ namespace TatehamaATS_v1.OnboardDevice
                         RelayState = false;
                         AddExceptionAction.Invoke(e);
                     }
-                    if (DateTime.Now.TimeOfDay - NetworkUpdatedTime > TimeSpan.FromSeconds(2))
+                    if (DateTime.Now.TimeOfDay - NetworkUpdatedTime > TimeSpan.FromSeconds(5))
                     {
                         var e = new NetworkIOConnectionException(3, "地上装置通信途絶2秒異常");
                         NetworkState = false;
@@ -148,7 +148,7 @@ namespace TatehamaATS_v1.OnboardDevice
         /// </summary>
         internal void ResetException()
         {
-            var StopDetection = TcData.myTrainData.Speed == 0 && (TcData.gameScreen == GameScreen.MainGame || TcData.gameScreen == GameScreen.MainGame_Pause);
+            var StopDetection = TcData.myTrainData.Speed == 0;
             var MasconEB = TcData.myTrainData.Bnotch == 8;
             foreach (var ex in exceptions)
             {

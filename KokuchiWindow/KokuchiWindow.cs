@@ -91,22 +91,34 @@ namespace TatehamaATS_v1.KokuchiWindow
                     case OperationNotificationType.Tenmatsusho:
                         if (kokuchiData.Content == "MC")
                         {
-                            DisplayImageByPos(1, 86);
+                            DisplayImageByPos(1, 171);
                         }
                         else if (kokuchiData.Content == "M")
                         {
-                            DisplayImageByPos(1, 103);
+                            DisplayImageByPos(1, 188);
                         }
                         else if (kokuchiData.Content == "C")
                         {
-                            DisplayImageByPos(1, 120);
+                            DisplayImageByPos(1, 205);
+                        }
+                        else if (kokuchiData.Content == "S")
+                        {
+                            DisplayImageByPos(50, 171);
+                        }
+                        else if (kokuchiData.Content == "A")
+                        {
+                            DisplayImageByPos(50, 188);
+                        }
+                        else
+                        {
+                            DisplayImageByPos(50, 222);
                         }
                         break;
                     case OperationNotificationType.ShuppatsuJikoku:
                         DisplayTimeImage(kokuchiData.Content);
                         break;
                     case OperationNotificationType.Torikeshi:
-                        DisplayImageByPos(1, 137);
+                        DisplayImageByPos(1, 86);
                         break;
                     default:
                         DisplayImageByPos(1, 171);
@@ -229,7 +241,7 @@ namespace TatehamaATS_v1.KokuchiWindow
                 }
                 if (KokuchiData == null)
                 {
-                    DisplayImageByPos(1, 154);
+                    DisplayImageByPos(1, 222);
                     return;
                 }
                 var DeltaTime = (DateTime.Now - KokuchiData.OperatedAt).TotalMilliseconds;
@@ -254,6 +266,7 @@ namespace TatehamaATS_v1.KokuchiWindow
                         else
                         {
                             DisplayImageByPos(50, 171);
+                            DisplayImageByPos(1, 222);
                         }
                         break;
                     case OperationNotificationType.TsuuchiKaijo:
@@ -266,7 +279,7 @@ namespace TatehamaATS_v1.KokuchiWindow
                             }
                             else
                             {
-                                DisplayImageByPos(50, 171);
+                                DisplayImageByPos(1, 222);
                             }
                         }
                         else if (DeltaTime < 20 * 1000)
@@ -283,7 +296,7 @@ namespace TatehamaATS_v1.KokuchiWindow
                         }
                         else
                         {
-                            DisplayImageByPos(50, 171);
+                            DisplayImageByPos(1, 222);
                         }
                         break;
                     case OperationNotificationType.Tenmatsusho:
@@ -294,11 +307,22 @@ namespace TatehamaATS_v1.KokuchiWindow
                         }
                         else
                         {
-                            DisplayImageByPos(50, 171);
+                            DisplayImageByPos(1, 222);
+                        }
+                        break;
+                    case OperationNotificationType.Apology:
+                        if (DeltaTime % 2000 < 1000)
+                        {
+                            //1500+500点滅        
+                            DisplayImageByPos(1, 137);
+                        }
+                        else
+                        {
+                            DisplayImageByPos(1, 154);
                         }
                         break;
                     default:
-                        DisplayImageByPos(50, 171);
+                        DisplayImageByPos(1, 222);
                         break;
                 }
             }

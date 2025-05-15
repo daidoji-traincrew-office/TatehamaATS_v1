@@ -261,7 +261,6 @@ namespace TatehamaATS_v1.OnboardDevice
         {
             status = ConnectionState.DisConnect;
             ConnectionStatusChanged?.Invoke(status);
-            AddExceptionAction.Invoke(new RelayConnectException(5, "起動直後"));
             while (true)
             {
                 _webSocket = new ClientWebSocket();

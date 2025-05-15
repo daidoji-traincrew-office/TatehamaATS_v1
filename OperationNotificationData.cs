@@ -22,6 +22,7 @@
         Shuppatsu,
         ShuppatsuJikoku,
         Torikeshi,
-        Tenmatsusho
+        Tenmatsusho,
+        Apology
     }
 }

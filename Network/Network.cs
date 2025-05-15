@@ -65,6 +65,7 @@ namespace TatehamaATS_v1.Network
         internal event Action<bool> RetsubanInOutStatusChanged;
 
         private bool previousStatus;
+        private bool connectErrorDialog = false;
 
         public Network(OpenIddictClientService service)
         {
@@ -76,6 +77,7 @@ namespace TatehamaATS_v1.Network
             SendData = new DataToServer();
             SendDataUpdate();
             previousStatus = false;
+            connectErrorDialog = false;
         }
 
         public void TcDataUpdate(TrainCrewStateData trainCrewStateData)
@@ -134,7 +136,7 @@ namespace TatehamaATS_v1.Network
         /// 認証処理
         /// </summary>
         /// <returns></returns>
-        public async Task Authorize()
+        public async Task<bool> Authorize()
         {
             using var source = new CancellationTokenSource(delay: TimeSpan.FromSeconds(90));
             try
@@ -154,17 +156,23 @@ namespace TatehamaATS_v1.Network
                 _token = resultAuth.BackchannelAccessToken!;
                 // 認証完了！      
                 await Connect();
+                return true;
             }
             catch (OperationCanceledException)
             {
                 // その他別な理由で認証失敗      
                 var e = new NetworkAuthorizeException(7, "認証タイムアウト");
                 AddExceptionAction.Invoke(e);
+                if (connectErrorDialog) return false;
+                connectErrorDialog = true;
                 DialogResult result = MessageBox.Show($"認証でタイムアウトしました。\n再認証してください。\n※いいえを選択した場合、再認証にはATS再起動が必要です。", "認証失敗 | 館浜ATS - ダイヤ運転会", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
                 if (result == DialogResult.Yes)
                 {
-                    Authorize();
+                    var r = await Authorize();
+                    connectErrorDialog = false;
+                    return r;
                 }
+                return false;
             }
             catch (OpenIddictExceptions.ProtocolException exception) when (exception.Error ==
                                                                OpenIddictConstants.Errors.AccessDenied)
@@ -173,6 +181,7 @@ namespace TatehamaATS_v1.Network
                 var e = new NetworkAccessDenied(7, "認証拒否(サーバー非存在・未入鋏)", exception);
                 AddExceptionAction.Invoke(e);
                 MessageBox.Show($"認証が拒否されました。\n運転会サーバーに参加し入鋏を受けてください。", "認証拒否 | 館浜ATS - ダイヤ運転会");
+                return false;
             }
             catch (OpenIddictExceptions.ProtocolException exception) when (exception.Error ==
                                                                            OpenIddictConstants.Errors.ServerError)
@@ -180,22 +189,32 @@ namespace TatehamaATS_v1.Network
                 // サーバーでトラブル発生                                                                                                       
                 var e = new NetworkAuthorizeException(7, "認証拒否以外", exception);
                 AddExceptionAction.Invoke(e);
+                if (connectErrorDialog) return false;
+                connectErrorDialog = true;
                 DialogResult result = MessageBox.Show($"認証に失敗しました。\n再認証しますか？\n※いいえを選択した場合、再認証にはATS再起動が必要です。\n\n{exception.Message}\n{exception.StackTrace}", "認証失敗 | 館浜ATS - ダイヤ運転会", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
                 if (result == DialogResult.Yes)
                 {
-                    Authorize();
+                    var r = await Authorize();
+                    connectErrorDialog = false;
+                    return r;
                 }
+                return false;
             }
             catch (Exception exception)
             {
                 // その他別な理由で認証失敗      
                 var e = new NetworkAuthorizeException(7, "認証失敗理由不明", exception);
                 AddExceptionAction.Invoke(e);
+                if (connectErrorDialog) return false;
+                connectErrorDialog = true;
                 DialogResult result = MessageBox.Show($"認証に失敗しました。\n再認証しますか？\n※いいえを選択した場合、再認証にはATS再起動が必要です。\n\n{exception.Message}\n{exception.StackTrace}", "認証失敗 | 館浜ATS - ダイヤ運転会", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
                 if (result == DialogResult.Yes)
                 {
-                    Authorize();
+                    var r = await Authorize();
+                    connectErrorDialog = false;
+                    return r;
                 }
+                return false;
             }
         }
 
@@ -237,6 +256,14 @@ namespace TatehamaATS_v1.Network
                     ConnectionStatusChanged?.Invoke(connected);
                     var e = new NetworkAccessDenied(7, "通信部接続失敗", ex);
                     AddExceptionAction.Invoke(e);
+                    if (connectErrorDialog) return;
+                    connectErrorDialog = true;
+                    DialogResult result = MessageBox.Show($"ロール不足です。\nアカウントを確認して再認証してください。\n再認証しますか？\n※いいえを選択した場合、再認証にはATS再起動が必要です。", "認証失敗 | 館浜ATS - ダイヤ運転会", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
+                    if (result == DialogResult.Yes)
+                    {
+                        await Authorize();
+                    }
+                    connectErrorDialog = false;
                 }
                 catch (Exception ex)
                 {

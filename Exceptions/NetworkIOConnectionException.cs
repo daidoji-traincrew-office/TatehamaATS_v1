@@ -31,7 +31,7 @@
         }
         public override ResetConditions ResetCondition()
         {
-            return ResetConditions.ExceptionReset;
+            return ResetConditions.StopDetection;
         }
         public override OutputBrake ToBrake()
         {
