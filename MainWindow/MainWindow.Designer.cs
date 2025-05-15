@@ -121,6 +121,7 @@
             Image_ATSReady.TabIndex = 5;
             Image_ATSReady.TabStop = false;
             Image_ATSReady.Visible = false;
+            Image_ATSReady.Click += Image_ATSReady_Click;
             // 
             // Image_ATSBrakeApply
             // 
@@ -202,7 +203,6 @@
             BackgroundImage = MainResource.Main_Background;
             BackgroundImageLayout = ImageLayout.None;
             ClientSize = new Size(300, 300);
-            Controls.Add(Image_Kyokan);
             Controls.Add(Image_TopMostOFF);
             Controls.Add(Image_Relay);
             Controls.Add(Image_Retsuban);
@@ -215,6 +215,7 @@
             Controls.Add(Image_ATSReady);
             Controls.Add(Image_Reset);
             Controls.Add(Image_ATSCut);
+            Controls.Add(Image_Kyokan);
             FormBorderStyle = FormBorderStyle.FixedToolWindow;
             MaximumSize = new Size(316, 339);
             MinimumSize = new Size(316, 339);

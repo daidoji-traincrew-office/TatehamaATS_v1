@@ -459,5 +459,10 @@ namespace TatehamaATS_v1.MainWindow
         {
 
         }
+
+        private void Image_ATSReady_Click(object sender, EventArgs e)
+        {
+            CableIO.TestWinChenge();
+        }
     }
 }
