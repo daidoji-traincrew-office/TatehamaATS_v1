@@ -229,7 +229,7 @@ namespace TatehamaATS_v1.Network
 
             connection = new HubConnectionBuilder()
                 .WithUrl($"{ServerAddress.SignalAddress}/hub/train?access_token={_token}")
-                .WithAutomaticReconnect()
+                .WithAutomaticReconnect(Enumerable.Range(0, 721).Select(x => TimeSpan.FromSeconds(x == 0 ? 0 : 5)).ToArray())
                 .Build();
 
             //connection.On<DataFromServer>("ReceiveData_ATS", DataFromServer =>
