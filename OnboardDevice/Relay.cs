@@ -499,6 +499,7 @@ namespace TatehamaATS_v1.OnboardDevice
 
         internal string TypeString(string Retsuban)
         {
+            Retsuban = Retsuban.Replace("X", "").Replace("Y", "").Replace("Z", "");
             if (Retsuban == "9999")
             {
                 return "";
