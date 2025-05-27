@@ -533,6 +533,10 @@ namespace TatehamaATS_v1.OnboardDevice
             {
                 return "準急";
             }
+            if (Retsuban.StartsWith("臨"))
+            {
+                return "回送";
+            }
             if (int.TryParse(Retsuban, null, out _))
             {
                 return "普通";
