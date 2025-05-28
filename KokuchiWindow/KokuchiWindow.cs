@@ -289,7 +289,7 @@ namespace TatehamaATS_v1.KokuchiWindow
         /// <param name="height"></param>
         private void DisplayImageByPosNum(int x, int y)
         {
-            DisplayImageByPos(x * 49 + 1, y * 19 + 1);
+            DisplayImageByPos(x * 49 + 1, y * 17 + 1);
         }
 
         /// <summary>
