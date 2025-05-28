@@ -67,7 +67,7 @@ namespace TatehamaATS_v1.KokuchiWindow
         /// <summary>
         /// 表示内容を変更する
         /// </summary>
-        private void SetLED(OperationNotificationData kokuchiData, int Index = 0)
+        private void SetLED(OperationNotificationData kokuchiData, int index = 0)
         {
             try
             {
@@ -81,7 +81,7 @@ namespace TatehamaATS_v1.KokuchiWindow
                         break;
                     case OperationNotificationType.Tsuuchi:
                     case OperationNotificationType.TsuuchiKaijo:
-                        if (Index == 1)
+                        if (index == 1)
                         {
                             DisplayImageByPosNum(2, 15);
                             break;
@@ -98,7 +98,7 @@ namespace TatehamaATS_v1.KokuchiWindow
                         DisplayImageByPosNum(0, 5);
                         break;
                     case OperationNotificationType.Tenmatsusho:
-                        if (Index == 1)
+                        if (index == 1)
                         {
                             DisplayImageByPosNum(2, 15);
                             break;
@@ -132,7 +132,7 @@ namespace TatehamaATS_v1.KokuchiWindow
                                 DisplayImageByPosNum(0, 8);
                                 break;
                             case "Orikaeshi":
-                                if (Index == 1)
+                                if (index == 1)
                                 {
                                     DisplayImageByPosNum(2, 15);
                                     break;
@@ -140,7 +140,7 @@ namespace TatehamaATS_v1.KokuchiWindow
                                 DisplayImageByPosNum(0, 9);
                                 break;
                             case "Apology":
-                                if (Index == 1)
+                                if (index == 1)
                                 {
                                     DisplayImageByPosNum(1, 11);
                                     break;
@@ -153,7 +153,72 @@ namespace TatehamaATS_v1.KokuchiWindow
                         }
                         break;
                     case OperationNotificationType.Class:
-                        if (Index == 1)
+                        //回送行先指定あり
+                        if (kokuchiData.Content == "TH75NiS")
+                        {
+                            switch (index)
+                            {
+                                case 0:
+                                    DisplayImageByPosNum(3, 6);
+                                    break;
+                                case 1:
+                                    DisplayImageByPosNum(0, 11);
+                                    break;
+                                case 2:
+                                    DisplayImageByPosNum(1, 11);
+                                    break;
+                                case 3:
+                                    DisplayImageByPosNum(0, 12);
+                                    break;
+                                default:
+                                    DisplayImageByPosNum(0, 7);
+                                    break;
+                            }
+                            break;
+                        }
+                        if (kokuchiData.Content == "TH66NiS")
+                        {
+                            switch (index)
+                            {
+                                case 0:
+                                    DisplayImageByPosNum(3, 6);
+                                    break;
+                                case 1:
+                                    DisplayImageByPosNum(0, 12);
+                                    break;
+                                case 2:
+                                    DisplayImageByPosNum(1, 12);
+                                    break;
+                                case 3:
+                                    DisplayImageByPosNum(0, 11);
+                                    break;
+                                default:
+                                    DisplayImageByPosNum(0, 7);
+                                    break;
+                            }
+                            break;
+                        }
+                        if (kokuchiData.Content == "TH66")
+                        {
+                            switch (index)
+                            {
+                                case 0:
+                                case 2:
+                                    DisplayImageByPosNum(1, 12);
+                                    break;
+                                case 1:
+                                case 3:
+                                    DisplayImageByPosNum(0, 12);
+                                    break;
+                                default:
+                                    DisplayImageByPosNum(0, 7);
+                                    break;
+                            }
+                            break;
+                        }
+
+                        //通常種別指定
+                        if (index == 1 || index == 3)
                         {
                             DisplayImageByPosNum(0, 11);
                             break;
@@ -406,8 +471,7 @@ namespace TatehamaATS_v1.KokuchiWindow
                         }
                         break;
                     case OperationNotificationType.Other:
-                    case OperationNotificationType.Class:
-                        //1000+1000点滅               
+                        //1000+1000+1000+1000点滅               
                         if (DeltaTime % 2000 < 1000)
                         {
                             SetLED(KokuchiData, 0);
@@ -415,6 +479,25 @@ namespace TatehamaATS_v1.KokuchiWindow
                         else
                         {
                             SetLED(KokuchiData, 1);
+                        }
+                        break;
+                    case OperationNotificationType.Class:
+                        //1000+1000+1000+1000点滅               
+                        if (DeltaTime % 4000 < 1000)
+                        {
+                            SetLED(KokuchiData, 0);
+                        }
+                        else if (DeltaTime % 4000 < 2000)
+                        {
+                            SetLED(KokuchiData, 1);
+                        }
+                        else if (DeltaTime % 4000 < 3000)
+                        {
+                            SetLED(KokuchiData, 2);
+                        }
+                        else
+                        {
+                            SetLED(KokuchiData, 3);
                         }
                         break;
                     default:
