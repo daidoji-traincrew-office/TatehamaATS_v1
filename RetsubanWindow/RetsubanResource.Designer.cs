@@ -553,6 +553,36 @@ namespace TatehamaATS_v1.RetsubanWindow {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
+        internal static System.Drawing.Bitmap Button_Clear {
+            get {
+                object obj = ResourceManager.GetObject("Button_Clear", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.Drawing.Bitmap Button_D {
+            get {
+                object obj = ResourceManager.GetObject("Button_D", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.Drawing.Bitmap Button_Danjiri {
+            get {
+                object obj = ResourceManager.GetObject("Button_Danjiri", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
         internal static System.Drawing.Bitmap Button_Del {
             get {
                 object obj = ResourceManager.GetObject("Button_Del", resourceCulture);
@@ -603,6 +633,16 @@ namespace TatehamaATS_v1.RetsubanWindow {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
+        internal static System.Drawing.Bitmap Button_S {
+            get {
+                object obj = ResourceManager.GetObject("Button_S", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
         internal static System.Drawing.Bitmap Button_Set {
             get {
                 object obj = ResourceManager.GetObject("Button_Set", resourceCulture);
@@ -623,9 +663,59 @@ namespace TatehamaATS_v1.RetsubanWindow {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
+        internal static System.Drawing.Bitmap Button_StopSet {
+            get {
+                object obj = ResourceManager.GetObject("Button_StopSet", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.Drawing.Bitmap Button_T {
+            get {
+                object obj = ResourceManager.GetObject("Button_T", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.Drawing.Bitmap Button_Tei {
+            get {
+                object obj = ResourceManager.GetObject("Button_Tei", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
         internal static System.Drawing.Bitmap Button_TimeSet {
             get {
                 object obj = ResourceManager.GetObject("Button_TimeSet", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.Drawing.Bitmap Button_Toku {
+            get {
+                object obj = ResourceManager.GetObject("Button_Toku", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.Drawing.Bitmap Button_Tsu {
+            get {
+                object obj = ResourceManager.GetObject("Button_Tsu", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

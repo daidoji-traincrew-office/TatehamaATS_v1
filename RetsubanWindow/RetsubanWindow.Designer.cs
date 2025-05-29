@@ -75,6 +75,15 @@
             Button_Y = new PictureBox();
             Button_Z = new PictureBox();
             LCD = new PictureBox();
+            Button_StopSet = new PictureBox();
+            Button_Clear = new PictureBox();
+            Button_Tei = new PictureBox();
+            Button_Tsu = new PictureBox();
+            Button_Toku = new PictureBox();
+            Button_Danjiri = new PictureBox();
+            Button_T = new PictureBox();
+            Button_S = new PictureBox();
+            Button_D = new PictureBox();
             ((System.ComponentModel.ISupportInitialize)Retsuban_4).BeginInit();
             ((System.ComponentModel.ISupportInitialize)Retsuban_3).BeginInit();
             ((System.ComponentModel.ISupportInitialize)Retsuban_2).BeginInit();
@@ -120,6 +129,15 @@
             ((System.ComponentModel.ISupportInitialize)Button_Y).BeginInit();
             ((System.ComponentModel.ISupportInitialize)Button_Z).BeginInit();
             ((System.ComponentModel.ISupportInitialize)LCD).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)Button_StopSet).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)Button_Clear).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)Button_Tei).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)Button_Tsu).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)Button_Toku).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)Button_Danjiri).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)Button_T).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)Button_S).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)Button_D).BeginInit();
             SuspendLayout();
             // 
             // Retsuban_4
@@ -455,7 +473,7 @@
             Button_RetsuSet.Size = new Size(30, 30);
             Button_RetsuSet.TabIndex = 12;
             Button_RetsuSet.TabStop = false;
-            Button_RetsuSet.MouseDown += Button_RetsuSet_Click_1;
+            Button_RetsuSet.MouseDown += Button_RetsuSet_Click;
             // 
             // Button_X
             // 
@@ -654,12 +672,128 @@
             LCD.TabIndex = 17;
             LCD.TabStop = false;
             // 
+            // Button_StopSet
+            // 
+            Button_StopSet.BackColor = Color.Transparent;
+            Button_StopSet.BackgroundImage = RetsubanResource.Button_StopSet;
+            Button_StopSet.BackgroundImageLayout = ImageLayout.None;
+            Button_StopSet.Location = new Point(415, 345);
+            Button_StopSet.Name = "Button_StopSet";
+            Button_StopSet.Size = new Size(30, 30);
+            Button_StopSet.TabIndex = 12;
+            Button_StopSet.TabStop = false;
+            Button_StopSet.Click += Button_StopSet_Click;
+            // 
+            // Button_Clear
+            // 
+            Button_Clear.BackColor = Color.Transparent;
+            Button_Clear.BackgroundImage = RetsubanResource.Button_Clear;
+            Button_Clear.BackgroundImageLayout = ImageLayout.None;
+            Button_Clear.Location = new Point(590, 380);
+            Button_Clear.Name = "Button_Clear";
+            Button_Clear.Size = new Size(30, 30);
+            Button_Clear.TabIndex = 18;
+            Button_Clear.TabStop = false;
+            Button_Clear.Click += Button_Clear_Click;
+            // 
+            // Button_Tei
+            // 
+            Button_Tei.BackColor = Color.Transparent;
+            Button_Tei.BackgroundImage = RetsubanResource.Button_Tei;
+            Button_Tei.BackgroundImageLayout = ImageLayout.None;
+            Button_Tei.Location = new Point(555, 345);
+            Button_Tei.Name = "Button_Tei";
+            Button_Tei.Size = new Size(30, 30);
+            Button_Tei.TabIndex = 19;
+            Button_Tei.TabStop = false;
+            Button_Tei.Click += Button_Tei_Click;
+            // 
+            // Button_Tsu
+            // 
+            Button_Tsu.BackColor = Color.Transparent;
+            Button_Tsu.BackgroundImage = RetsubanResource.Button_Tsu;
+            Button_Tsu.BackgroundImageLayout = ImageLayout.None;
+            Button_Tsu.Location = new Point(590, 345);
+            Button_Tsu.Name = "Button_Tsu";
+            Button_Tsu.Size = new Size(30, 30);
+            Button_Tsu.TabIndex = 20;
+            Button_Tsu.TabStop = false;
+            Button_Tsu.Click += Button_Tsu_Click;
+            // 
+            // Button_Toku
+            // 
+            Button_Toku.BackColor = Color.Transparent;
+            Button_Toku.BackgroundImage = RetsubanResource.Button_Toku;
+            Button_Toku.BackgroundImageLayout = ImageLayout.None;
+            Button_Toku.Location = new Point(485, 380);
+            Button_Toku.Name = "Button_Toku";
+            Button_Toku.Size = new Size(30, 30);
+            Button_Toku.TabIndex = 21;
+            Button_Toku.TabStop = false;
+            Button_Toku.Click += Button_Toku_Click;
+            // 
+            // Button_Danjiri
+            // 
+            Button_Danjiri.BackColor = Color.Transparent;
+            Button_Danjiri.BackgroundImage = RetsubanResource.Button_Danjiri;
+            Button_Danjiri.BackgroundImageLayout = ImageLayout.None;
+            Button_Danjiri.Location = new Point(450, 380);
+            Button_Danjiri.Name = "Button_Danjiri";
+            Button_Danjiri.Size = new Size(30, 30);
+            Button_Danjiri.TabIndex = 22;
+            Button_Danjiri.TabStop = false;
+            Button_Danjiri.Click += Button_Danjiri_Click;
+            // 
+            // Button_T
+            // 
+            Button_T.BackColor = Color.Transparent;
+            Button_T.BackgroundImage = RetsubanResource.Button_T;
+            Button_T.BackgroundImageLayout = ImageLayout.None;
+            Button_T.Location = new Point(450, 240);
+            Button_T.Name = "Button_T";
+            Button_T.Size = new Size(30, 30);
+            Button_T.TabIndex = 23;
+            Button_T.TabStop = false;
+            Button_T.Click += Button_T_Click;
+            // 
+            // Button_S
+            // 
+            Button_S.BackColor = Color.Transparent;
+            Button_S.BackgroundImage = RetsubanResource.Button_S;
+            Button_S.BackgroundImageLayout = ImageLayout.None;
+            Button_S.Location = new Point(450, 205);
+            Button_S.Name = "Button_S";
+            Button_S.Size = new Size(30, 30);
+            Button_S.TabIndex = 24;
+            Button_S.TabStop = false;
+            Button_S.Click += Button_S_Click;
+            // 
+            // Button_D
+            // 
+            Button_D.BackColor = Color.Transparent;
+            Button_D.BackgroundImage = RetsubanResource.Button_D;
+            Button_D.BackgroundImageLayout = ImageLayout.None;
+            Button_D.Location = new Point(485, 310);
+            Button_D.Name = "Button_D";
+            Button_D.Size = new Size(30, 30);
+            Button_D.TabIndex = 25;
+            Button_D.TabStop = false;
+            Button_D.Click += Button_D_Click;
+            // 
             // RetsubanWindow
             // 
             AutoScaleMode = AutoScaleMode.None;
             BackgroundImage = RetsubanResource.Retsuban_Background;
             BackgroundImageLayout = ImageLayout.None;
             ClientSize = new Size(640, 425);
+            Controls.Add(Button_D);
+            Controls.Add(Button_S);
+            Controls.Add(Button_T);
+            Controls.Add(Button_Danjiri);
+            Controls.Add(Button_Toku);
+            Controls.Add(Button_Tsu);
+            Controls.Add(Button_Tei);
+            Controls.Add(Button_Clear);
             Controls.Add(LCD);
             Controls.Add(Lamp_Car);
             Controls.Add(Lamp_Time);
@@ -684,6 +818,7 @@
             Controls.Add(Button_Kai);
             Controls.Add(Button_CarSet);
             Controls.Add(Button_5);
+            Controls.Add(Button_StopSet);
             Controls.Add(Button_UnkoSet);
             Controls.Add(Button_7);
             Controls.Add(Button_TimeSet);
@@ -754,6 +889,15 @@
             ((System.ComponentModel.ISupportInitialize)Button_Y).EndInit();
             ((System.ComponentModel.ISupportInitialize)Button_Z).EndInit();
             ((System.ComponentModel.ISupportInitialize)LCD).EndInit();
+            ((System.ComponentModel.ISupportInitialize)Button_StopSet).EndInit();
+            ((System.ComponentModel.ISupportInitialize)Button_Clear).EndInit();
+            ((System.ComponentModel.ISupportInitialize)Button_Tei).EndInit();
+            ((System.ComponentModel.ISupportInitialize)Button_Tsu).EndInit();
+            ((System.ComponentModel.ISupportInitialize)Button_Toku).EndInit();
+            ((System.ComponentModel.ISupportInitialize)Button_Danjiri).EndInit();
+            ((System.ComponentModel.ISupportInitialize)Button_T).EndInit();
+            ((System.ComponentModel.ISupportInitialize)Button_S).EndInit();
+            ((System.ComponentModel.ISupportInitialize)Button_D).EndInit();
             ResumeLayout(false);
         }
 
@@ -805,5 +949,14 @@
         private PictureBox Button_Y;
         private PictureBox Button_Z;
         private PictureBox LCD;
+        private PictureBox Button_StopSet;
+        private PictureBox Button_Clear;
+        private PictureBox Button_Tei;
+        private PictureBox Button_Tsu;
+        private PictureBox Button_Toku;
+        private PictureBox Button_Danjiri;
+        private PictureBox Button_T;
+        private PictureBox Button_S;
+        private PictureBox Button_D;
     }
 }

@@ -121,8 +121,14 @@
   <data name="Retsuban_Background" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Image\Retsuban_Background.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Button_Clear" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Image\Button_Clear.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="Button_VerDisplay" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Image\Button_VerDisplay.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Button_Tsu" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Image\Button_Tsu.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Button_4" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Image\Button_4.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -166,26 +172,32 @@
   <data name="_16dot_Kai" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Image\16dot_Kai.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="_16dot_CX" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Image\16dot_CX.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="_7seg_3" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Image\7seg_3.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="_16dot_KZ" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Image\16dot_KZ.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Button_T" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Image\Button_T.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="_7seg_9" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Image\7seg_9.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="LCD_Waku" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Image\LCD_Waku.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="_7seg_4" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Image\7seg_4.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Button_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Image\Button_0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="_16dot_AX" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Image\16dot_AX.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Button_Danjiri" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Image\Button_Danjiri.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Button_RetsuSet" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Image\Button_RetsuSet.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="_16dot_BY" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Image\16dot_BY.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -205,6 +217,9 @@
   <data name="_16dot_BX" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Image\16dot_BX.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Button_A" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Image\Button_A.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="_7seg_N" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Image\7seg_N.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -219,6 +234,9 @@
   </data>
   <data name="Button_TimeSet" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Image\Button_TimeSet.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Button_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Image\Button_0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Lamp" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Image\Lamp.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -250,8 +268,8 @@
   <data name="_16dot_K" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Image\16dot_K.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Button_8" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Image\Button_8.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Button_S" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Image\Button_S.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Button_2" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Image\Button_2.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -271,6 +289,9 @@
   <data name="Button_X" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Image\Button_X.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Button_StopSet" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Image\Button_StopSet.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="_16dot_C" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Image\16dot_C.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -286,6 +307,9 @@
   <data name="Button_5" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Image\Button_5.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Button_8" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Image\Button_8.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="Button_Set" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Image\Button_Set.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -295,28 +319,31 @@
   <data name="_7seg_5" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Image\7seg_5.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Button_RetsuSet" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Image\Button_RetsuSet.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Button_Toku" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Image\Button_Toku.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="_16dot_Y" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Image\16dot_Y.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Button_A" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Image\Button_A.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="_16dot_CX" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Image\16dot_CX.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Button_Del" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Image\Button_Del.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Button_Tei" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Image\Button_Tei.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="_16dot_CY" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Image\16dot_CY.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="_7seg_1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Image\7seg_1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="LCD_Font" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Image\LCD_Font.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="LCD_Waku" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Image\LCD_Waku.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="_7seg_1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Image\7seg_1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Button_D" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Image\Button_D.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>
