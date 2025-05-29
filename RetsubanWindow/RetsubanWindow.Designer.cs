@@ -74,6 +74,7 @@
             ClockTimer = new System.Windows.Forms.Timer(components);
             Button_Y = new PictureBox();
             Button_Z = new PictureBox();
+            LCD = new PictureBox();
             ((System.ComponentModel.ISupportInitialize)Retsuban_4).BeginInit();
             ((System.ComponentModel.ISupportInitialize)Retsuban_3).BeginInit();
             ((System.ComponentModel.ISupportInitialize)Retsuban_2).BeginInit();
@@ -118,6 +119,7 @@
             ((System.ComponentModel.ISupportInitialize)Time_s1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)Button_Y).BeginInit();
             ((System.ComponentModel.ISupportInitialize)Button_Z).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)LCD).BeginInit();
             SuspendLayout();
             // 
             // Retsuban_4
@@ -424,7 +426,7 @@
             Button_Del.BackColor = Color.Transparent;
             Button_Del.BackgroundImage = RetsubanResource.Button_Del;
             Button_Del.BackgroundImageLayout = ImageLayout.None;
-            Button_Del.Location = new Point(590, 345);
+            Button_Del.Location = new Point(555, 380);
             Button_Del.Name = "Button_Del";
             Button_Del.Size = new Size(30, 30);
             Button_Del.TabIndex = 13;
@@ -436,7 +438,7 @@
             Button_Set.BackColor = Color.Transparent;
             Button_Set.BackgroundImage = RetsubanResource.Button_Set;
             Button_Set.BackgroundImageLayout = ImageLayout.None;
-            Button_Set.Location = new Point(555, 345);
+            Button_Set.Location = new Point(520, 380);
             Button_Set.Name = "Button_Set";
             Button_Set.Size = new Size(30, 30);
             Button_Set.TabIndex = 14;
@@ -472,7 +474,7 @@
             Button_VerDisplay.BackColor = Color.Transparent;
             Button_VerDisplay.BackgroundImage = RetsubanResource.Button_VerDisplay;
             Button_VerDisplay.BackgroundImageLayout = ImageLayout.None;
-            Button_VerDisplay.Location = new Point(415, 345);
+            Button_VerDisplay.Location = new Point(415, 380);
             Button_VerDisplay.Name = "Button_VerDisplay";
             Button_VerDisplay.Size = new Size(30, 30);
             Button_VerDisplay.TabIndex = 12;
@@ -532,7 +534,7 @@
             Button_K.BackColor = Color.Transparent;
             Button_K.BackgroundImage = RetsubanResource.Button_K;
             Button_K.BackgroundImageLayout = ImageLayout.None;
-            Button_K.Location = new Point(485, 310);
+            Button_K.Location = new Point(485, 345);
             Button_K.Name = "Button_K";
             Button_K.Size = new Size(30, 30);
             Button_K.TabIndex = 12;
@@ -640,11 +642,25 @@
             Button_Z.TabStop = false;
             Button_Z.MouseDown += Button_Z_Click;
             // 
+            // LCD
+            // 
+            LCD.BackColor = Color.Transparent;
+            LCD.BackgroundImage = RetsubanResource.LCD_Waku;
+            LCD.BackgroundImageLayout = ImageLayout.None;
+            LCD.Image = RetsubanResource.LCD_Waku;
+            LCD.Location = new Point(20, 307);
+            LCD.Name = "LCD";
+            LCD.Size = new Size(365, 101);
+            LCD.TabIndex = 17;
+            LCD.TabStop = false;
+            // 
             // RetsubanWindow
             // 
             AutoScaleMode = AutoScaleMode.None;
             BackgroundImage = RetsubanResource.Retsuban_Background;
-            ClientSize = new Size(640, 400);
+            BackgroundImageLayout = ImageLayout.None;
+            ClientSize = new Size(640, 425);
+            Controls.Add(LCD);
             Controls.Add(Lamp_Car);
             Controls.Add(Lamp_Time);
             Controls.Add(Lamp_Retsuban);
@@ -737,6 +753,7 @@
             ((System.ComponentModel.ISupportInitialize)Time_s1).EndInit();
             ((System.ComponentModel.ISupportInitialize)Button_Y).EndInit();
             ((System.ComponentModel.ISupportInitialize)Button_Z).EndInit();
+            ((System.ComponentModel.ISupportInitialize)LCD).EndInit();
             ResumeLayout(false);
         }
 
@@ -787,5 +804,6 @@
         private System.Windows.Forms.Timer ClockTimer;
         private PictureBox Button_Y;
         private PictureBox Button_Z;
+        private PictureBox LCD;
     }
 }

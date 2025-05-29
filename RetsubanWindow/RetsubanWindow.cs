@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Documents;
 using System.Windows.Forms;
 using TakumiteAudioWrapper;
 using TatehamaATS_v1.Exceptions;
@@ -16,6 +17,7 @@ using TrainCrewAPI;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using Image = System.Drawing.Image;
+
 
 namespace TatehamaATS_v1.RetsubanWindow
 {
@@ -39,6 +41,8 @@ namespace TatehamaATS_v1.RetsubanWindow
         public string NewCar;
         public TimeSpan ShiftTime = TimeSpan.FromHours(-10);
         public string NewHour;
+
+        private List<string> LCDFontList = new List<string>();
 
         private RetsubanMode retsubanMode;
 
@@ -94,6 +98,21 @@ namespace TatehamaATS_v1.RetsubanWindow
                 {" ",  RetsubanResource._7seg_N} ,
                 {"",  RetsubanResource._7seg_N}
             };
+            var lcdfontString =
+                " ，．・：；？！”｜…（）［］＜＞←→＠" +
+                "0123456789回試臨xyz■特停通" +
+                "ABCDEFGHIJKLMNOPQRST" +
+                "UVWXYZŪŌァィゥェォヵヶャュョッー" +
+                "アイウエオカキクケコサシスセソタチツテト" +
+                "ナニヌネノハヒフヘホマミムメモヤ　ユ　ヨ" +
+                "ラリルレロワヰヱヲン゛゜　　　　　　　?";
+
+            // LCDFontListにlcdfontStringを1文字ずつ追加
+            foreach (char c in lcdfontString)
+            {
+                LCDFontList.Add(c.ToString());
+            }
+
             try
             {
                 AudioManager = new AudioManager();
@@ -113,7 +132,8 @@ namespace TatehamaATS_v1.RetsubanWindow
                 var e = new CsharpException(9, "sound死亡", ex);
                 AddExceptionAction?.Invoke(e);
             }
-            set_trainnum?.PlayLoop(1.0f);
+            //set_trainnum?.PlayLoop(1.0f);
+            LCDDrawing();
         }
 
         private void Loaded(object sender, EventArgs e)
@@ -143,6 +163,7 @@ namespace TatehamaATS_v1.RetsubanWindow
 
         private void ClockTimer_Tick(object sender, EventArgs e)
         {
+            LCDDrawing();
             var tst_time = DateTime.Now + ShiftTime;
             TimeData timeData = new TimeData()
             {
@@ -321,6 +342,189 @@ namespace TatehamaATS_v1.RetsubanWindow
                 Car_2.BackgroundImage = Images_7seg[$"{car[0]}"];
                 Car_1.BackgroundImage = Images_7seg[$"{car[1]}"];
             }
+        }
+
+        private void LCDDrawing()
+        {
+            var displayList = GetLCDData();
+
+            // 画像を取得してリストに格納
+            List<Bitmap> lcdImages = new List<Bitmap>();
+            foreach (var str in displayList)
+            {
+                lcdImages.Add(GetLCDFontImageByChar(str));
+            }
+
+            // 画像をLCD領域にならべる
+            var NewLCD = new Bitmap(LCD.Width, LCD.Height);
+            // 起点を5,5として、xは24、yは32ごとに並べる。横は15文字制限
+            using (Graphics g = Graphics.FromImage(NewLCD))
+            {
+                int x = 5;
+                int y = 5;
+                for (int i = 0; i < lcdImages.Count; i++)
+                {
+                    if (i % 15 == 0 && i != 0) // 15文字ごとに改行
+                    {
+                        x = 5; // xをリセット
+                        y += 32; // yを次の行に移動
+                    }
+                    g.DrawImage(lcdImages[i], x, y, 20, 28); // サイズは24x32で描画
+                    x += 24; // 次の文字の位置へ移動
+                }
+            }
+            //描画する
+            LCD.BackgroundImage = NewLCD;
+        }
+
+        private List<string> GetLCDData()
+        {
+            var displayString = GetAvailableChar("ヒョウジテスト　フォント試\n臨回0123456789xyz\nカナ英数字ト特殊文字ノミ表示可");
+
+            var displayStringList = new List<string>();
+            // 文字列を改行ごとに分割し、各行をリストに追加
+            foreach (var line in displayString.Split('\n'))
+            {
+                displayStringList.Add(line);
+            }
+
+            var displayList = new List<string>();
+            for (int i = 0; i < displayStringList.Count; i++)
+            {
+                displayList.SetDisplayData(displayStringList[i], 0, i, false); // 横書きで配置
+            }
+
+            return displayList;
+        }
+
+        /// <summary>
+        /// LCDに表示可能な文字列へ変換する
+        /// ①全角カタカナのうち、濁点・半濁点を、濁点・半濁点なしの文字+濁点・半濁点に分離する。
+        /// ②全角数値を半角数値に変換する。
+        /// ③全角アルファベットを半角アルファベットに変換する。
+        /// </summary>
+        private string GetAvailableChar(string str)
+        {
+            if (string.IsNullOrEmpty(str)) return str;
+
+            // ① 全角カタカナの濁点・半濁点分離
+            // 濁点・半濁点対応表
+            var dakutenMap = new Dictionary<char, char>
+            {
+                {'ガ','カ'}, {'ギ','キ'}, {'グ','ク'}, {'ゲ','ケ'}, {'ゴ','コ'},
+                {'ザ','サ'}, {'ジ','シ'}, {'ズ','ス'}, {'ゼ','セ'}, {'ゾ','ソ'},
+                {'ダ','タ'}, {'ヂ','チ'}, {'ヅ','ツ'}, {'デ','テ'}, {'ド','ト'},
+                {'バ','ハ'}, {'ビ','ヒ'}, {'ブ','フ'}, {'ベ','ヘ'}, {'ボ','ホ'},
+                {'ヴ','ウ'}
+            };
+            var handakutenMap = new Dictionary<char, char>
+            {
+                {'パ','ハ'}, {'ピ','ヒ'}, {'プ','フ'}, {'ペ','ヘ'}, {'ポ','ホ'}
+            };
+            var result = new StringBuilder();
+
+            foreach (var c in str)
+            {
+                // ① カタカナ濁点・半濁点分離
+                if (dakutenMap.ContainsKey(c))
+                {
+                    result.Append(dakutenMap[c]);
+                    result.Append('゛'); // U+309B
+                }
+                else if (handakutenMap.ContainsKey(c))
+                {
+                    result.Append(handakutenMap[c]);
+                    result.Append('゜'); // U+309C
+                }
+                // ② 全角数字→半角数字
+                else if (c >= '０' && c <= '９')
+                {
+                    result.Append((char)('0' + (c - '０')));
+                }
+                // ③ 全角英大文字→半角英大文字
+                else if (c >= 'Ａ' && c <= 'Ｚ')
+                {
+                    result.Append((char)('A' + (c - 'Ａ')));
+                }
+                // ③ 全角英小文字→半角英小文字
+                else if (c >= 'ａ' && c <= 'ｚ')
+                {
+                    result.Append((char)('a' + (c - 'ａ')));
+                }
+                else
+                {
+                    result.Append(c);
+                }
+            }
+
+            return result.ToString();
+        }
+
+        /// <summary>
+        /// LCDFont画像内からその文字の画像を取得するメソッド
+        /// </summary>
+        /// <param name="str">対象文字</param>
+        /// <returns>対象文字の画像(20*35)</returns>
+        private Bitmap GetLCDFontImageByChar(string str)
+        {
+            if (string.IsNullOrEmpty(str) || !LCDFontList.Contains(str))
+            {
+                str = "?";
+            }
+            int index = LCDFontList.IndexOf(str);
+            // 1行20文字
+            int x = (index % 20) * 6 + 1;
+            int y = (index / 20) * 8 + 1;
+            return EnlargePixelArt(GetLCDFontImageByPos(x, y));
+        }
+
+
+        /// <summary>
+        /// 指定した座標とサイズに基づいて画像を切り出す
+        /// </summary>
+        /// <param name="number">切り出す画像の番号</param>
+        /// <returns>切り出された画像</returns>
+        private Bitmap GetLCDFontImageByPos(int x, int y, int width = 5, int height = 7)
+        {
+            Bitmap croppedImage = new Bitmap(width, height);
+            using (Graphics g = Graphics.FromImage(croppedImage))
+            {
+                g.DrawImage(RetsubanResource.LCD_Font, new Rectangle(0, 0, width, height), new Rectangle(x, y, width, height), GraphicsUnit.Pixel);
+            }
+            return croppedImage;
+        }
+
+        /// <summary>
+        /// ピクセルアートを4倍に拡大する
+        /// </summary>
+        /// <param name="original">元の画像</param>
+        /// <returns>4倍に拡大された画像</returns>
+        private Bitmap EnlargePixelArt(Bitmap original)
+        {
+            int newWidth = original.Width * 4;
+            int newHeight = original.Height * 4;
+
+            Bitmap enlargedImage = new Bitmap(newWidth + 1, newHeight + 1);
+            using (Graphics g = Graphics.FromImage(enlargedImage))
+            {
+                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+                for (int y = 0; y < original.Height; y++)
+                {
+                    for (int x = 0; x < original.Width; x++)
+                    {
+                        Color pixelColor = original.GetPixel(x, y);
+                        for (int dy = 0; dy < 4; dy++)
+                        {
+                            for (int dx = 0; dx < 4; dx++)
+                            {
+                                enlargedImage.SetPixel(x * 4 + dx, y * 4 + dy, pixelColor);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return enlargedImage;
         }
 
         private void Button_RetsuSet_Click_1(object sender, EventArgs e)
@@ -753,6 +957,61 @@ namespace TatehamaATS_v1.RetsubanWindow
                 CarDrawing(NewCar);
                 return;
             }
+        }
+    }
+
+    public static class ListStringExtensions
+    {
+        /// <summary>
+        /// 文字配置を行う拡張メソッド
+        /// </summary>
+        /// <param name="list">対象リスト</param>
+        /// <param name="str">設定文字列</param>
+        /// <param name="x">横の文字位置</param>
+        /// <param name="y">縦の文字位置</param>
+        /// <param name="isY">縦書きかどうか</param>
+        /// <returns>変更後のリスト</returns>
+        public static List<string> SetDisplayData(this List<string> list, string str, int x, int y, bool isY)
+        {
+            // 開始位置を求める
+            if (x < 0 || y < 0 || x > 15 || y > 3)
+            {
+                throw new ArgumentOutOfRangeException("x or y is out of range.");
+            }
+            var startPosition = y * 15 + x;
+            if (isY) // 縦書きの場合
+            {
+                for (int i = 0; i < str.Length; i++)
+                {
+                    int index = startPosition + i * 15;
+                    // 存在しないインデックスの場合、Listのサイズを拡張する
+                    if (index >= list.Count)
+                    {
+                        for (int j = list.Count; j <= index; j++)
+                        {
+                            list.Add(" "); // 空白で埋める
+                        }
+                    }
+                    list[index] = str[i].ToString();
+                }
+            }
+            else // 横書きの場合
+            {
+                for (int i = 0; i < str.Length; i++)
+                {
+                    int index = startPosition + i;
+                    // 存在しないインデックスの場合、Listのサイズを拡張する
+                    if (index >= list.Count)
+                    {
+                        for (int j = list.Count; j <= index; j++)
+                        {
+                            list.Add(" "); // 空白で埋める
+                        }
+                    }
+                    list[index] = str[i].ToString();
+                }
+            }
+            return list;
         }
     }
 }

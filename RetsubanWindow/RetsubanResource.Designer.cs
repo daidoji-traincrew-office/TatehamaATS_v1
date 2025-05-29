@@ -693,6 +693,26 @@ namespace TatehamaATS_v1.RetsubanWindow {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
+        internal static System.Drawing.Bitmap LCD_Font {
+            get {
+                object obj = ResourceManager.GetObject("LCD_Font", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.Drawing.Bitmap LCD_Waku {
+            get {
+                object obj = ResourceManager.GetObject("LCD_Waku", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
         internal static System.Drawing.Bitmap Retsuban_Background {
             get {
                 object obj = ResourceManager.GetObject("Retsuban_Background", resourceCulture);
