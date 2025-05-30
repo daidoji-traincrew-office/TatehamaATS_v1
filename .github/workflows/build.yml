@@ -129,6 +129,7 @@ jobs:
           )
           files=""
           for file in "${files[@]}"; do
+            echo "Checking file: $file"
             if [ ! -f "$file" ]; then
              echo "File $file does not exist, skipping."
              continue
