@@ -121,12 +121,14 @@ jobs:
       - name: Get Files
         id: get_files
         run: |
+          files=(
+            "out/${{ needs.calc_version.outputs.APP_PREFIX }}-dev-standalone.zip"
+            "out/${{ needs.calc_version.outputs.APP_PREFIX }}-dev.zip"
+            "out/${{ needs.calc_version.outputs.APP_PREFIX }}-standalone.zip"
+            "out/${{ needs.calc_version.outputs.APP_PREFIX }}.zip"
+          )
           json_list=$(jq -n '[]') # 空のJSONリストを初期化
-          for file in \
-              "out/${{ needs.calc_version.outputs.APP_PREFIX }}-dev-standalone.zip" \
-              "out/${{ needs.calc_version.outputs.APP_PREFIX }}-dev.zip" \
-              "out/${{ needs.calc_version.outputs.APP_PREFIX }}-standalone.zip" \
-              "out/${{ needs.calc_version.outputs.APP_PREFIX }}.zip"; do
+          for file in "${files[@]}"; do
             if [ -f "$file" ]; then
               json_list=$(echo "$json_list" | jq --arg file "$file" '. + [$file]')
             fi
