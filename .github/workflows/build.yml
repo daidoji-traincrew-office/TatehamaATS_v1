@@ -133,13 +133,13 @@ jobs:
               json_list=$(echo "$json_list" | jq --arg file "$file" '. + [$file]')
             fi
           done
-          echo $json_list
-#          echo "FILES=$json_list" >> "$GITHUB_OUTPUT"   
+          escaped_json=$(echo "$json_list" | jq -R -s @json) # JSON文字列をエスケープ
+          echo "FILES=$escaped_json" >> "$GITHUB_OUTPUT"
       - name: Create New Release
         id: create_release
         uses: softprops/action-gh-release@v2.2.1
         with:
           tag_name: ${{ needs.calc_version.outputs.VERSION }}
           make_latest: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
-          files: ${{ toJson(steps.get_files.outputs.FILES) }}
+          files: ${{ fromJSON(steps.get_files.outputs.FILES) }}
           prerelease: ${{ github.event_name != 'push' || github.ref != 'refs/heads/master' }}
