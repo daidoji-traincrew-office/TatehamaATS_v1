@@ -133,6 +133,7 @@ jobs:
               json_list=$(echo "$json_list" | jq --arg file "$file" '. + [$file]')
             fi
           done
+          echo $json_list
           echo 'FILES=$json_list' >> "$GITHUB_OUTPUT"
       - name: Create New Release
         id: create_release
