@@ -136,8 +136,7 @@ jobs:
             if [ -n "$files" ]; then
               files+=$'\n'
             fi
-              files+="$file"
-            fi
+            files+="$file"
           done
           echo 'FILES=$files' >> "$GITHUB_OUTPUT"
       - name: Create New Release
