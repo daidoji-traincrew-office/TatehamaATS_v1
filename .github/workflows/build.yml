@@ -127,7 +127,7 @@ jobs:
             "out/${{ needs.calc_version.outputs.APP_PREFIX }}-standalone.zip"
             "out/${{ needs.calc_version.outputs.APP_PREFIX }}.zip"
           )
-          files=""
+          exists_files=""
           for file in "${files[@]}"; do
             echo "Checking file: $file"
             if [ ! -f "$file" ]; then
@@ -135,11 +135,11 @@ jobs:
              continue
             fi
             if [ -n "$files" ]; then
-              files+=$'\n'
+              exists_files+=$'\n'
             fi
-            files+="$file"
+            exists_files+="$file"
           done
-          echo 'FILES=$files' >> "$GITHUB_OUTPUT"
+          echo 'FILES=$exists_files' >> "$GITHUB_OUTPUT"
       - name: Create New Release
         id: create_release
         uses: softprops/action-gh-release@v2.2.1
