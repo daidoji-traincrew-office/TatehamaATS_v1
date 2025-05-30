@@ -139,7 +139,11 @@ jobs:
             fi
             exists_files+="$file"
           done
-          echo "FILES=$exists_files" >> "$GITHUB_OUTPUT"
+          {
+            echo 'FILES<<EOF'
+            echo "$exists_files"
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
       - name: Create New Release
         id: create_release
         uses: softprops/action-gh-release@v2.2.1
