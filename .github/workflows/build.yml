@@ -133,8 +133,7 @@ jobs:
               json_list=$(echo "$json_list" | jq --arg file "$file" '. + [$file]')
             fi
           done
-          escaped_json=$(echo "$json_list" | jq -R -s @json) # JSON文字列をエスケープ
-          echo "FILES=$escaped_json" >> "$GITHUB_OUTPUT"
+          echo 'FILES=$json_list' >> "$GITHUB_OUTPUT"
       - name: Create New Release
         id: create_release
         uses: softprops/action-gh-release@v2.2.1
