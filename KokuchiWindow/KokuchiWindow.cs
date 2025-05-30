@@ -142,10 +142,10 @@ namespace TatehamaATS_v1.KokuchiWindow
                             case "Apology":
                                 if (index == 1)
                                 {
-                                    DisplayImageByPosNum(1, 11);
+                                    DisplayImageByPosNum(1, 10);
                                     break;
                                 }
-                                DisplayImageByPosNum(0, 11);
+                                DisplayImageByPosNum(0, 10);
                                 break;
                             default:
                                 DisplayImageByPosNum(0, 7);
