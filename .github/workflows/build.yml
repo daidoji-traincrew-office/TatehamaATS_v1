@@ -78,7 +78,7 @@ jobs:
           namespace ${{ env.NAMESPACE }};
           public static class ServerAddress {
               public const string SignalAddress = "${SERVER_ADDRESS}"; 
-              public const string WebAddress = "${{ env.VERSION }}";
+              public const string Version = "${{ env.VERSION }}";
           }
           EOF
           cat ./ServerAddress.cs
