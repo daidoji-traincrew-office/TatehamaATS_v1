@@ -93,23 +93,15 @@ namespace TatehamaATS_v1.RetsubanWindow
                 string head = match.Groups[1].Value;
                 // Headに画像を描画
                 // 描画処理: head画像をHead領域に配置
-                //先頭文字
-                if (head == "回")
+                //先頭文字                    
+                // Headに画像を描画
+                Retsuban_Head.Image = head switch
                 {
-                    Retsuban_Head.Image = RetsubanResource._16dot_Kai;
-                }
-                else if (head == "試")
-                {
-                    Retsuban_Head.Image = RetsubanResource._16dot_Shi;
-                }
-                else if (head == "臨")
-                {
-                    Retsuban_Head.Image = RetsubanResource._16dot_Rin;
-                }
-                else
-                {
-                    Retsuban_Head.Image = RetsubanResource._16dot_Null;
-                }
+                    "回" => RetsubanResource._16dot_Kai,
+                    "試" => RetsubanResource._16dot_Shi,
+                    "臨" => RetsubanResource._16dot_Rin,
+                    _ => RetsubanResource._16dot_Null,
+                };
 
                 // 4~1領域 - 数字部分を右寄せで各桁に描画
                 string digits = match.Groups[2].Value.PadLeft(4, ' '); // 数字を4桁に右寄せ、空白で埋める
@@ -124,69 +116,30 @@ namespace TatehamaATS_v1.RetsubanWindow
                 // Tailに画像を描画
                 // 描画処理: tail画像をTail領域に配置
                 //接尾文字
-                switch (tail)
+                // 圧縮表記でTail領域描画
+                Retsuban_Tail.Image = tail switch
                 {
-                    case "A":
-                        Retsuban_Tail.Image = RetsubanResource._16dot_A;
-                        break;
-                    case "B":
-                        Retsuban_Tail.Image = RetsubanResource._16dot_B;
-                        break;
-                    case "C":
-                        Retsuban_Tail.Image = RetsubanResource._16dot_C;
-                        break;
-                    case "K":
-                        Retsuban_Tail.Image = RetsubanResource._16dot_K;
-                        break;
-                    case "X":
-                        Retsuban_Tail.Image = RetsubanResource._16dot_X;
-                        break;
-                    case "Y":
-                        Retsuban_Tail.Image = RetsubanResource._16dot_Y;
-                        break;
-                    case "Z":
-                        Retsuban_Tail.Image = RetsubanResource._16dot_Z;
-                        break;
-                    case "AX":
-                        Retsuban_Tail.Image = RetsubanResource._16dot_AX;
-                        break;
-                    case "BX":
-                        Retsuban_Tail.Image = RetsubanResource._16dot_BX;
-                        break;
-                    case "CX":
-                        Retsuban_Tail.Image = RetsubanResource._16dot_CX;
-                        break;
-                    case "KX":
-                        Retsuban_Tail.Image = RetsubanResource._16dot_KX;
-                        break;
-                    case "AY":
-                        Retsuban_Tail.Image = RetsubanResource._16dot_AY;
-                        break;
-                    case "BY":
-                        Retsuban_Tail.Image = RetsubanResource._16dot_BY;
-                        break;
-                    case "CY":
-                        Retsuban_Tail.Image = RetsubanResource._16dot_CY;
-                        break;
-                    case "KY":
-                        Retsuban_Tail.Image = RetsubanResource._16dot_KY;
-                        break;
-                    case "AZ":
-                        Retsuban_Tail.Image = RetsubanResource._16dot_AZ;
-                        break;
-                    case "BZ":
-                        Retsuban_Tail.Image = RetsubanResource._16dot_BZ;
-                        break;
-                    case "CZ":
-                        Retsuban_Tail.Image = RetsubanResource._16dot_CZ;
-                        break;
-                    case "KZ":
-                        Retsuban_Tail.Image = RetsubanResource._16dot_KZ;
-                        break;
-                    default:
-                        Retsuban_Tail.Image = RetsubanResource._16dot_Null;
-                        break;
-                }
+                    "A" => RetsubanResource._16dot_A,
+                    "B" => RetsubanResource._16dot_B,
+                    "C" => RetsubanResource._16dot_C,
+                    "K" => RetsubanResource._16dot_K,
+                    "X" => RetsubanResource._16dot_X,
+                    "Y" => RetsubanResource._16dot_Y,
+                    "Z" => RetsubanResource._16dot_Z,
+                    "AX" => RetsubanResource._16dot_AX,
+                    "BX" => RetsubanResource._16dot_BX,
+                    "CX" => RetsubanResource._16dot_CX,
+                    "KX" => RetsubanResource._16dot_KX,
+                    "AY" => RetsubanResource._16dot_AY,
+                    "BY" => RetsubanResource._16dot_BY,
+                    "CY" => RetsubanResource._16dot_CY,
+                    "KY" => RetsubanResource._16dot_KY,
+                    "AZ" => RetsubanResource._16dot_AZ,
+                    "BZ" => RetsubanResource._16dot_BZ,
+                    "CZ" => RetsubanResource._16dot_CZ,
+                    "KZ" => RetsubanResource._16dot_KZ,
+                    _ => RetsubanResource._16dot_Null,
+                };
             }
         }
 
