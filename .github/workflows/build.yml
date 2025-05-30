@@ -133,7 +133,8 @@ jobs:
               json_list=$(echo "$json_list" | jq --arg file "$file" '. + [$file]')
             fi
           done
-          echo "FILES=$json_list" >> "$GITHUB_OUTPUT"   
+          echo $json_list
+#          echo "FILES=$json_list" >> "$GITHUB_OUTPUT"   
       - name: Create New Release
         id: create_release
         uses: softprops/action-gh-release@v2.2.1
