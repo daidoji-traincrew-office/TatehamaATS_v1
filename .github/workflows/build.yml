@@ -118,18 +118,22 @@ jobs:
         with:
           path: 'out'
           merge-multiple: 'true'
-      - name: Create New Release
-        id: create_release
-        uses: softprops/action-gh-release@v2.2.1
-        with:
-          tag_name: ${{ needs.calc_version.outputs.VERSION }}
-          make_latest: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
-          files: |
-            $(for file in \
+      - name: Get Files
+        id: get_files
+        run: |
+          files=$(for file in \
               "out/${{ needs.calc_version.outputs.APP_PREFIX }}-dev-standalone.zip" \
               "out/${{ needs.calc_version.outputs.APP_PREFIX }}-dev.zip" \
               "out/${{ needs.calc_version.outputs.APP_PREFIX }}-standalone.zip" \
               "out/${{ needs.calc_version.outputs.APP_PREFIX }}.zip"; do
                 if [ -f "$file" ]; then echo "$file"; fi
               done | paste -sd " " -)
+          echo "FILES=$files" >> "$GITHUB_OUTPUT"
+      - name: Create New Release
+        id: create_release
+        uses: softprops/action-gh-release@v2.2.1
+        with:
+          tag_name: ${{ needs.calc_version.outputs.VERSION }}
+          make_latest: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+          files: ${{ steps.get_files.outputs.FILES }}
           prerelease: ${{ github.event_name != 'push' || github.ref != 'refs/heads/master' }}
