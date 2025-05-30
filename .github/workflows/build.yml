@@ -13,6 +13,7 @@ jobs:
     name: "Calc Version"
     outputs:
       VERSION: ${{ steps.calc_version.outputs.VERSION }}
+      APP_PREFIX: ${{ steps.calc_version.outputs.APP_PREFIX }}
     steps:
       - name: Get latest release
         id: latest_release
@@ -51,6 +52,8 @@ jobs:
             VERSION=$(date +%Y%m%d%H%M%S)
           fi
           echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+          FileNameVersion=$(echo "$VERSION" | sed 's/\./_/g')
+          echo "APP_PREFIX=${{ env.APP_NAME }}_${FileNameVersion" >> "$GITHUB_OUTPUT"
   build:
     runs-on: ubuntu-latest
     name: "Build"
@@ -62,9 +65,8 @@ jobs:
     steps:
       - name: Set Zip File Name
         run: |
-          version=$(echo "${{ needs.calc_version.outputs.VERSION }}" | sed 's/\./_/g')
           echo "APP_VERSION=${{ needs.calc_version.outputs.VERSION }}" >> $GITHUB_ENV
-          echo "ZIP_FILE_NAME=${{ env.APP_NAME }}_${version}${{ (matrix.dev && '-dev') || ''}}${{ (matrix.standalone && '-standalone') || '' }}.zip" >> $GITHUB_ENV
+          echo "ZIP_FILE_NAME=${{ needs.calc_version.outputs.APP_PREFIX }}${{ (matrix.dev && '-dev') || ''}}${{ (matrix.standalone && '-standalone') || '' }}.zip" >> $GITHUB_ENV
       - name: Checkout
         uses: actions/checkout@v4.2.2
       - name: Write ServerAddress.cs
@@ -123,8 +125,8 @@ jobs:
           tag_name: ${{ needs.calc_version.outputs.VERSION }}
           make_latest: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
           files: |
-            out/*-dev-standalone.zip
-            out/*-dev.zip
-            out/*-standalone.zip
-            out/*.zip
+            out/${{ needs.calc_version.outputs.APP_PREFIX }}-dev-standalone.zip
+            out/${{ needs.calc_version.outputs.APP_PREFIX }}-dev.zip
+            out/${{ needs.calc_version.outputs.APP_PREFIX }}-standalone.zip
+            out/${{ needs.calc_version.outputs.APP_PREFIX }}.zip
           prerelease: ${{ github.event_name != 'push' || github.ref != 'refs/heads/master' }}
