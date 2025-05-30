@@ -74,13 +74,13 @@ jobs:
           else
             SERVER_ADDRESS=${{ secrets.SERVER_ADDRESS }}
           fi
-          cat <<EOF
+          cat <<EOF  > ./ServerAddress.cs
           namespace ${{ env.NAMESPACE }};
           public static class ServerAddress {
               public const string SignalAddress = "${SERVER_ADDRESS}"; 
               public const string WebAddress = "${{ env.VERSION }}";
           }
-          EOF > ./ServerAddress.cs
+          EOF
           cat ./ServerAddress.cs
       - name: Setup dotnet 8.0.x
         uses: actions/setup-dotnet@v4.3.1
