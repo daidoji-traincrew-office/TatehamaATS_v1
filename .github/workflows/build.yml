@@ -63,7 +63,7 @@ jobs:
       - name: Set Zip File Name
         run: |
           version=$(echo "${{ needs.calc_version.outputs.VERSION }}" | sed 's/\./_/g')
-          echo "VERSION=${{ needs.calc_version.outputs.VERSION }}" >> $GITHUB_ENV
+          echo "APP_VERSION=${{ needs.calc_version.outputs.VERSION }}" >> $GITHUB_ENV
           echo "ZIP_FILE_NAME=${{ env.APP_NAME }}_${version}${{ (matrix.dev && '-dev') || ''}}${{ (matrix.standalone && '-standalone') || '' }}.zip" >> $GITHUB_ENV
       - name: Checkout
         uses: actions/checkout@v4.2.2
@@ -78,10 +78,9 @@ jobs:
           namespace ${{ env.NAMESPACE }};
           public static class ServerAddress {
               public const string SignalAddress = "${SERVER_ADDRESS}"; 
-              public const string Version = "${{ env.VERSION }}";
+              public const string Version = "${{ env.APP_VERSION }}";
           }
           EOF
-          cat ./ServerAddress.cs
       - name: Setup dotnet 8.0.x
         uses: actions/setup-dotnet@v4.3.1
         with:
