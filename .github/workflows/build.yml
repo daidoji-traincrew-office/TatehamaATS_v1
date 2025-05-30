@@ -121,7 +121,7 @@ jobs:
       - name: Get Files
         id: get_files
         run: |
-          json_list=$(jq -n '[]' | tee /dev/null) # 空のJSONリストを初期化
+          json_list=$(jq -n '[]') # 空のJSONリストを初期化
           for file in \
               "out/${{ needs.calc_version.outputs.APP_PREFIX }}-dev-standalone.zip" \
               "out/${{ needs.calc_version.outputs.APP_PREFIX }}-dev.zip" \
