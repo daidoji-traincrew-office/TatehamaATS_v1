@@ -71,6 +71,7 @@ namespace TatehamaATS_v1.RetsubanWindow
                 LCDFontList.Add(c.ToString());
             }
             retsubanLogic = new RetsubanLogic(Retsuban_Head, new PictureBox[] { Retsuban_4, Retsuban_3, Retsuban_2, Retsuban_1 }, Retsuban_Tail, Car_2, Car_1);
+            retsubanLogic.SetDiaNameAction += SetDiaNameAction;
             timeLogic = new TimeLogic(Time_h2, Time_h1, Time_m2, Time_m1, Time_s2, Time_s1);
             //set_trainnum?.PlayLoop(1.0f);
             LCDDrawing();
