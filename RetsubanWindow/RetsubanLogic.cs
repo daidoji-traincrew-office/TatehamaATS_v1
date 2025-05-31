@@ -29,6 +29,7 @@ namespace TatehamaATS_v1.RetsubanWindow
         /// 設定情報変更
         /// </summary>
         internal event Action<string> SetDiaNameAction;
+        internal event Action<string> SetCarAction;
 
         private AudioManager AudioManager;
         private AudioWrapper beep1;
@@ -50,7 +51,7 @@ namespace TatehamaATS_v1.RetsubanWindow
             // 初期化
             Retsuban = "9999";
             Car = 0;
-            NewRetsuban = "9999";
+            NewRetsuban = "";
             NewCar = "";
             Images_7seg = new Dictionary<string, Image> {
                 {" ",  RetsubanResource._7seg_N} ,
@@ -74,7 +75,7 @@ namespace TatehamaATS_v1.RetsubanWindow
             set_trainsetlen = AudioManager.AddAudio("sound/set_trainsetlen.wav", 1.0f);
             set_complete = AudioManager.AddAudio("sound/set_complete.wav", 1.0f);
 
-            set_trainnum?.PlayLoop(1.0f);
+            //set_trainnum?.PlayLoop(1.0f);
             RetsubanDrawing();
         }
 
@@ -303,6 +304,7 @@ namespace TatehamaATS_v1.RetsubanWindow
                                 Car = newCar;
                             }
                             CarDrawing(NewCar);
+                            SetCarAction?.Invoke(NewCar);
                             set_trainsetlen?.Stop();
                             if (Retsuban != null || Retsuban == "9999")
                             {
@@ -375,6 +377,7 @@ namespace TatehamaATS_v1.RetsubanWindow
                     return;
                 case "TimeSet":
                 case "UnkoSet":
+                case "StopSet":
                 case "VerDisplay":
                     nowRetsuSetting = false;
                     nowCarSetting = false;

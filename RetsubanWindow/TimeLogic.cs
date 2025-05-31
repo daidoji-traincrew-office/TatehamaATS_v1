@@ -70,6 +70,7 @@ namespace TatehamaATS_v1.RetsubanWindow
             beep1 = AudioManager.AddAudio("sound/beep1.wav", 1.0f);
             beep2 = AudioManager.AddAudio("sound/beep2.wav", 1.0f);
         }
+
         public void ClockTimer_Tick()
         {
             var tst_time = DateTime.Now + ShiftTime;
@@ -94,7 +95,7 @@ namespace TatehamaATS_v1.RetsubanWindow
                 }
             }
         }
-
+             
         /// <summary>
         /// 時間部描画
         /// </summary>
@@ -187,6 +188,7 @@ namespace TatehamaATS_v1.RetsubanWindow
                 case "RetsuSet":
                 case "CarSet":
                 case "UnkoSet":
+                case "StopSet":
                 case "VerDisplay":
                     nowSetting = false;
                     TimeDrawing(BeforeTimeData);
