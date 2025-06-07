@@ -14,6 +14,8 @@ namespace TatehamaATS_v1.RetsubanWindow
 
         private List<string> LCDFontList = new List<string>();
 
+        private bool nowUnkoSetting = false;
+
         private bool nowVerDisplay = false;
 
         private PictureBox LCD { get; set; }
@@ -58,7 +60,7 @@ namespace TatehamaATS_v1.RetsubanWindow
 
         public void SetRetsuban(string retsuban)
         {
-            Retsuban = retsuban.Replace("X","x").Replace("Y", "y").Replace("Z", "z");
+            Retsuban = retsuban.Replace("X", "x").Replace("Y", "y").Replace("Z", "z");
         }
 
         public void SetCar(string car)
@@ -79,20 +81,20 @@ namespace TatehamaATS_v1.RetsubanWindow
 
             // 画像をLCD領域にならべる
             var NewLCD = new Bitmap(LCD.Width, LCD.Height);
-            // 起点を5,5として、xは24、yは32ごとに並べる。横は15文字制限
+            // 起点を8,5として、xは22、yは32ごとに並べる。横は16文字制限
             using (Graphics g = Graphics.FromImage(NewLCD))
             {
-                int x = 5;
+                int x = 8;
                 int y = 5;
                 for (int i = 0; i < lcdImages.Count; i++)
                 {
-                    if (i % 15 == 0 && i != 0) // 15文字ごとに改行
+                    if (i % 16 == 0 && i != 0) // 15文字ごとに改行
                     {
-                        x = 5; // xをリセット
+                        x = 8; // xをリセット
                         y += 32; // yを次の行に移動
                     }
-                    g.DrawImage(lcdImages[i], x, y, 20, 28); // サイズは24x32で描画
-                    x += 24; // 次の文字の位置へ移動
+                    g.DrawImage(lcdImages[i], x, y, 20, 28); // サイズは20x28で描画
+                    x += 22; // 次の文字の位置へ移動
                 }
             }
             //描画する
@@ -132,15 +134,15 @@ namespace TatehamaATS_v1.RetsubanWindow
 
         private string GetVerString()
         {
-            return GetAvailableChar("ソフトバージョン\n" + ServerAddress.Version.Split('-')[0] + "\n" + (ServerAddress.Version.Contains("dev") ? "DEV" : "PROD") + (ServerAddress.Version.Contains("standalone") ? "　STANDALONE" : ""));
+            return GetAvailableChar("ソフトバージョン\nV." + ServerAddress.Version.Split('-')[0] + "\n" + (ServerAddress.Version.Contains("dev") ? "DEV" : "PROD") + (ServerAddress.Version.Contains("standalone") ? "　STANDALONE" : ""));
         }
 
         private string GetNormalString()
         {
-            if(string.IsNullOrEmpty(Retsuban)) return GetAvailableChar($"レツバン ミセッテイ\nセッテイシテクダサイ");
+            if (string.IsNullOrEmpty(Retsuban)) return GetAvailableChar($"レツバン ミセッテイ\nセッテイシテクダサイ");
             if (Retsuban == "9999") return GetAvailableChar($"9999 フテイリョウスウ\nダミーレツバン\n");
             if (string.IsNullOrEmpty(Car)) return GetAvailableChar($"リョウスウ ミセッテイ\nセッテイシテクダサイ");
-            return GetAvailableChar($"{Retsuban} {Car}リョウ\nシウンテン\nエノケンシャク→コマノ");
+            return GetAvailableChar($"{Retsuban} {Car}リョウ\nレッシャジョウホウヒョウジ\nタイオウサギョウチュウ");
         }
 
         /// <summary>
