@@ -134,7 +134,7 @@ jobs:
              echo "File $file does not exist, skipping."
              continue
             fi
-            if [ -n "$files" ]; then
+            if [ -n "$exists_files" ]; then
               exists_files+=$'\n'
             fi
             exists_files+="$file"
