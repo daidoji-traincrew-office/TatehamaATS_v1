@@ -186,7 +186,7 @@ namespace TatehamaATS_v1.OnboardDevice
                                   $"Code:{exception.ToCode()} " +
                                   $"Message:{exception.Message} " +
                                   $"Inner:{exception.InnerException?.Message ?? ""}\n" +
-                                  $"Stack: {exception.StackTrace}";
+                                  $"Stack: {exception.StackTrace ?? exception.InnerException?.StackTrace ?? "なし"}";
                         File.AppendAllText(LogFilePath, log + Environment.NewLine, Encoding.UTF8);
                         break;
                 }
