@@ -204,7 +204,11 @@ namespace TatehamaATS_v1.OnboardDevice
         {
             var StopDetection = TcData.myTrainData.Speed == 0;
             var MasconEB = TcData.myTrainData.Bnotch == 8;
-            foreach (var ex in exceptions)
+
+            // 削除対象キーを一時リストで保持
+            var removeKeys = new List<string>();
+
+            foreach (var ex in exceptions.ToList())
             {
                 string key = ex.Key;
                 TimeSpan time = DateTime.Now - exceptionsTime[key];
@@ -212,60 +216,43 @@ namespace TatehamaATS_v1.OnboardDevice
                 switch (ex.Value.ResetCondition())
                 {
                     case ResetConditions.ExceptionReset:
-                        if (time < resetTime)
+                        if (time >= resetTime)
                         {
-                            //故障復帰最低時間を下回っている場合無視
-                        }
-                        else
-                        {
-                            exceptions.Remove(key);
+                            removeKeys.Add(key);
                         }
                         break;
                     case ResetConditions.RetsubanReset:
-                        if (RetsubanReset) exceptions.Remove(key);
+                        if (RetsubanReset) removeKeys.Add(key);
                         break;
                     case ResetConditions.NetworkReset:
-                        if (NetworkState) exceptions.Remove(key);
+                        if (NetworkState) removeKeys.Add(key);
                         break;
                     case ResetConditions.StopDetection_RelayReset:
-                        if (RelayState && StopDetection) exceptions.Remove(key);
+                        if (RelayState && StopDetection) removeKeys.Add(key);
                         break;
                     case ResetConditions.StopDetection_NetworkReset:
-                        if (NetworkState && StopDetection) exceptions.Remove(key);
+                        if (NetworkState && StopDetection) removeKeys.Add(key);
                         break;
                     case ResetConditions.StopDetection:
-                        if (time < resetTime)
-                        {
-                            //故障復帰最低時間を下回っている場合無視
-                        }
-                        else
-                        {
-                            if (StopDetection) exceptions.Remove(key);
-                        }
+                        if (time >= resetTime && StopDetection) removeKeys.Add(key);
                         break;
                     case ResetConditions.StopDetection_MasconEB:
-                        if (time < resetTime)
-                        {
-                            //故障復帰最低時間を下回っている場合無視
-                        }
-                        else
-                        {
-                            if (StopDetection && MasconEB) exceptions.Remove(key);
-                        }
+                        if (time >= resetTime && StopDetection && MasconEB) removeKeys.Add(key);
                         break;
                     case ResetConditions.StopDetection_MasconEB_ATSReset:
-                        if (time < resetTime)
-                        {
-                            //故障復帰最低時間を下回っている場合無視
-                        }
-                        else
-                        {
-                            if (StopDetection && MasconEB && ATSReset) exceptions.Remove(key);
-                        }
+                        if (time >= resetTime && StopDetection && MasconEB && ATSReset) removeKeys.Add(key);
                         break;
                 }
-                if (PowerReset) exceptions.Remove(key);
+                if (PowerReset) removeKeys.Add(key);
             }
+
+            // まとめて削除
+            foreach (var key in removeKeys.Distinct())
+            {
+                exceptions.Remove(key);
+                exceptionsTime.Remove(key);
+            }
+
             if (StopDetection)
             {
                 RelayState = false;

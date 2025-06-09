@@ -318,7 +318,7 @@ namespace TatehamaATS_v1.Network
                     var sendCircuit = new List<TrackCircuitData>();
                     var HasInvalidCharsFlag = false;
                     //軌道回路
-                    foreach (var trackCircuit in TcData.trackCircuitList)
+                    foreach (var trackCircuit in TcData.trackCircuitList.ToList())
                     {
                         if (trackCircuit.On)
                         {
