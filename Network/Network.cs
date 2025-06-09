@@ -408,6 +408,23 @@ namespace TatehamaATS_v1.Network
                     NetworkWorking?.Invoke();
                 }
             }
+            catch (WebSocketException e) when (e.WebSocketErrorCode == WebSocketError.ConnectionClosedPrematurely)
+            {
+                // 再接続を試みる
+                try
+                {
+                    await connection.StopAsync();
+                    await connection.StartAsync();
+                    connected = true;
+                    ConnectionStatusChanged?.Invoke(connected);
+                }
+                catch (Exception rex)
+                {
+                    AddExceptionAction?.Invoke(new NetworkConnectException(7, "再接続失敗", rex));
+                    connected = false;
+                    ConnectionStatusChanged?.Invoke(connected);
+                }
+            }
             catch (InvalidOperationException ex)
             {
                 var e = new NetworkConnectException(7, "切断と思われる", ex);
