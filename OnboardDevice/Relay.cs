@@ -230,7 +230,7 @@ namespace TatehamaATS_v1.OnboardDevice
         {
             var routes = new List<Route>();
 
-            foreach (var interlockData in interlockDataList)
+            foreach (var interlockData in interlockDataList.ToList())
             {
                 foreach (var interlockRoute in interlockData.routes)
                 {
@@ -369,7 +369,7 @@ namespace TatehamaATS_v1.OnboardDevice
 
         internal void SignalSet(List<SignalData> signalDatas)
         {
-            foreach (var signalData in signalDatas)
+            foreach (var signalData in signalDatas.ToList())
             {
                 _ = SendSingleCommand("SetSignalPhase", new string[] { signalData.Name, signalData.phase.ToString() });
             }
@@ -377,7 +377,7 @@ namespace TatehamaATS_v1.OnboardDevice
             var outSignals = SignalDatas
                 .Where(s2 => !signalDatas.Any(s1 => s1.Name == s2.Name))
                 .ToList();
-            foreach (var signalData in outSignals)
+            foreach (var signalData in outSignals.ToList())
             {
                 _ = SendSingleCommand("SetSignalPhase", new string[] { signalData.Name, Phase.None.ToString() });
             }
@@ -386,7 +386,7 @@ namespace TatehamaATS_v1.OnboardDevice
 
         internal void EMSet(List<EmergencyLightData> emergencyLightDatas)
         {
-            foreach (var emergencyLightData in emergencyLightDatas)
+            foreach (var emergencyLightData in emergencyLightDatas.ToList())
             {
                 SendSingleCommand("SetEmergencyLight", new string[] { emergencyLightData.Name, emergencyLightData.State ? "true" : "false" });
             }
@@ -404,7 +404,6 @@ namespace TatehamaATS_v1.OnboardDevice
 
         internal void UpdateRoute(List<Route> routes)
         {
-            // routes または Routes が null の場合は処理をスキップ
             if (routes == null)
             {
                 Debug.WriteLine("routes is null. Skipping UpdateRoute.");
@@ -413,27 +412,29 @@ namespace TatehamaATS_v1.OnboardDevice
 
             if (TrainCrewRoutes == null)
             {
-                Debug.WriteLine("ServerRoutes is null. Initializing empty list.");
+                Debug.WriteLine("TrainCrewRoutes is null. Initializing empty list.");
                 TrainCrewRoutes = new List<Route>();
             }
 
-            // TrainCrewRoutesの設定内容を項目ごとにDebug出力
+            // デバッグ出力
             Debug.WriteLine("TrainCrewRoutes:");
-            foreach (var route in TrainCrewRoutes)
+            foreach (var route in TrainCrewRoutes.ToList())
             {
                 Debug.WriteLine($"  TcName: {route.TcName}");
             }
 
+            // 差分計算時もToList()でスナップショット
+            var currentRoutes = TrainCrewRoutes.ToList();
+            var newRoutes = routes.ToList();
 
-            // 保存した差分と比較し、増えた分はSetRoute、減った分はDeleteRouteを実行する
-            var addedRoutes = routes.Where(r => !TrainCrewRoutes.Any(r2 => r2.TcName == System.Text.RegularExpressions.Regex.Replace(r.TcName, @"[ST]([A-Z])$", "$1"))).ToList();
-            var removedRoutes = TrainCrewRoutes.Where(r => !routes.Any(r2 => System.Text.RegularExpressions.Regex.Replace(r2.TcName, @"[ST]([A-Z])$", "$1") == r.TcName)).ToList();
+            var addedRoutes = newRoutes.Where(r => !currentRoutes.Any(r2 => r2.TcName == System.Text.RegularExpressions.Regex.Replace(r.TcName, @"[ST]([A-Z])$", "$1"))).ToList();
+            var removedRoutes = currentRoutes.Where(r => !newRoutes.Any(r2 => System.Text.RegularExpressions.Regex.Replace(r2.TcName, @"[ST]([A-Z])$", "$1") == r.TcName)).ToList();
 
-            foreach (var route in addedRoutes)
+            foreach (var route in addedRoutes.ToList())
             {
                 SetRoute(route);
             }
-            foreach (var route in removedRoutes)
+            foreach (var route in removedRoutes.ToList())
             {
                 DeleteRoute(route);
             }
@@ -787,7 +788,7 @@ namespace TatehamaATS_v1.OnboardDevice
         public void ForceStopSignal(bool IsStop)
         {
             TrainCrewInput.GetTrainState();
-            foreach (var signalData in TrainCrewInput.signals)
+            foreach (var signalData in TrainCrewInput.signals.ToList())
             {
                 if (IsStop)
                 {
