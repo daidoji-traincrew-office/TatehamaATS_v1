@@ -184,9 +184,8 @@ namespace TatehamaATS_v1.OnboardDevice
                     default:
                         var log = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] " +
                                   $"Code:{exception.ToCode()} " +
-                                  $"Message:{exception.Message} " +
-                                  $"Inner:{exception.InnerException?.Message ?? ""}\n" +
-                                  $"Stack: {exception.StackTrace ?? exception.InnerException?.StackTrace ?? "なし"}";
+                                  $"Message:{exception.Message} \n" +
+                                  $"Inner:{exception.InnerException}";
                         File.AppendAllText(LogFilePath, log + Environment.NewLine, Encoding.UTF8);
                         break;
                 }
