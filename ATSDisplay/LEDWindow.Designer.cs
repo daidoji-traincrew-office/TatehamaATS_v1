@@ -88,6 +88,7 @@
             // 
             // L2
             // 
+            L2.BackColor = Color.Transparent;
             L2.BackgroundImage = LEDResource.Null;
             L2.BackgroundImageLayout = ImageLayout.Stretch;
             L2.Image = LEDResource.LED_Waku;
