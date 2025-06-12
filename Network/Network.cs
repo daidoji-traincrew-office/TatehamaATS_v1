@@ -318,7 +318,7 @@ namespace TatehamaATS_v1.Network
                     var sendCircuit = new List<TrackCircuitData>();
                     var HasInvalidCharsFlag = false;
                     //軌道回路
-                    foreach (var trackCircuit in TcData.trackCircuitList)
+                    foreach (var trackCircuit in TcData.trackCircuitList.ToList())
                     {
                         if (trackCircuit.On)
                         {
@@ -403,6 +403,23 @@ namespace TatehamaATS_v1.Network
                 else
                 {
                     NetworkWorking?.Invoke();
+                }
+            }
+            catch (WebSocketException e) when (e.WebSocketErrorCode == WebSocketError.ConnectionClosedPrematurely)
+            {
+                // 再接続を試みる
+                try
+                {
+                    await connection.StopAsync();
+                    await connection.StartAsync();
+                    connected = true;
+                    ConnectionStatusChanged?.Invoke(connected);
+                }
+                catch (Exception rex)
+                {
+                    AddExceptionAction?.Invoke(new NetworkConnectException(7, "再接続失敗", rex));
+                    connected = false;
+                    ConnectionStatusChanged?.Invoke(connected);
                 }
             }
             catch (InvalidOperationException ex)
