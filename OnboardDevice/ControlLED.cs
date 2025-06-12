@@ -8,7 +8,6 @@ namespace TatehamaATS_v1
     internal class ControlLED
     {
         internal bool isShow;
-        internal bool isTest;
         internal List<string> ExceptionCodes;
         private LEDWindow ledWindow;
         private int l3Index = 0; // display.L3のインデックスを追跡するための変数         
@@ -16,7 +15,7 @@ namespace TatehamaATS_v1
         private DateTime TestStart = DateTime.MinValue;
         internal string? overrideText = null;
 
-        internal bool ATSLEDTest;
+        internal int ATSLEDTest;
         internal ATSDisplayData TC_ATSDisplayData;
 
         /// <summary>
@@ -44,7 +43,26 @@ namespace TatehamaATS_v1
 
         private void TestModePush()
         {
-            ATSLEDTest = true;
+            // どのテストを行うかは時間末尾で制御し疑似乱数とする。
+            if (TestStart == DateTime.MinValue)
+            {
+                TestStart = DateTime.Now;
+                if (ATSLEDTest == 0)
+                {
+                    var millisecond = TestStart.Millisecond;
+                    if (0 <= millisecond && millisecond < 100 && millisecond % 2 == 0)
+                    {
+                        // 0~100ミリ秒の間で偶数
+                        // 狐咲テスト
+                        ATSLEDTest = 2;
+                    }
+                    else
+                    {
+                        // 通常テスト
+                        ATSLEDTest = 1;
+                    }
+                }
+            }
         }
 
         public void LEDHide()
@@ -106,34 +124,50 @@ namespace TatehamaATS_v1
         private void UpdateDisplay()
         {
             //Debug.WriteLine(TrainState.ATSDisplay);
-            if (ATSLEDTest)
+            if (ATSLEDTest == 1)
             {
-                if (TestStart == DateTime.MinValue)
+                var deltaT = DateTime.Now - TestStart;
+
+                var LED = deltaT.Seconds % 3 + 360;
+                var Place = deltaT.Seconds / 3 % 3 + 1;
+                if (deltaT < TimeSpan.FromSeconds(2))
                 {
-                    TestStart = DateTime.Now;
+                    if (Place != 1) ledWindow.DisplayImage(1, 0);
+                    if (Place != 2) ledWindow.DisplayImage(2, 0);
+                    if (Place != 3) ledWindow.DisplayImage(3, 0);
+                    ledWindow.DisplayImage(Place, LED);
+                    return;
                 }
+                else
+                {
+                    TestStart = DateTime.MinValue;
+                    ATSLEDTest = 0;
+                }
+            }
+            if (ATSLEDTest == 2)
+            {
                 var deltaT = DateTime.Now - TestStart;
 
                 var LED = deltaT.Seconds % 3 + 27;
                 var Place = deltaT.Seconds / 3 % 3 + 1;
                 if (deltaT < TimeSpan.FromSeconds(6))
                 {
-                    ledWindow.DisplayImage(2, 66);
-                    ledWindow.DisplayImage(3, 67);
+                    ledWindow.DisplayImage(2, 380);
+                    ledWindow.DisplayImage(3, 381);
                     if (deltaT < TimeSpan.FromSeconds(3))
                     {
-                        ledWindow.DisplayImage(1, 64);
+                        ledWindow.DisplayImage(1, 378);
                     }
                     else if (deltaT < TimeSpan.FromSeconds(6))
                     {
-                        ledWindow.DisplayImage(1, 65);
+                        ledWindow.DisplayImage(1, 379);
                     }
                     return;
                 }
                 else
                 {
                     TestStart = DateTime.MinValue;
-                    ATSLEDTest = false;
+                    ATSLEDTest = 0;
                 }
             }
             if (TC_ATSDisplayData != null)
@@ -362,5 +396,4 @@ namespace TatehamaATS_v1
             }
         }
     }
-}
 }

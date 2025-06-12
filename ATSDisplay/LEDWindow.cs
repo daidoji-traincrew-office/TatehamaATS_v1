@@ -106,8 +106,8 @@ namespace TatehamaATS_v1.ATSDisplay
         /// <returns>切り出された画像</returns>
         private Bitmap GetImageByNumber(int number)
         {
-            int columns = 6;
-            int rows = 30;
+            int columns = 8;
+            int rows = 32;
             int width = 32;
             int height = 16;
             int margin = 1;
