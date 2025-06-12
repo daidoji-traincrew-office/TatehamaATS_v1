@@ -203,7 +203,7 @@ namespace TatehamaATS_v1
                         }
                         else
                         {
-                            l3Index = (int)((NowTime - L3Start).TotalSeconds * 2 + 1) % L3List.Count;
+                            l3Index = (int)((NowTime - L3Start).TotalSeconds * 1 + 1) % L3List.Count;
                         }
 
                         ledWindow.DisplayImage(3, ConvertToLEDNumber(L3List[l3Index]));
@@ -249,7 +249,7 @@ namespace TatehamaATS_v1
                     }
                     else
                     {
-                        l3Index = (int)((NowTime - L3Start).TotalSeconds * 2 + 1) % L3List.Count;
+                        l3Index = (int)((NowTime - L3Start).TotalSeconds * 1 + 1) % L3List.Count;
                     }
                     ledWindow.DisplayImage(3, ConvertToLEDNumber(L3List[l3Index]));
                 }
