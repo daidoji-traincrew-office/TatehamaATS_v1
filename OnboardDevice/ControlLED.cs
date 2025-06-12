@@ -278,10 +278,7 @@ namespace TatehamaATS_v1
             }
             switch (str)
             {
-                case "":
-                case "無表示":
-                case "OFF":
-                case null:
+                case "" or "無表示" or "OFF" or null:
                     return 0;
                 case "普通":
                     return 1;
@@ -289,9 +286,7 @@ namespace TatehamaATS_v1
                     return 2;
                 case "急行":
                     return 3;
-                case "快急":
-                    return 4;
-                case "快速急行":
+                case "快急" or "快速急行":
                     return 4;
                 case "区急":
                     return 6;
@@ -309,21 +304,32 @@ namespace TatehamaATS_v1
                     return 12;
                 case "D特":
                     return 13;
+                case "準特":
+                    return 14;
                 case "回送":
                     return 15;
-                case "だんじり準急":
-                    return 21;
                 case "だんじり急行":
-                    return 22;
+                    return 17;
                 case "だんじり快急":
+                    return 18;
+                case "だんじりA特":
+                    return 19;
+                case "だんじりB特":
+                    return 20;
+                case "だんじりC特1":
+                    return 21;
+                case "だんじりC特2":
+                    return 22;
+                case "だんじりC特3":
                     return 23;
-                case "回送-2":
+                case "だんじりC特4":
                     return 24;
-                case "回送-3":
+                case "だんじりD特":
                     return 25;
-                case "C特2-2":
+                case "だんじり準特":
                     return 26;
                 case "F":
+                    return 122;// 本来はFだが、見た目上110にする。
                     return 126;
                 case "P":
                     return 50;
@@ -347,11 +353,14 @@ namespace TatehamaATS_v1
                     return 61;
                 case "撤去":
                     return 62;
-                case "御水 澪":
+                case "交代":
                     return 63;
+                case "待機":
+                    return 64;
                 default:
                     throw new LEDDisplayStringAbnormal(8, $"未定義:{str}　ControlLED.cs@ConvertToLEDNumber()");
             }
         }
     }
+}
 }
