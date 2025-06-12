@@ -335,9 +335,6 @@ namespace TatehamaATS_v1.Network
                         SendData.OnTrackList = sendCircuit;
                     }
                 }
-
-                //告知仮実装
-                SendData.Kokuchi = "";
             }
             catch (Exception ex)
             {
