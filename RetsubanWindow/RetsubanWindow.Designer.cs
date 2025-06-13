@@ -840,7 +840,7 @@
             Controls.Add(Retsuban_2);
             Controls.Add(Retsuban_3);
             Controls.Add(Retsuban_4);
-            FormBorderStyle = FormBorderStyle.FixedToolWindow;
+            FormBorderStyle = FormBorderStyle.FixedSingle;
             Name = "RetsubanWindow";
             Text = "列番設定器 | 館浜ATS - ダイヤ運転会";
             FormClosing += RetsubanWindow_FormClosing;

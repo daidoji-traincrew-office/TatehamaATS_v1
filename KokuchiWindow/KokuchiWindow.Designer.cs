@@ -72,7 +72,7 @@
             ClientSize = new Size(369, 167);
             Controls.Add(Transparency);
             Controls.Add(KokuchiLED);
-            FormBorderStyle = FormBorderStyle.FixedToolWindow;
+            FormBorderStyle = FormBorderStyle.FixedSingle;
             Name = "KokuchiWindow";
             Text = "運転告知器 | 館浜ATS - ダイヤ運転会";
             FormClosing += KokuchiWindow_FormClosing;
