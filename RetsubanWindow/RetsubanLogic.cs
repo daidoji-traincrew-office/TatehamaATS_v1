@@ -75,7 +75,7 @@ namespace TatehamaATS_v1.RetsubanWindow
             set_trainsetlen = AudioManager.AddAudio("sound/set_trainsetlen.wav", 1.0f);
             set_complete = AudioManager.AddAudio("sound/set_complete.wav", 1.0f);
 
-            //set_trainnum?.PlayLoop(1.0f);
+            set_trainnum?.PlayLoop(1.0f);
             RetsubanDrawing();
         }
 
