@@ -55,11 +55,15 @@ namespace TatehamaATS_v1.RetsubanWindow
             TopMost = true;
 
             retsubanLogic = new RetsubanLogic(Retsuban_Head, new PictureBox[] { Retsuban_4, Retsuban_3, Retsuban_2, Retsuban_1 }, Retsuban_Tail, Car_2, Car_1);
-            retsubanLogic.SetDiaNameAction += SetDiaNameAction;
+            retsubanLogic.SetDiaNameAction += OnSetDiaName;
             timeLogic = new TimeLogic(Time_h2, Time_h1, Time_m2, Time_m1, Time_s2, Time_s1);
             LCDLogic = new LCDLogic(LCD);
-            retsubanLogic.SetDiaNameAction += LCDLogic.SetRetsuban;
             retsubanLogic.SetCarAction += LCDLogic.SetCar;
+        }
+        private void OnSetDiaName(string retsuban)
+        {
+            SetDiaNameAction?.Invoke(retsuban); // 外部への伝播
+            LCDLogic?.SetRetsuban(retsuban);     // LCDLogicへの伝播
         }
 
         private void Loaded(object sender, EventArgs e)
