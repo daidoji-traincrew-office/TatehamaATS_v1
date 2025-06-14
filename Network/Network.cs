@@ -335,6 +335,8 @@ namespace TatehamaATS_v1.Network
                         SendData.OnTrackList = sendCircuit;
                     }
                 }
+
+                SendData.CarStates = TcData.myTrainData.CarStates;
             }
             catch (Exception ex)
             {
