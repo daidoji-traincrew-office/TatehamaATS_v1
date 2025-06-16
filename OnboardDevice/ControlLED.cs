@@ -19,6 +19,16 @@ namespace TatehamaATS_v1
         internal ATSDisplayData TC_ATSDisplayData;
 
         /// <summary>
+        /// 早着判定
+        /// </summary>
+        internal bool OnPreviousTrain;
+
+        /// <summary>
+        /// 交代前判定
+        /// </summary>
+        internal bool TherePreviousTrain;
+
+        /// <summary>
         /// 故障発生
         /// </summary>
         internal event Action<ATSCommonException> AddExceptionAction;
@@ -180,6 +190,22 @@ namespace TatehamaATS_v1
                     if (ExceptionCodes.Count != 0)
                     {
                         L3List = ExceptionCodes;
+                    }
+                    else if (OnPreviousTrain)
+                    {
+                        L3List = new List<string> { "早着", "撤去" };
+                    }
+                    else if (TherePreviousTrain)
+                    {
+                        L3List = new List<string> { "交代", "待機" };
+                    }
+                    else if (OnPreviousTrain)
+                    {
+                        L3List = new List<string> { "早着", "撤去" };
+                    }
+                    else if (TherePreviousTrain)
+                    {
+                        L3List = new List<string> { "交代", "待機" };
                     }
                     else
                     {

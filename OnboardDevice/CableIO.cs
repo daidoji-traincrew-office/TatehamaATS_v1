@@ -367,6 +367,8 @@ namespace TatehamaATS_v1.OnboardDevice
                 Relay.SignalSet(signalDataList);
                 Relay.UpdateRoute(dataFromServer.RouteData);
             }
+            ControlLED.OnPreviousTrain = dataFromServer.IsOnPreviousTrain;
+            ControlLED.TherePreviousTrain = dataFromServer.IsTherePreviousTrain;
         }
 
         /// <summary>
