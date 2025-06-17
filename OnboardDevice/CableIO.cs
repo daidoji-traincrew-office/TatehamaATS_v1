@@ -61,6 +61,11 @@ namespace TatehamaATS_v1.OnboardDevice
         bool InspectionRecordEmBrakeState;
 
         /// <summary>
+        /// 交代前状態
+        /// </summary>
+        bool TherePrevious;
+
+        /// <summary>
         /// 自車防護無線
         /// </summary>
         bool MyBougoState;
@@ -268,7 +273,7 @@ namespace TatehamaATS_v1.OnboardDevice
             bool emBrakeState;
             if (ATSPowerState)
             {
-                emBrakeState = InspectionRecordEmBrakeState;
+                emBrakeState = InspectionRecordEmBrakeState || TherePrevious;
             }
             else
             {
@@ -367,6 +372,7 @@ namespace TatehamaATS_v1.OnboardDevice
                 Relay.SignalSet(signalDataList);
                 Relay.UpdateRoute(dataFromServer.RouteData);
             }
+            TherePrevious = dataFromServer.IsTherePreviousTrain;
             ControlLED.OnPreviousTrain = dataFromServer.IsOnPreviousTrain;
             ControlLED.TherePreviousTrain = dataFromServer.IsTherePreviousTrain;
         }

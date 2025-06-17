@@ -399,12 +399,16 @@ namespace TatehamaATS_v1.Network
                     {
                         RetsubanInOutStatusChanged.Invoke(false);
                     }
+
                     previousStatus = currentStatus;
                     //Debug.WriteLine($"{SendData}");
                     DataFromServer DataFromServer;
                     DataFromServer = await connection.InvokeAsync<DataFromServer>("SendData_ATS", SendData);
-                    //    Debug.WriteLine("受信");
-                    //Debug.WriteLine(DataFromServer.ToString());
+
+                    if (DataFromServer.IsOnPreviousTrain)
+                    {
+                        currentStatus = true;
+                    }
                     ServerDataUpdate?.Invoke(DataFromServer, currentStatus);
                 }
                 else
