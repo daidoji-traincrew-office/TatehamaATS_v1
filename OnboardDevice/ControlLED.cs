@@ -140,7 +140,7 @@ namespace TatehamaATS_v1
 
                 var LED = deltaT.Seconds % 3 + 360;
                 var Place = deltaT.Seconds / 3 % 3 + 1;
-                if (deltaT < TimeSpan.FromSeconds(2))
+                if (deltaT < TimeSpan.FromSeconds(9))
                 {
                     if (Place != 1) ledWindow.DisplayImage(1, 0);
                     if (Place != 2) ledWindow.DisplayImage(2, 0);
