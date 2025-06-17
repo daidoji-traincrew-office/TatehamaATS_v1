@@ -118,8 +118,8 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="ATS_LED2" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\ATSDisplay\ATS_LED2.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="_3B1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>3B1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="LED_Waku" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>LED-Waku.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -127,7 +127,10 @@
   <data name="Null" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Null.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="_3B1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>3B1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="ATS_LED2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\ATSDisplay\ATS_LED2.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ATS_LED" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>ATS_LED.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

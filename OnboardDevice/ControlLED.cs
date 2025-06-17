@@ -8,7 +8,6 @@ namespace TatehamaATS_v1
     internal class ControlLED
     {
         internal bool isShow;
-        internal bool isTest;
         internal List<string> ExceptionCodes;
         private LEDWindow ledWindow;
         private int l3Index = 0; // display.L3のインデックスを追跡するための変数         
@@ -16,8 +15,18 @@ namespace TatehamaATS_v1
         private DateTime TestStart = DateTime.MinValue;
         internal string? overrideText = null;
 
-        internal bool ATSLEDTest;
+        internal int ATSLEDTest;
         internal ATSDisplayData TC_ATSDisplayData;
+
+        /// <summary>
+        /// 早着判定
+        /// </summary>
+        internal bool OnPreviousTrain;
+
+        /// <summary>
+        /// 交代前判定
+        /// </summary>
+        internal bool TherePreviousTrain;
 
         /// <summary>
         /// 故障発生
@@ -44,7 +53,26 @@ namespace TatehamaATS_v1
 
         private void TestModePush()
         {
-            ATSLEDTest = true;
+            // どのテストを行うかは時間末尾で制御し疑似乱数とする。
+            if (TestStart == DateTime.MinValue)
+            {
+                TestStart = DateTime.Now;
+                if (ATSLEDTest == 0)
+                {
+                    var millisecond = TestStart.Millisecond;
+                    if (0 <= millisecond && millisecond < 100 && millisecond % 2 == 0)
+                    {
+                        // 0~100ミリ秒の間で偶数
+                        // 狐咲テスト
+                        ATSLEDTest = 2;
+                    }
+                    else
+                    {
+                        // 通常テスト
+                        ATSLEDTest = 1;
+                    }
+                }
+            }
         }
 
         public void LEDHide()
@@ -106,34 +134,50 @@ namespace TatehamaATS_v1
         private void UpdateDisplay()
         {
             //Debug.WriteLine(TrainState.ATSDisplay);
-            if (ATSLEDTest)
+            if (ATSLEDTest == 1)
             {
-                if (TestStart == DateTime.MinValue)
+                var deltaT = DateTime.Now - TestStart;
+
+                var LED = deltaT.Seconds % 3 + 360;
+                var Place = deltaT.Seconds / 3 % 3 + 1;
+                if (deltaT < TimeSpan.FromSeconds(2))
                 {
-                    TestStart = DateTime.Now;
+                    if (Place != 1) ledWindow.DisplayImage(1, 0);
+                    if (Place != 2) ledWindow.DisplayImage(2, 0);
+                    if (Place != 3) ledWindow.DisplayImage(3, 0);
+                    ledWindow.DisplayImage(Place, LED);
+                    return;
                 }
+                else
+                {
+                    TestStart = DateTime.MinValue;
+                    ATSLEDTest = 0;
+                }
+            }
+            if (ATSLEDTest == 2)
+            {
                 var deltaT = DateTime.Now - TestStart;
 
                 var LED = deltaT.Seconds % 3 + 27;
                 var Place = deltaT.Seconds / 3 % 3 + 1;
                 if (deltaT < TimeSpan.FromSeconds(6))
                 {
-                    ledWindow.DisplayImage(2, 66);
-                    ledWindow.DisplayImage(3, 67);
+                    ledWindow.DisplayImage(2, 380);
+                    ledWindow.DisplayImage(3, 381);
                     if (deltaT < TimeSpan.FromSeconds(3))
                     {
-                        ledWindow.DisplayImage(1, 64);
+                        ledWindow.DisplayImage(1, 378);
                     }
                     else if (deltaT < TimeSpan.FromSeconds(6))
                     {
-                        ledWindow.DisplayImage(1, 65);
+                        ledWindow.DisplayImage(1, 379);
                     }
                     return;
                 }
                 else
                 {
                     TestStart = DateTime.MinValue;
-                    ATSLEDTest = false;
+                    ATSLEDTest = 0;
                 }
             }
             if (TC_ATSDisplayData != null)
@@ -146,6 +190,22 @@ namespace TatehamaATS_v1
                     if (ExceptionCodes.Count != 0)
                     {
                         L3List = ExceptionCodes;
+                    }
+                    else if (OnPreviousTrain)
+                    {
+                        L3List = new List<string> { "早着", "撤去" };
+                    }
+                    else if (TherePreviousTrain)
+                    {
+                        L3List = new List<string> { "交代", "待機" };
+                    }
+                    else if (OnPreviousTrain)
+                    {
+                        L3List = new List<string> { "早着", "撤去" };
+                    }
+                    else if (TherePreviousTrain)
+                    {
+                        L3List = new List<string> { "交代", "待機" };
                     }
                     else
                     {
@@ -169,7 +229,7 @@ namespace TatehamaATS_v1
                         }
                         else
                         {
-                            l3Index = (int)((NowTime - L3Start).TotalSeconds * 2 + 1) % L3List.Count;
+                            l3Index = (int)((NowTime - L3Start).TotalSeconds * 1 + 1) % L3List.Count;
                         }
 
                         ledWindow.DisplayImage(3, ConvertToLEDNumber(L3List[l3Index]));
@@ -215,7 +275,7 @@ namespace TatehamaATS_v1
                     }
                     else
                     {
-                        l3Index = (int)((NowTime - L3Start).TotalSeconds * 2 + 1) % L3List.Count;
+                        l3Index = (int)((NowTime - L3Start).TotalSeconds * 1 + 1) % L3List.Count;
                     }
                     ledWindow.DisplayImage(3, ConvertToLEDNumber(L3List[l3Index]));
                 }
@@ -278,10 +338,7 @@ namespace TatehamaATS_v1
             }
             switch (str)
             {
-                case "":
-                case "無表示":
-                case "OFF":
-                case null:
+                case "" or "無表示" or "OFF" or null:
                     return 0;
                 case "普通":
                     return 1;
@@ -289,9 +346,7 @@ namespace TatehamaATS_v1
                     return 2;
                 case "急行":
                     return 3;
-                case "快急":
-                    return 4;
-                case "快速急行":
+                case "快急" or "快速急行":
                     return 4;
                 case "区急":
                     return 6;
@@ -309,21 +364,32 @@ namespace TatehamaATS_v1
                     return 12;
                 case "D特":
                     return 13;
+                case "準特":
+                    return 14;
                 case "回送":
                     return 15;
-                case "だんじり準急":
-                    return 21;
                 case "だんじり急行":
-                    return 22;
+                    return 17;
                 case "だんじり快急":
+                    return 18;
+                case "だんじりA特":
+                    return 19;
+                case "だんじりB特":
+                    return 20;
+                case "だんじりC特1":
+                    return 21;
+                case "だんじりC特2":
+                    return 22;
+                case "だんじりC特3":
                     return 23;
-                case "回送-2":
+                case "だんじりC特4":
                     return 24;
-                case "回送-3":
+                case "だんじりD特":
                     return 25;
-                case "C特2-2":
+                case "だんじり準特":
                     return 26;
                 case "F":
+                    return 122;// 本来はFだが、見た目上110にする。
                     return 126;
                 case "P":
                     return 50;
@@ -347,8 +413,10 @@ namespace TatehamaATS_v1
                     return 61;
                 case "撤去":
                     return 62;
-                case "御水 澪":
+                case "交代":
                     return 63;
+                case "待機":
+                    return 64;
                 default:
                     throw new LEDDisplayStringAbnormal(8, $"未定義:{str}　ControlLED.cs@ConvertToLEDNumber()");
             }
