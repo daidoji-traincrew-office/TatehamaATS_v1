@@ -41,7 +41,7 @@
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(12, 22);
+            label1.Location = new Point(12, 32);
             label1.Name = "label1";
             label1.Size = new Size(77, 12);
             label1.TabIndex = 0;
@@ -50,7 +50,7 @@
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(12, 57);
+            label2.Location = new Point(12, 82);
             label2.Name = "label2";
             label2.Size = new Size(77, 12);
             label2.TabIndex = 0;
@@ -62,7 +62,7 @@
             stabwTime.Location = new Point(95, 9);
             stabwTime.Name = "stabwTime";
             stabwTime.RightToLeft = RightToLeft.No;
-            stabwTime.Size = new Size(82, 27);
+            stabwTime.Size = new Size(129, 47);
             stabwTime.TabIndex = 0;
             stabwTime.Text = "999秒";
             stabwTime.TextAlign = ContentAlignment.MiddleRight;
@@ -70,10 +70,10 @@
             // staMeter
             // 
             staMeter.Font = new Font("ＭＳ ゴシック", 20.25F, FontStyle.Regular, GraphicsUnit.Point, 128);
-            staMeter.Location = new Point(109, 47);
+            staMeter.Location = new Point(95, 59);
             staMeter.Name = "staMeter";
             staMeter.RightToLeft = RightToLeft.No;
-            staMeter.Size = new Size(68, 27);
+            staMeter.Size = new Size(129, 47);
             staMeter.TabIndex = 0;
             staMeter.Text = "-99m";
             staMeter.TextAlign = ContentAlignment.MiddleRight;
@@ -81,7 +81,7 @@
             // label5
             // 
             label5.AutoSize = true;
-            label5.Location = new Point(192, 22);
+            label5.Location = new Point(230, 32);
             label5.Name = "label5";
             label5.Size = new Size(65, 12);
             label5.TabIndex = 0;
@@ -90,7 +90,7 @@
             // label6
             // 
             label6.AutoSize = true;
-            label6.Location = new Point(192, 57);
+            label6.Location = new Point(230, 82);
             label6.Name = "label6";
             label6.Size = new Size(53, 12);
             label6.TabIndex = 0;
@@ -99,10 +99,10 @@
             // Add
             // 
             Add.Font = new Font("ＭＳ ゴシック", 20.25F, FontStyle.Regular, GraphicsUnit.Point, 128);
-            Add.Location = new Point(263, 44);
+            Add.Location = new Point(301, 59);
             Add.Name = "Add";
             Add.RightToLeft = RightToLeft.No;
-            Add.Size = new Size(74, 27);
+            Add.Size = new Size(129, 47);
             Add.TabIndex = 0;
             Add.Text = "1回";
             Add.TextAlign = ContentAlignment.MiddleRight;
@@ -110,9 +110,9 @@
             // Yurumego
             // 
             Yurumego.Font = new Font("ＭＳ ゴシック", 20.25F, FontStyle.Regular, GraphicsUnit.Point, 128);
-            Yurumego.Location = new Point(263, 9);
+            Yurumego.Location = new Point(301, 9);
             Yurumego.Name = "Yurumego";
-            Yurumego.Size = new Size(74, 27);
+            Yurumego.Size = new Size(129, 47);
             Yurumego.TabIndex = 0;
             Yurumego.Text = "10回";
             Yurumego.TextAlign = ContentAlignment.MiddleRight;
@@ -120,7 +120,7 @@
             // TestWindow
             // 
             AutoScaleMode = AutoScaleMode.None;
-            ClientSize = new Size(345, 83);
+            ClientSize = new Size(429, 111);
             Controls.Add(label6);
             Controls.Add(label5);
             Controls.Add(label2);

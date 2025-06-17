@@ -134,7 +134,7 @@ namespace TatehamaATS_v1.RetsubanWindow
 
         private string GetVerString()
         {
-            return GetAvailableChar("ソフトバージョン\nV." + ServerAddress.Version.Split('-')[0].Replace("v", "") + "\n" + (ServerAddress.Version.Contains("dev") ? "DEV" : "PROD") + (ServerAddress.Version.Contains("standalone") ? "　STANDALONE" : ServerAddress.Version.Contains("handbuild") ? "　HAND-BUILD" : ""));
+            return GetAvailableChar("ソフトバージョン\nV." + ServerAddress.Version.Split('-')[0].Replace("v", "") + "\n" + (ServerAddress.Version.Contains("de") ? "DEV" : "PROD") + (ServerAddress.Version.Contains("standalone") ? "　STANDALONE" : ServerAddress.Version.Contains("handbuild") ? "　HAND-BUILD" : ""));
         }
 
         private string GetNormalString()

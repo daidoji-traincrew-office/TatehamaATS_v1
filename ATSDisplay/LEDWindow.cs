@@ -10,7 +10,7 @@ namespace TatehamaATS_v1.ATSDisplay
         public LEDWindow()
         {
             InitializeComponent();
-            sourceImage = LEDResource.ATS_LED2;
+            sourceImage = LEDResource.ATS_LED;
             Shown += TopMost_Shown;
         }
 
@@ -33,7 +33,7 @@ namespace TatehamaATS_v1.ATSDisplay
                 Bitmap croppedImage;
                 if (0x180 <= imageNumber && imageNumber <= 0x1FF || 0x280 <= imageNumber && imageNumber <= 0x2FF || 0x380 <= imageNumber && imageNumber <= 0x3FF || 0x580 <= imageNumber && imageNumber <= 0x5FF || 0x680 <= imageNumber && imageNumber <= 0x6FF || 0x780 <= imageNumber && imageNumber <= 0x7FF || 0x880 <= imageNumber && imageNumber <= 0x8FF)
                 {
-                    croppedImage = GetImageByNumber(250);
+                    croppedImage = GetImageByNumber(351);
                     //コード表示無視
                     int codeC = (imageNumber >> 8) & 0xF;
                     Bitmap codeCImage = GetImageByCodeNumber(codeC);
@@ -106,8 +106,8 @@ namespace TatehamaATS_v1.ATSDisplay
         /// <returns>切り出された画像</returns>
         private Bitmap GetImageByNumber(int number)
         {
-            int columns = 6;
-            int rows = 30;
+            int columns = 8;
+            int rows = 32;
             int width = 32;
             int height = 16;
             int margin = 1;
@@ -144,8 +144,8 @@ namespace TatehamaATS_v1.ATSDisplay
             int width = 6;
             int height = 16;
             int margin = 1;
-            int dx = 170;
-            int dy = 17;
+            int dx = 236;
+            int dy = 34;
 
 
             int colIndex = number / 4;

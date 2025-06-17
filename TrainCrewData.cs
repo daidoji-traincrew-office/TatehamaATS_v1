@@ -324,14 +324,14 @@ namespace TrainCrewAPI
     [System.Serializable]
     public class CarState
     {
-        public bool DoorClose;
-        public float BC_Press;
-        public float Ampare;
-        public string CarModel;
-        public bool HasPantograph = false;
-        public bool HasDriverCab = false;
-        public bool HasConductorCab = false;
-        public bool HasMotor = false;
+        public bool DoorClose { get; set; }
+        public float BC_Press { get; set; }
+        public float Ampare { get; set; }
+        public string CarModel { get; set; }
+        public bool HasPantograph { get; set; } = false;
+        public bool HasDriverCab { get; set; } = false;
+        public bool HasConductorCab { get; set; } = false;
+        public bool HasMotor { get; set; } = false;
     }
     [System.Serializable]
     public class StationInfo
