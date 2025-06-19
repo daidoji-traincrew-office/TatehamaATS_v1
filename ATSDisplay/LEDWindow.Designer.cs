@@ -126,7 +126,7 @@
             MinimizeBox = false;
             Name = "LEDWindow";
             StartPosition = FormStartPosition.CenterScreen;
-            Text = "LEDWIndow";
+            Text = "ATS表示器 | 館浜ATS - ダイヤ運転会";
             TopMost = true;
             MouseDown += pictureBox1_MouseDown;
             MouseMove += pictureBox1_MouseMove;
