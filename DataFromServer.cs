@@ -10,12 +10,12 @@ namespace TatehamaATS_v1
         public string DiaName { get; set; } = "9999";
         public List<TrackCircuitData> OnTrackList { get; set; } = new List<TrackCircuitData>();
         public bool BougoState { get; set; } = false;
-        public string Kokuchi { get; set; } = "9999";
-        //将来用
         public float Speed { get; set; } = 0.0f;
+        public float Acceleration { get; set; } = 0.0f;
+        public List<CarState> CarStates { get; set; } = new List<CarState>();
+        //将来用
         public int PNotch { get; set; } = 0;
         public int BNotch { get; set; } = 8;
-        public List<CarState> CarStates { get; set; } = new List<CarState>();
         public override string ToString()
         {
             return $"BougoState:{BougoState}/DiaName:{DiaName}/{string.Join(",", OnTrackList)}";
@@ -24,12 +24,42 @@ namespace TatehamaATS_v1
 
     public class DataFromServer
     {
-        public List<SignalData> NextSignalData { get; set; } = null;
-        public List<SignalData> DoubleNextSignalData { get; set; } = null;
-        public bool BougoState { get; set; }
-        public List<EmergencyLightData> EmergencyLightDatas { get; set; }
-        public OperationNotificationData? OperationNotificationData { get; set; }
-        public List<Route> RouteData { get; set; } = [];
+        /// <summary>
+        /// 次信号の状態
+        /// </summary>
+        public List<SignalData> NextSignalData { get; set; } = [];
+        /// <summary>
+        /// 次々信号の状態
+        /// </summary>
+        public List<SignalData> DoubleNextSignalData { get; set; } = [];
+        /// <summary>
+        /// 防護無線の状態
+        /// </summary>
+        public bool BougoState { get; set; } = false;
+        /// <summary>
+        /// 特発状態
+        /// </summary>
+        public List<EmergencyLightData> EmergencyLightDatas { get; set; } = [];
+        /// <summary>
+        /// 運転告知器の状態
+        /// </summary>
+        public OperationNotificationData? OperationNotificationData { get; set; } = null;
+        /// <summary>
+        /// 進路情報
+        /// </summary>
+        public List<Route> RouteData { get; set; } = new();
+        /// <summary>
+        /// 踏みつぶし状態
+        /// </summary>
+        public bool IsOnPreviousTrain { get; set; } = false;
+        /// <summary>
+        /// 同一運番状態
+        /// </summary>
+        public bool IsTherePreviousTrain { get; set; } = false;
+        /// <summary>
+        /// 編成構成不一致
+        /// </summary>
+        public bool IsCarMismatch;
         public override string ToString()
         {
             return $"BougoState:{BougoState}/{OperationNotificationData}/{RouteData}/{string.Join(",", NextSignalData)}/{string.Join(",", DoubleNextSignalData)}";

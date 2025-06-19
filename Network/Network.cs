@@ -7,6 +7,7 @@ namespace TatehamaATS_v1.Network
     using System;
     using System.Diagnostics;
     using System.Net;
+    using System.Net.Http.Headers;
     using System.Net.WebSockets;
     using System.Text.RegularExpressions;
     using TatehamaATS_v1.Exceptions;
@@ -66,6 +67,7 @@ namespace TatehamaATS_v1.Network
 
         private bool previousStatus;
         private bool connectErrorDialog = false;
+        private bool previousDriveStatus;
 
         public Network(OpenIddictClientService service)
         {
@@ -335,9 +337,10 @@ namespace TatehamaATS_v1.Network
                         SendData.OnTrackList = sendCircuit;
                     }
                 }
-
-                //告知仮実装
-                SendData.Kokuchi = "";
+                SendData.Speed = TcData.myTrainData.Speed;
+                SendData.CarStates = TcData.myTrainData.CarStates;
+                // まだない
+                SendData.Acceleration = 0.0f;
             }
             catch (Exception ex)
             {
@@ -378,6 +381,7 @@ namespace TatehamaATS_v1.Network
                 }
                 if (TcData.gameScreen == GameScreen.MainGame || TcData.gameScreen == GameScreen.MainGame_Pause)
                 {
+                    previousDriveStatus = true;
                     try
                     {
                         currentStatus = IsOddTrainNumber(OverrideDiaName) != IsOddTrainNumber(TcData.myTrainData.diaName);
@@ -395,18 +399,62 @@ namespace TatehamaATS_v1.Network
                     {
                         RetsubanInOutStatusChanged.Invoke(false);
                     }
+
                     previousStatus = currentStatus;
                     //Debug.WriteLine($"{SendData}");
                     DataFromServer DataFromServer;
                     DataFromServer = await connection.InvokeAsync<DataFromServer>("SendData_ATS", SendData);
-                    //    Debug.WriteLine("受信");
-                    //Debug.WriteLine(DataFromServer.ToString());
+
+                    if (DataFromServer.IsOnPreviousTrain)
+                    {
+                        currentStatus = true;
+                    }
                     ServerDataUpdate?.Invoke(DataFromServer, currentStatus);
                 }
                 else
                 {
+                    if (previousDriveStatus)
+                    {
+                        DriverGetsOff();
+                    }
                     NetworkWorking?.Invoke();
                 }
+            }
+            catch (WebSocketException e) when (e.WebSocketErrorCode == WebSocketError.ConnectionClosedPrematurely)
+            {
+                // 再接続を試みる
+                try
+                {
+                    await connection.StopAsync();
+                    await connection.StartAsync();
+                    connected = true;
+                    ConnectionStatusChanged?.Invoke(connected);
+                }
+                catch (Exception rex)
+                {
+                    AddExceptionAction?.Invoke(new NetworkConnectException(7, "再接続失敗", rex));
+                    connected = false;
+                    ConnectionStatusChanged?.Invoke(connected);
+                }
+            }
+            catch (InvalidOperationException ex)
+            {
+                var e = new NetworkConnectException(7, "切断と思われる", ex);
+                AddExceptionAction.Invoke(e);
+            }
+            catch (Exception ex)
+            {
+                var e = new NetworkDataException(7, "", ex);
+                AddExceptionAction.Invoke(e);
+            }
+        }
+
+        public async void DriverGetsOff()
+        {
+            try
+            {
+                await connection.InvokeAsync<DataFromServer>("DriverGetsOff", OverrideDiaName);
+                previousDriveStatus = false;
             }
             catch (WebSocketException e) when (e.WebSocketErrorCode == WebSocketError.ConnectionClosedPrematurely)
             {
