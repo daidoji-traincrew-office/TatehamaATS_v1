@@ -26,6 +26,11 @@ namespace TatehamaATS_v1.Network
         private DataToServer SendData;
 
         /// <summary>
+        /// サーバーから来たデータ
+        /// </summary>
+        DataFromServer DataFromServer;
+
+        /// <summary>
         /// 車両データ
         /// </summary>
         private TrainCrewStateData TcData;
@@ -39,6 +44,11 @@ namespace TatehamaATS_v1.Network
         /// 防護無線発報状態
         /// </summary>
         internal bool IsBougo;
+
+        /// <summary>
+        /// 早着撤去無視フラグ
+        /// </summary>
+        internal bool IsTherePreviousTrainIgnore;
 
         /// <summary>
         /// 故障発生
@@ -401,20 +411,21 @@ namespace TatehamaATS_v1.Network
                     }
 
                     previousStatus = currentStatus;
-                    //Debug.WriteLine($"{SendData}");
-                    DataFromServer DataFromServer;
-                    DataFromServer = await connection.InvokeAsync<DataFromServer>("SendData_ATS", SendData);
+                    //Debug.WriteLine($"{SendData}");        
+                    DataFromServer dataFromServer;
+                    dataFromServer = await connection.InvokeAsync<DataFromServer>("SendData_ATS", SendData);
 
-                    if (DataFromServer.IsOnPreviousTrain)
+                    if (dataFromServer.IsOnPreviousTrain)
                     {
                         currentStatus = true;
                     }
-                    ServerDataUpdate?.Invoke(DataFromServer, currentStatus);
+                    ServerDataUpdate?.Invoke(dataFromServer, currentStatus);
                 }
                 else
                 {
                     if (previousDriveStatus)
                     {
+                        IsTherePreviousTrainIgnore = false;
                         DriverGetsOff();
                     }
                     NetworkWorking?.Invoke();
@@ -508,6 +519,16 @@ namespace TatehamaATS_v1.Network
         {
             await connection.StopAsync();
             await connection.DisposeAsync();
+        }
+
+        public void IsTherePreviousTrainIgnoreSet()
+        {
+            // 早着撤去無視フラグをセット、早着状態なら無視フラグ設定できる。
+            if (DataFromServer == null)
+            {
+                return;
+            }
+            IsTherePreviousTrainIgnore = DataFromServer.IsTherePreviousTrain;
         }
     }
 }
