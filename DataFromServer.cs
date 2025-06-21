@@ -7,15 +7,20 @@ namespace TatehamaATS_v1
 {
     public class DataToServer
     {
+        public bool BougoState { get; set; } = false;
+        public List<CarState> CarStates { get; set; } = new List<CarState>();
         public string DiaName { get; set; } = "9999";
         public List<TrackCircuitData> OnTrackList { get; set; } = new List<TrackCircuitData>();
-        public bool BougoState { get; set; } = false;
+
+        //早着撤去無視フラグ      
+        public bool IsTherePreviousTrainIgnore { get; set; } = false;
+
         public float Speed { get; set; } = 0.0f;
         public float Acceleration { get; set; } = 0.0f;
-        public List<CarState> CarStates { get; set; } = new List<CarState>();
         //将来用
         public int PNotch { get; set; } = 0;
         public int BNotch { get; set; } = 8;
+
         public override string ToString()
         {
             return $"BougoState:{BougoState}/DiaName:{DiaName}/{string.Join(",", OnTrackList)}";
