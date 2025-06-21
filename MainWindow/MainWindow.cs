@@ -276,6 +276,7 @@ namespace TatehamaATS_v1.MainWindow
                 //Todo: ATS復帰操作を送る
                 Debug.WriteLine("ATS復帰");
                 CableIO.ATSResetPush();
+                CableIO.IsTherePreviousTrainIgnore();
             }
         }
 
@@ -457,7 +458,6 @@ namespace TatehamaATS_v1.MainWindow
 
         private void Image_ATSCut_Click(object sender, MouseEventArgs e)
         {
-
         }
 
         private void Image_ATSReady_Click(object sender, EventArgs e)

@@ -204,6 +204,7 @@
             BackgroundImageLayout = ImageLayout.None;
             ClientSize = new Size(300, 300);
             Controls.Add(Image_Kyokan);
+            Controls.Add(Image_Reset);
             Controls.Add(Image_TopMostOFF);
             Controls.Add(Image_Relay);
             Controls.Add(Image_Retsuban);
@@ -214,7 +215,6 @@
             Controls.Add(Image_ATSOpen);
             Controls.Add(Image_ATSBrakeApply);
             Controls.Add(Image_ATSReady);
-            Controls.Add(Image_Reset);
             Controls.Add(Image_ATSCut);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximumSize = new Size(316, 339);
