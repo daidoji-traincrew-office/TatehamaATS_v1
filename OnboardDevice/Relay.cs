@@ -768,15 +768,22 @@ namespace TatehamaATS_v1.OnboardDevice
 
         public void SetEB(bool State, bool force = false)
         {
-            if (State)
+            try
             {
-                TrainCrewInput.SetATO_Notch(-8);
-                brake = -8;
+                if (State)
+                {
+                    TrainCrewInput.SetATO_Notch(-8);
+                    brake = -8;
+                }
+                else if ((brake == -8 || force) && !State)
+                {
+                    TrainCrewInput.SetATO_Notch(0);
+                    brake = 0;
+                }
             }
-            else if ((brake == -8 || force) && !State)
+            catch (Exception ex)
             {
-                TrainCrewInput.SetATO_Notch(0);
-                brake = 0;
+                SetEB(State, force);
             }
         }
 
