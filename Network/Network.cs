@@ -10,15 +10,23 @@ namespace TatehamaATS_v1.Network
     using System.Net.Http.Headers;
     using System.Net.WebSockets;
     using System.Text.RegularExpressions;
+    using System.Threading;
     using TatehamaATS_v1.Exceptions;
     using TrainCrewAPI;
 
     public class Network
     {
-        public static HubConnection connection;
-        public static bool connected { get; set; } = false;
-        private static string _token = "";
+        private readonly TimeSpan _renewMargin = TimeSpan.FromMinutes(1);
         private readonly OpenIddictClientService _service;
+        private HubConnection? _connection;
+
+        private static string _token = "";
+        private string _refreshToken = "";
+        private DateTimeOffset _tokenExpiration = DateTimeOffset.MinValue;
+
+        public static bool connected { get; set; } = false;
+        // 再接続間隔（ミリ秒）
+        private const int ReconnectIntervalMs = 1000;
 
         /// <summary>
         /// 送信するべきデータ
@@ -134,11 +142,18 @@ namespace TatehamaATS_v1.Network
             }
         }
 
+        // interactive認証とエラーハンドリング
+        public async Task<bool> Authorize()
+        {
+            var cancellationToken = new CancellationTokenSource(TimeSpan.FromSeconds(90)).Token;
+            return await Authorize(cancellationToken);
+        }
+
         /// <summary>
         /// 認証処理
         /// </summary>
         /// <returns></returns>
-        public async Task<bool> Authorize()
+        public async Task<bool> Authorize(CancellationToken cancellationToken)
         {
             using var source = new CancellationTokenSource(delay: TimeSpan.FromSeconds(90));
             try
@@ -149,13 +164,15 @@ namespace TatehamaATS_v1.Network
                     CancellationToken = source.Token
                 });
 
-                // Wait for the user to complete the authorization process.
+                // Wait for the user to complete the authorization process.             
                 var resultAuth = await _service.AuthenticateInteractivelyAsync(new()
                 {
-                    CancellationToken = source.Token,
+                    CancellationToken = cancellationToken,
                     Nonce = result.Nonce
                 });
-                _token = resultAuth.BackchannelAccessToken!;
+                _token = resultAuth.BackchannelAccessToken;
+                _tokenExpiration = resultAuth.BackchannelAccessTokenExpirationDate ?? DateTimeOffset.MinValue;
+                _refreshToken = resultAuth.RefreshToken;
                 // 認証完了！      
                 await Connect();
                 return true;
@@ -177,7 +194,7 @@ namespace TatehamaATS_v1.Network
                 return false;
             }
             catch (OpenIddictExceptions.ProtocolException exception) when (exception.Error ==
-                                                               OpenIddictConstants.Errors.AccessDenied)
+                                                               OpenIddictConstants.Errors.UnauthorizedClient)
             {
                 // ログインしたユーザーがサーバーにいないか、入鋏ロールがついてない
                 var e = new NetworkAccessDenied(7, "認証拒否(サーバー非存在・未入鋏)", exception);
@@ -220,6 +237,155 @@ namespace TatehamaATS_v1.Network
             }
         }
 
+
+        private async Task TryReconnectAsync()
+        {
+            while (true)
+            {
+                try
+                {
+                    var isActionNeeded = await TryReconnectOnceAsync();
+                    if (isActionNeeded)
+                    {
+                        Debug.WriteLine("Action needed after reconnection.");
+                        break;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Reconnect failed: {ex.Message}");
+                }
+                if (_connection != null && _connection.State == HubConnectionState.Connected)
+                {
+                    Debug.WriteLine("Reconnected successfully.");
+                    break;
+                }
+                await Task.Delay(ReconnectIntervalMs);
+            }
+        }
+
+        /// <summary>
+        /// 再接続を試みます。
+        /// </summary>
+        /// <returns></returns>
+        private async Task<bool> TryReconnectOnceAsync()
+        {
+            bool isActionNeeded;
+            // トークンが切れていない場合 かつ 切れるまで余裕がある場合はそのまま再接続
+            if (_tokenExpiration > DateTimeOffset.UtcNow + _renewMargin)
+            {
+                Debug.WriteLine("Try reconnect with current token...");
+                isActionNeeded = await Authorize(CancellationToken.None);
+                Debug.WriteLine("Reconnected with current token.");
+                return isActionNeeded;
+            }
+            // トークンが切れていてリフレッシュトークンが有効な場合はリフレッシュ
+            try
+            {
+                Debug.WriteLine("Try refresh token...");
+                await RefreshTokenWithHandlingAsync(CancellationToken.None);
+                await DisposeAndStopConnectionAsync(CancellationToken.None); // 古いクライアントを破棄
+                InitializeConnection(); // 新しいクライアントを初期化
+                isActionNeeded = await Authorize(CancellationToken.None); // 新しいクライアントを開始
+                if (isActionNeeded)
+                {
+                    return true; // アクションが必要な場合はtrueを返す
+                }
+                SetEventHandlers(); // イベントハンドラを設定
+                Debug.WriteLine("Reconnected with refreshed token.");
+                return false; // アクションが必要ない場合はfalseを返す
+            }
+            catch (OpenIddictExceptions.ProtocolException ex) when (ex.Error == OpenIddictConstants.Errors.InvalidGrant)
+            {
+                // リフレッシュトークンが無効な場合
+                Debug.WriteLine("Refresh token is invalid or expired.");
+                TaskDialog.ShowDialog(new TaskDialogPage
+                {
+                    Caption = "再認証が必要です",
+                    Heading = "Discord再認証が必要です",
+                    Icon = TaskDialogIcon.Warning,
+                    Text = "認証情報の有効期限が切れました。再度ログインしてください。"
+                });
+                await Authorize(CancellationToken.None);
+                await DisposeAndStopConnectionAsync(CancellationToken.None); // 古いクライアントを破棄
+                InitializeConnection(); // 新しいクライアントを初期化
+                isActionNeeded = await Authorize(CancellationToken.None); // 新しいクライアントを開始
+                if (isActionNeeded)
+                {
+                    return true; // アクションが必要な場合はtrueを返す
+                }
+                SetEventHandlers(); // イベントハンドラを設定
+                Debug.WriteLine("Reconnected after re-authentication.");
+                return false; // アクションが必要ない場合はfalseを返す
+            }
+        }
+
+
+        /// <summary>
+        /// リフレッシュトークンを使用してトークンを更新します。
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        private async Task RefreshTokenWithHandlingAsync(CancellationToken cancellationToken)
+        {
+            var result = await _service.AuthenticateWithRefreshTokenAsync(new()
+            {
+                CancellationToken = cancellationToken,
+                RefreshToken = _refreshToken
+            });
+
+            _token = result.AccessToken;
+            _tokenExpiration = result.AccessTokenExpirationDate ?? DateTimeOffset.MinValue;
+            _refreshToken = result.RefreshToken;
+            Debug.WriteLine($"Token refreshed successfully");
+        }
+
+
+        // _connectionの破棄と停止
+        private async Task DisposeAndStopConnectionAsync(CancellationToken cancellationToken)
+        {
+            if (_connection == null)
+            {
+                return;
+            }
+            await _connection.StopAsync(cancellationToken);
+            await _connection.DisposeAsync();
+            _connection = null;
+        }
+
+
+        // _connectionの初期化
+        private void InitializeConnection()
+        {
+            if (_connection != null)
+            {
+                throw new InvalidOperationException("_connection is already initialized.");
+            }
+            _connection = new HubConnectionBuilder()
+                .WithUrl($"{ServerAddress.SignalAddress}/hub/tid?access_token={_token}")
+                .Build();
+        }
+
+        // SignalR接続のイベントハンドラ設定
+        private void SetEventHandlers()
+        {
+            if (_connection == null)
+            {
+                throw new InvalidOperationException("_connection is not initialized.");
+            }
+            _connection.Closed += async (error) =>
+            {
+                Debug.WriteLine($"SignalR disconnected");
+                if (error == null)
+                {
+                    return;
+                }
+                Debug.WriteLine($"Error: {error.Message}");
+                await TryReconnectAsync();
+            };
+        }
+
+
         /// <summary>
         /// 接続処理
         /// </summary>
@@ -229,12 +395,12 @@ namespace TatehamaATS_v1.Network
             AddExceptionAction?.Invoke(new NetworkConnectException(7, "通信部接続失敗"));
             ConnectionStatusChanged?.Invoke(connected);
 
-            connection = new HubConnectionBuilder()
+            _connection = new HubConnectionBuilder()
                 .WithUrl($"{ServerAddress.SignalAddress}/hub/train?access_token={_token}")
                 .WithAutomaticReconnect(Enumerable.Range(0, 721).Select(x => TimeSpan.FromSeconds(x == 0 ? 0 : 5)).ToArray())
                 .Build();
 
-            //connection.On<DataFromServer>("ReceiveData_ATS", DataFromServer =>
+            //_connection.On<DataFromServer>("ReceiveData_ATS", DataFromServer =>
             //{
             //    Debug.WriteLine("受信");
             //    Debug.WriteLine(DataFromServer.ToString());
@@ -245,7 +411,7 @@ namespace TatehamaATS_v1.Network
             {
                 try
                 {
-                    await connection.StartAsync();
+                    await _connection.StartAsync();
                     Debug.WriteLine("Connected");
                     connected = true;
                     ConnectionStatusChanged?.Invoke(connected);
@@ -269,7 +435,7 @@ namespace TatehamaATS_v1.Network
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine("connection Error!!");
+                    Debug.WriteLine("_connection Error!!");
                     connected = false;
                     ConnectionStatusChanged?.Invoke(connected);
                     var e = new NetworkConnectException(7, "通信部接続失敗", ex);
@@ -277,7 +443,7 @@ namespace TatehamaATS_v1.Network
                 }
             }
 
-            connection.Reconnecting += exception =>
+            _connection.Reconnecting += exception =>
             {
                 connected = false;
                 ConnectionStatusChanged?.Invoke(connected);
@@ -285,7 +451,7 @@ namespace TatehamaATS_v1.Network
                 return Task.CompletedTask;
             };
 
-            connection.Reconnected += exeption =>
+            _connection.Reconnected += exeption =>
             {
                 connected = true;
                 ConnectionStatusChanged?.Invoke(connected);
@@ -425,8 +591,8 @@ namespace TatehamaATS_v1.Network
                 // 再接続を試みる
                 try
                 {
-                    await connection.StopAsync();
-                    await connection.StartAsync();
+                    await _connection.StopAsync();
+                    await _connection.StartAsync();
                     connected = true;
                     ConnectionStatusChanged?.Invoke(connected);
                 }
@@ -453,7 +619,7 @@ namespace TatehamaATS_v1.Network
         {
             try
             {
-                await connection.InvokeAsync<DataFromServer>("DriverGetsOff", OverrideDiaName);
+                await _connection.InvokeAsync<DataFromServer>("DriverGetsOff", OverrideDiaName);
                 previousDriveStatus = false;
             }
             catch (WebSocketException e) when (e.WebSocketErrorCode == WebSocketError.ConnectionClosedPrematurely)
@@ -461,8 +627,8 @@ namespace TatehamaATS_v1.Network
                 // 再接続を試みる
                 try
                 {
-                    await connection.StopAsync();
-                    await connection.StartAsync();
+                    await _connection.StopAsync();
+                    await _connection.StartAsync();
                     connected = true;
                     ConnectionStatusChanged?.Invoke(connected);
                 }
@@ -506,8 +672,8 @@ namespace TatehamaATS_v1.Network
 
         public async Task Close()
         {
-            await connection.StopAsync();
-            await connection.DisposeAsync();
+            await _connection.StopAsync();
+            await _connection.DisposeAsync();
         }
     }
 }
