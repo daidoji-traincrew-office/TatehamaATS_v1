@@ -56,30 +56,31 @@ namespace TakumiteAudioWrapper
         /// <param name="volume">音量(0.0〜1.0)</param>
         public void PlayLoop(float volume)
         {
-            if (_disposed) throw new ObjectDisposedException(nameof(AudioWrapper));
-
-            if (_isLooping)
+            try
             {
-                if (_loopStream != null)
+                if (_disposed) throw new ObjectDisposedException(nameof(AudioWrapper));
+
+                Stop(); // 既存リソースを必ず破棄
+
+                _audioFile = new AudioFileReader(_filePath);
+                _loopStream = new LoopStream(_audioFile)
                 {
-                    _loopStream.Volume = _relativeVolume * Math.Clamp(volume, 0.0f, 1.0f);
-                }
-                return;
+                    Volume = _relativeVolume * Math.Clamp(volume, 0.0f, 1.0f)
+                };
+
+                _wavePlayer = new WaveOutEvent();
+                _wavePlayer.Init(_loopStream);
+                _wavePlayer.Play();
+
+                _isLooping = true;
             }
-
-            Stop();
-
-            _audioFile = new AudioFileReader(_filePath);
-            _loopStream = new LoopStream(_audioFile)
+            catch
             {
-                Volume = _relativeVolume * Math.Clamp(volume, 0.0f, 1.0f)
-            };
-
-            _wavePlayer = new WaveOutEvent();
-            _wavePlayer.Init(_loopStream);
-            _wavePlayer.Play();
-
-            _isLooping = true;
+                if (!_isLooping)
+                {
+                    PlayLoop(volume);
+                }
+            }
         }
 
         /// <summary>
@@ -89,16 +90,15 @@ namespace TakumiteAudioWrapper
         {
             if (_disposed) return;
 
-            _wavePlayer?.Stop();
-
-            _wavePlayer?.Dispose();
+            try { _wavePlayer?.Stop(); } catch { }
+            try { _wavePlayer?.Dispose(); } catch { }
             _wavePlayer = null;
 
-            _audioFile?.Dispose();
-            _audioFile = null;
-
-            _loopStream?.Dispose();
+            try { _loopStream?.Dispose(); } catch { }
             _loopStream = null;
+
+            try { _audioFile?.Dispose(); } catch { }
+            _audioFile = null;
 
             _isLooping = false;
         }
