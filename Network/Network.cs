@@ -351,6 +351,7 @@ namespace TatehamaATS_v1.Network
                 SendData.CarStates = TcData.myTrainData.CarStates;
                 // まだない
                 SendData.Acceleration = 0.0f;
+                SendData.IsTherePreviousTrainIgnore = IsTherePreviousTrainIgnore;
             }
             catch (Exception ex)
             {
@@ -420,6 +421,7 @@ namespace TatehamaATS_v1.Network
                         currentStatus = true;
                     }
                     ServerDataUpdate?.Invoke(dataFromServer, currentStatus);
+                    DataFromServer = dataFromServer;
                 }
                 else
                 {
