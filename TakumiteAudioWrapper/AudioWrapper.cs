@@ -56,6 +56,10 @@ namespace TakumiteAudioWrapper
         /// <param name="volume">音量(0.0〜1.0)</param>
         public void PlayLoop(float volume)
         {
+            if (_isLooping)
+            {
+                return; // 既にループ再生中の場合は何もしない
+            }
             try
             {
                 if (_disposed) throw new ObjectDisposedException(nameof(AudioWrapper));
