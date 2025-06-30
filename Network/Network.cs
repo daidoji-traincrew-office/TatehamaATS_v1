@@ -208,7 +208,7 @@ namespace TatehamaATS_v1.Network
                 var result = await _service.ChallengeInteractivelyAsync(new()
                 {
                     CancellationToken = source.Token,
-                    Scopes = []
+                    Scopes = [OpenIddictConstants.Scopes.OfflineAccess]
                 });
 
                 // Wait for the user to complete the authorization process.             
