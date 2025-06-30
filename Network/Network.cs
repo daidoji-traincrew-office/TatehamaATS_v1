@@ -410,6 +410,8 @@ namespace TatehamaATS_v1.Network
                     return;
                 }
                 Debug.WriteLine($"Error: {error.Message}");
+                // Todo: 接続が切れた場合、エラーコードを発出させる
+                // 接続が切れた場合、再接続を試みる
                 await TryReconnectAsync();
             };
         }
