@@ -157,7 +157,10 @@ namespace TatehamaATS_v1.Network
             }
         }
 
-        // interactive認証とエラーハンドリング
+        /// <summary>
+        /// interactive認証とエラーハンドリング
+        /// </summary>
+        /// <returns>認証に成功したかどうか</returns>
         public async Task<bool> Authorize()
         {
             var cancellationToken = new CancellationTokenSource(TimeSpan.FromSeconds(90)).Token;
@@ -165,9 +168,9 @@ namespace TatehamaATS_v1.Network
         }
 
         /// <summary>
-        /// 認証処理
+        /// interactive認証とエラーハンドリング
         /// </summary>
-        /// <returns></returns>
+        /// <returns>認証に成功したかどうか</returns>
         public async Task<bool> Authorize(CancellationToken cancellationToken)
         {
             using var source = new CancellationTokenSource(delay: TimeSpan.FromSeconds(90));
