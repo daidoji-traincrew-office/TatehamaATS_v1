@@ -22,6 +22,7 @@ namespace TatehamaATS_v1
         //将来用
         public int PNotch { get; set; } = 0;
         public int BNotch { get; set; } = 8;
+
         public override string ToString()
         {
             return $"BougoState:{BougoState}/DiaName:{DiaName}/{string.Join(",", OnTrackList)}";

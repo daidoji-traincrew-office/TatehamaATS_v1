@@ -34,6 +34,11 @@ namespace TatehamaATS_v1.Network
         private DataToServer SendData;
 
         /// <summary>
+        /// サーバーから来たデータ
+        /// </summary>
+        DataFromServer DataFromServer;
+
+        /// <summary>
         /// 車両データ
         /// </summary>
         private TrainCrewStateData TcData;
@@ -579,20 +584,22 @@ namespace TatehamaATS_v1.Network
                     }
 
                     previousStatus = currentStatus;
-                    //Debug.WriteLine($"{SendData}");
-                    DataFromServer DataFromServer;
-                    DataFromServer = await connection.InvokeAsync<DataFromServer>("SendData_ATS", SendData);
+                    //Debug.WriteLine($"{SendData}");        
+                    DataFromServer dataFromServer;
+                    dataFromServer = await connection.InvokeAsync<DataFromServer>("SendData_ATS", SendData);
 
-                    if (DataFromServer.IsOnPreviousTrain)
+                    if (dataFromServer.IsOnPreviousTrain)
                     {
                         currentStatus = true;
                     }
-                    ServerDataUpdate?.Invoke(DataFromServer, currentStatus);
+                    ServerDataUpdate?.Invoke(dataFromServer, currentStatus);
+                    DataFromServer = dataFromServer;
                 }
                 else
                 {
                     if (previousDriveStatus)
                     {
+                        IsTherePreviousTrainIgnore = false;
                         DriverGetsOff();
                     }
                     NetworkWorking?.Invoke();

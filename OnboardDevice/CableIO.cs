@@ -434,5 +434,10 @@ namespace TatehamaATS_v1.OnboardDevice
         {
             Network.StartUpdateLoop();
         }
+
+        internal void IsTherePreviousTrainIgnore()
+        {
+            Network.IsTherePreviousTrainIgnoreSet();
+        }
     }
 }
