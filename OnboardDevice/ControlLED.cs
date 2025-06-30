@@ -29,6 +29,11 @@ namespace TatehamaATS_v1
         internal bool TherePreviousTrain;
 
         /// <summary>
+        /// ワープ疑惑
+        /// </summary>
+        internal bool MaybeWarp;
+
+        /// <summary>
         /// 故障発生
         /// </summary>
         internal event Action<ATSCommonException> AddExceptionAction;
@@ -199,13 +204,9 @@ namespace TatehamaATS_v1
                     {
                         L3List = new List<string> { "交代", "待機" };
                     }
-                    else if (OnPreviousTrain)
+                    else if (MaybeWarp)
                     {
-                        L3List = new List<string> { "早着", "撤去" };
-                    }
-                    else if (TherePreviousTrain)
-                    {
-                        L3List = new List<string> { "交代", "待機" };
+                        L3List = new List<string> { "ワープ？" };
                     }
                     else
                     {
@@ -229,7 +230,7 @@ namespace TatehamaATS_v1
                         }
                         else
                         {
-                            l3Index = (int)((NowTime - L3Start).TotalSeconds * 1 + 1) % L3List.Count;
+                            l3Index = (int)((NowTime - L3Start).TotalSeconds * 2 + 1) % L3List.Count;
                         }
 
                         ledWindow.DisplayImage(3, ConvertToLEDNumber(L3List[l3Index]));
@@ -417,6 +418,8 @@ namespace TatehamaATS_v1
                     return 63;
                 case "待機":
                     return 64;
+                case "ワープ？":
+                    return 65;
                 default:
                     throw new LEDDisplayStringAbnormal(8, $"未定義:{str}　ControlLED.cs@ConvertToLEDNumber()");
             }

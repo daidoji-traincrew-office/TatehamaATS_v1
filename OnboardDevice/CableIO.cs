@@ -66,6 +66,11 @@ namespace TatehamaATS_v1.OnboardDevice
         bool TherePrevious;
 
         /// <summary>
+        /// ワープ疑い
+        /// </summary>
+        bool MaybeWarp;
+
+        /// <summary>
         /// 自車防護無線
         /// </summary>
         bool MyBougoState;
@@ -273,7 +278,7 @@ namespace TatehamaATS_v1.OnboardDevice
             bool emBrakeState;
             if (ATSPowerState)
             {
-                emBrakeState = InspectionRecordEmBrakeState || TherePrevious;
+                emBrakeState = InspectionRecordEmBrakeState || TherePrevious || MaybeWarp;
             }
             else
             {
@@ -373,8 +378,10 @@ namespace TatehamaATS_v1.OnboardDevice
                 Relay.UpdateRoute(dataFromServer.RouteData);
             }
             TherePrevious = dataFromServer.IsTherePreviousTrain;
+            MaybeWarp = dataFromServer.IsMaybeWarp;
             ControlLED.OnPreviousTrain = dataFromServer.IsOnPreviousTrain;
             ControlLED.TherePreviousTrain = dataFromServer.IsTherePreviousTrain;
+            ControlLED.MaybeWarp = dataFromServer.IsMaybeWarp;
         }
 
         /// <summary>
@@ -432,6 +439,11 @@ namespace TatehamaATS_v1.OnboardDevice
         internal void IsTherePreviousTrainIgnore()
         {
             Network.IsTherePreviousTrainIgnoreSet();
+        }
+
+        internal void IsMaybeWarpIgnore()
+        {
+            Network.IsMaybeWarpIgnoreSet();
         }
     }
 }
