@@ -608,8 +608,7 @@ namespace TatehamaATS_v1.Network
                 // 再接続を試みる
                 try
                 {
-                    await _connection.StopAsync();
-                    await _connection.StartAsync();
+                    await TryReconnectOnceAsync(); 
                     connected = true;
                     ConnectionStatusChanged?.Invoke(connected);
                 }
@@ -644,8 +643,7 @@ namespace TatehamaATS_v1.Network
                 // 再接続を試みる
                 try
                 {
-                    await _connection.StopAsync();
-                    await _connection.StartAsync();
+                    await TryReconnectOnceAsync(); 
                     connected = true;
                     ConnectionStatusChanged?.Invoke(connected);
                 }
