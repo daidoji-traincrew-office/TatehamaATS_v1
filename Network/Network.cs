@@ -156,22 +156,42 @@ namespace TatehamaATS_v1.Network
                 }
             }
         }
-
-        /// <summary>
-        /// interactive認証とエラーハンドリング
-        /// </summary>
-        /// <returns>認証に成功したかどうか</returns>
+        
         public async Task<bool> Authorize()
         {
-            var cancellationToken = new CancellationTokenSource(TimeSpan.FromSeconds(90)).Token;
-            return await Authorize(cancellationToken);
+            // 認証を行う
+            var isAuthenticated = await InteractiveAuthenticateAsync();
+            if (!isAuthenticated)
+            {
+                return false;
+            }
+            await DisposeAndStopConnectionAsync(CancellationToken.None); // 古いクライアントを破棄
+            InitializeConnection(); // 新しいクライアントを初期化
+            // 接続を試みる
+            var isActionNeeded = await Connect();
+            if (isActionNeeded)
+            {
+                return true;
+            }
+            SetEventHandlers(); // イベントハンドラを設定
+            return false;
         }
 
         /// <summary>
         /// interactive認証とエラーハンドリング
         /// </summary>
         /// <returns>認証に成功したかどうか</returns>
-        public async Task<bool> Authorize(CancellationToken cancellationToken)
+        private async Task<bool> InteractiveAuthenticateAsync()
+        {
+            var cancellationToken = new CancellationTokenSource(TimeSpan.FromSeconds(90)).Token;
+            return await InteractiveAuthenticateAsync(cancellationToken);
+        }
+
+        /// <summary>
+        /// interactive認証とエラーハンドリング
+        /// </summary>
+        /// <returns>認証に成功したかどうか</returns>
+        private async Task<bool> InteractiveAuthenticateAsync(CancellationToken cancellationToken)
         {
             using var source = new CancellationTokenSource(delay: TimeSpan.FromSeconds(90));
             try
@@ -191,8 +211,7 @@ namespace TatehamaATS_v1.Network
                 _token = resultAuth.BackchannelAccessToken;
                 _tokenExpiration = resultAuth.BackchannelAccessTokenExpirationDate ?? DateTimeOffset.MinValue;
                 _refreshToken = resultAuth.RefreshToken;
-                // 認証完了！      
-                await Connect();
+                // 認証完了！
                 return true;
             }
             catch (OperationCanceledException)
@@ -205,7 +224,7 @@ namespace TatehamaATS_v1.Network
                 DialogResult result = MessageBox.Show($"認証でタイムアウトしました。\n再認証してください。\n※いいえを選択した場合、再認証にはATS再起動が必要です。", "認証失敗 | 館浜ATS - ダイヤ運転会", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
                 if (result == DialogResult.Yes)
                 {
-                    var r = await Authorize();
+                    var r = await InteractiveAuthenticateAsync();
                     connectErrorDialog = false;
                     return r;
                 }
@@ -231,7 +250,7 @@ namespace TatehamaATS_v1.Network
                 DialogResult result = MessageBox.Show($"認証に失敗しました。\n再認証しますか？\n※いいえを選択した場合、再認証にはATS再起動が必要です。\n\n{exception.Message}\n{exception.StackTrace}", "認証失敗 | 館浜ATS - ダイヤ運転会", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
                 if (result == DialogResult.Yes)
                 {
-                    var r = await Authorize();
+                    var r = await InteractiveAuthenticateAsync();
                     connectErrorDialog = false;
                     return r;
                 }
@@ -247,7 +266,7 @@ namespace TatehamaATS_v1.Network
                 DialogResult result = MessageBox.Show($"認証に失敗しました。\n再認証しますか？\n※いいえを選択した場合、再認証にはATS再起動が必要です。\n\n{exception.Message}\n{exception.StackTrace}", "認証失敗 | 館浜ATS - ダイヤ運転会", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
                 if (result == DialogResult.Yes)
                 {
-                    var r = await Authorize();
+                    var r = await InteractiveAuthenticateAsync();
                     connectErrorDialog = false;
                     return r;
                 }
@@ -293,7 +312,7 @@ namespace TatehamaATS_v1.Network
             if (_tokenExpiration > DateTimeOffset.UtcNow + _renewMargin)
             {
                 Debug.WriteLine("Try reconnect with current token...");
-                isActionNeeded = await Authorize(CancellationToken.None);
+                isActionNeeded = await Connect();
                 Debug.WriteLine("Reconnected with current token.");
                 return isActionNeeded;
             }
@@ -304,7 +323,7 @@ namespace TatehamaATS_v1.Network
                 await RefreshTokenWithHandlingAsync(CancellationToken.None);
                 await DisposeAndStopConnectionAsync(CancellationToken.None); // 古いクライアントを破棄
                 InitializeConnection(); // 新しいクライアントを初期化
-                isActionNeeded = await Authorize(CancellationToken.None); // 新しいクライアントを開始
+                isActionNeeded = await Connect(); // 新しいクライアントを開始
                 if (isActionNeeded)
                 {
                     return true; // アクションが必要な場合はtrueを返す
@@ -324,17 +343,9 @@ namespace TatehamaATS_v1.Network
                     Icon = TaskDialogIcon.Warning,
                     Text = "認証情報の有効期限が切れました。再度ログインしてください。"
                 });
-                await Authorize(CancellationToken.None);
-                await DisposeAndStopConnectionAsync(CancellationToken.None); // 古いクライアントを破棄
-                InitializeConnection(); // 新しいクライアントを初期化
-                isActionNeeded = await Authorize(CancellationToken.None); // 新しいクライアントを開始
-                if (isActionNeeded)
-                {
-                    return true; // アクションが必要な場合はtrueを返す
-                }
-                SetEventHandlers(); // イベントハンドラを設定
+                var result = await Authorize();
                 Debug.WriteLine("Reconnected after re-authentication.");
-                return false; // アクションが必要ない場合はfalseを返す
+                return result;
             }
         }
 
@@ -408,15 +419,10 @@ namespace TatehamaATS_v1.Network
         /// 接続処理
         /// </summary>
         /// <returns></returns>
-        public async Task Connect()
+        private async Task<bool> Connect()
         {
             AddExceptionAction?.Invoke(new NetworkConnectException(7, "通信部接続失敗"));
             ConnectionStatusChanged?.Invoke(connected);
-
-            _connection = new HubConnectionBuilder()
-                .WithUrl($"{ServerAddress.SignalAddress}/hub/train?access_token={_token}")
-                .WithAutomaticReconnect(Enumerable.Range(0, 721).Select(x => TimeSpan.FromSeconds(x == 0 ? 0 : 5)).ToArray())
-                .Build();
 
             //_connection.On<DataFromServer>("ReceiveData_ATS", DataFromServer =>
             //{
@@ -425,6 +431,7 @@ namespace TatehamaATS_v1.Network
             //    ServerDataUpdate?.Invoke(DataFromServer);
             //});
 
+            var result = false;
             while (!connected)
             {
                 try
@@ -442,12 +449,15 @@ namespace TatehamaATS_v1.Network
                     ConnectionStatusChanged?.Invoke(connected);
                     var e = new NetworkAccessDenied(7, "通信部接続失敗", ex);
                     AddExceptionAction.Invoke(e);
-                    if (connectErrorDialog) return;
-                    connectErrorDialog = true;
-                    DialogResult result = MessageBox.Show($"ロール不足です。\nアカウントを確認して再認証してください。\n再認証しますか？\n※いいえを選択した場合、再認証にはATS再起動が必要です。", "認証失敗 | 館浜ATS - ダイヤ運転会", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
-                    if (result == DialogResult.Yes)
+                    if (connectErrorDialog)
                     {
-                        await Authorize();
+                        return true;
+                    }
+                    connectErrorDialog = true;
+                    DialogResult dialogResult = MessageBox.Show($"ロール不足です。\nアカウントを確認して再認証してください。\n再認証しますか？\n※いいえを選択した場合、再認証にはATS再起動が必要です。", "認証失敗 | 館浜ATS - ダイヤ運転会", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
+                    if (dialogResult == DialogResult.Yes)
+                    {
+                        result = await Authorize();
                     }
                     connectErrorDialog = false;
                 }
@@ -460,23 +470,7 @@ namespace TatehamaATS_v1.Network
                     AddExceptionAction.Invoke(e);
                 }
             }
-
-            _connection.Reconnecting += exception =>
-            {
-                connected = false;
-                ConnectionStatusChanged?.Invoke(connected);
-                Debug.WriteLine("reconnecting");
-                return Task.CompletedTask;
-            };
-
-            _connection.Reconnected += exeption =>
-            {
-                connected = true;
-                ConnectionStatusChanged?.Invoke(connected);
-                Debug.WriteLine("Connected");
-                return Task.CompletedTask;
-            };
-            await Task.Delay(Timeout.Infinite);
+            return result;
         }
 
 
@@ -695,17 +689,7 @@ namespace TatehamaATS_v1.Network
         
         public async ValueTask DisposeAsync()
         {
-            await Close();
-        }
-
-        public async Task Close()
-        {
-            if(_connection == null)
-            {
-                return;
-            }
-            await _connection.StopAsync();
-            await _connection.DisposeAsync();
+            await DisposeAndStopConnectionAsync(CancellationToken.None);
         }
 
         public void IsTherePreviousTrainIgnoreSet()
