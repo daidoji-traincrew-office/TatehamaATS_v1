@@ -14,7 +14,7 @@ namespace TatehamaATS_v1.Network
     using TatehamaATS_v1.Exceptions;
     using TrainCrewAPI;
 
-    public class Network
+    public class Network: IAsyncDisposable
     {
         private readonly TimeSpan _renewMargin = TimeSpan.FromMinutes(1);
         private readonly OpenIddictClientService _service;
@@ -689,9 +689,18 @@ namespace TatehamaATS_v1.Network
                 throw new ArgumentException("列番が無効です。");
             }
         }
+        
+        public async ValueTask DisposeAsync()
+        {
+            await Close();
+        }
 
         public async Task Close()
         {
+            if(_connection == null)
+            {
+                return;
+            }
             await _connection.StopAsync();
             await _connection.DisposeAsync();
         }
