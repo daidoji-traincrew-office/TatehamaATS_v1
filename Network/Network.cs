@@ -337,26 +337,32 @@ namespace TatehamaATS_v1.Network
             // トークンが切れていてリフレッシュトークンが有効な場合はリフレッシュ
             try
             {
-                if (!string.IsNullOrWhiteSpace(_refreshToken))
+                Debug.WriteLine("Try refresh token...");
+                await RefreshTokenWithHandlingAsync(CancellationToken.None);
+                await DisposeAndStopConnectionAsync(CancellationToken.None); // 古いクライアントを破棄
+                InitializeConnection(); // 新しいクライアントを初期化
+                isActionNeeded = await Connect(); // 新しいクライアントを開始
+                if (isActionNeeded)
                 {
-                    Debug.WriteLine("Try refresh token...");
-                    await RefreshTokenWithHandlingAsync(CancellationToken.None);
-                    await DisposeAndStopConnectionAsync(CancellationToken.None); // 古いクライアントを破棄
-                    InitializeConnection(); // 新しいクライアントを初期化
-                    isActionNeeded = await Connect(); // 新しいクライアントを開始
-                    if (isActionNeeded)
-                    {
-                        return true; // アクションが必要な場合はtrueを返す
-                    }
-
-                    SetEventHandlers(); // イベントハンドラを設定
-                    Debug.WriteLine("Reconnected with refreshed token.");
-                    return false; // アクションが必要ない場合はfalseを返す    
+                    return true; // アクションが必要な場合はtrueを返す
                 }
+
+                SetEventHandlers(); // イベントハンドラを設定
+                Debug.WriteLine("Reconnected with refreshed token.");
+                return false; // アクションが必要ない場合はfalseを返す    
             }
-            catch (OpenIddictExceptions.ProtocolException ex) when (ex.Error == OpenIddictConstants.Errors.InvalidGrant)
+            catch (OpenIddictExceptions.ProtocolException ex) 
+                when (ex.Error is 
+                          OpenIddictConstants.Errors.InvalidToken 
+                          or OpenIddictConstants.Errors.InvalidGrant
+                          or OpenIddictConstants.Errors.ExpiredToken)
             {
                 // ignore: リフレッシュトークンが無効な場合
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error during token refresh: {ex.Message}");
+                throw;
             }
 
             // リフレッシュトークンが無効な場合
