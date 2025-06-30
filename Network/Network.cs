@@ -351,13 +351,17 @@ namespace TatehamaATS_v1.Network
                 Debug.WriteLine("Reconnected with refreshed token.");
                 return false; // アクションが必要ない場合はfalseを返す    
             }
-            catch (OpenIddictExceptions.ProtocolException ex) 
-                when (ex.Error is 
-                          OpenIddictConstants.Errors.InvalidToken 
+            catch (OpenIddictExceptions.ProtocolException ex)
+                when (ex.Error is
+                          OpenIddictConstants.Errors.InvalidToken
                           or OpenIddictConstants.Errors.InvalidGrant
                           or OpenIddictConstants.Errors.ExpiredToken)
             {
                 // ignore: リフレッシュトークンが無効な場合
+            }
+            catch (InvalidOperationException)
+            {
+                // ignore: リフレッシュトークンが設定されていない場合
             }
             catch (Exception ex)
             {
@@ -387,6 +391,10 @@ namespace TatehamaATS_v1.Network
         /// <returns></returns>
         private async Task RefreshTokenWithHandlingAsync(CancellationToken cancellationToken)
         {
+            if(string.IsNullOrEmpty(_refreshToken))
+            {
+                throw new InvalidOperationException("Refresh token is not set.");
+            }
             var result = await _service.AuthenticateWithRefreshTokenAsync(new()
             {
                 CancellationToken = cancellationToken,
