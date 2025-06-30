@@ -594,6 +594,7 @@ namespace TatehamaATS_v1.Network
                     }
                     ServerDataUpdate?.Invoke(dataFromServer, currentStatus);
                     DataFromServer = dataFromServer;
+                    IsMaybeWarpIgnore = false;
                 }
                 else
                 {
@@ -604,7 +605,6 @@ namespace TatehamaATS_v1.Network
                     }
                     NetworkWorking?.Invoke();
                 }
-                IsMaybeWarpIgnore = false;
             }
             catch (WebSocketException e) when (e.WebSocketErrorCode == WebSocketError.ConnectionClosedPrematurely)
             {
@@ -704,6 +704,14 @@ namespace TatehamaATS_v1.Network
                 return;
             }
             IsTherePreviousTrainIgnore = DataFromServer.IsTherePreviousTrain;
+        }
+
+        public void IsMaybeWarpIgnoreSet()
+        {
+            if (DataFromServer == null)
+            {
+                return;
+            }
             IsMaybeWarpIgnore = DataFromServer.IsMaybeWarp;
         }
     }

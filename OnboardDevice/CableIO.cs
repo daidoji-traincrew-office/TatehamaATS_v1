@@ -381,6 +381,7 @@ namespace TatehamaATS_v1.OnboardDevice
             MaybeWarp = dataFromServer.IsMaybeWarp;
             ControlLED.OnPreviousTrain = dataFromServer.IsOnPreviousTrain;
             ControlLED.TherePreviousTrain = dataFromServer.IsTherePreviousTrain;
+            ControlLED.MaybeWarp = dataFromServer.IsMaybeWarp;
         }
 
         /// <summary>
@@ -438,6 +439,11 @@ namespace TatehamaATS_v1.OnboardDevice
         internal void IsTherePreviousTrainIgnore()
         {
             Network.IsTherePreviousTrainIgnoreSet();
+        }
+
+        internal void IsMaybeWarpIgnore()
+        {
+            Network.IsMaybeWarpIgnoreSet();
         }
     }
 }

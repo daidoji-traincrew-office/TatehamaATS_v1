@@ -240,6 +240,14 @@ namespace TatehamaATS_v1.MainWindow
         {
             if (e.Button == MouseButtons.Left)
             {
+                if (isLongPressed)
+                {
+                    //Todo: ATS復帰操作を送る
+                    Debug.WriteLine("ATS復帰");
+                    CableIO.ATSResetPush();
+                    CableIO.IsTherePreviousTrainIgnore();
+                    CableIO.IsMaybeWarpIgnore();
+                }
                 isLongPressed = false; // 初期化
                 longPressTimer.Start();
             }
@@ -271,13 +279,6 @@ namespace TatehamaATS_v1.MainWindow
 
         private void Image_Reset_Click(object sender, EventArgs e)
         {
-            if (isLongPressed)
-            {
-                //Todo: ATS復帰操作を送る
-                Debug.WriteLine("ATS復帰");
-                CableIO.ATSResetPush();
-                CableIO.IsTherePreviousTrainIgnore();
-            }
         }
 
         private void Image_ATSCut_MouseDown(object sender, MouseEventArgs e)
