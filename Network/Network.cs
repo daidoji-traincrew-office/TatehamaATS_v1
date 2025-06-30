@@ -586,7 +586,7 @@ namespace TatehamaATS_v1.Network
                     previousStatus = currentStatus;
                     //Debug.WriteLine($"{SendData}");        
                     DataFromServer dataFromServer;
-                    dataFromServer = await connection.InvokeAsync<DataFromServer>("SendData_ATS", SendData);
+                    dataFromServer = await _connection.InvokeAsync<DataFromServer>("SendData_ATS", SendData);
 
                     if (dataFromServer.IsOnPreviousTrain)
                     {
@@ -692,8 +692,8 @@ namespace TatehamaATS_v1.Network
 
         public async Task Close()
         {
-            await connection.StopAsync();
-            await connection.DisposeAsync();
+            await _connection.StopAsync();
+            await _connection.DisposeAsync();
         }
 
         public void IsTherePreviousTrainIgnoreSet()
