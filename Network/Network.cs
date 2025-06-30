@@ -49,6 +49,16 @@ namespace TatehamaATS_v1.Network
         internal bool IsBougo;
 
         /// <summary>
+        /// 早着撤去無視フラグ
+        /// </summary>
+        internal bool IsTherePreviousTrainIgnore;
+
+        /// <summary>
+        /// ワープ許容フラグ
+        /// </summary>
+        internal bool IsMaybeWarpIgnore;
+
+        /// <summary>
         /// 故障発生
         /// </summary>
         internal event Action<ATSCommonException> AddExceptionAction;
@@ -507,6 +517,8 @@ namespace TatehamaATS_v1.Network
                 SendData.CarStates = TcData.myTrainData.CarStates;
                 // まだない
                 SendData.Acceleration = 0.0f;
+                SendData.IsTherePreviousTrainIgnore = IsTherePreviousTrainIgnore;
+                SendData.IsMaybeWarpIgnore = IsMaybeWarpIgnore;
             }
             catch (Exception ex)
             {
@@ -585,6 +597,7 @@ namespace TatehamaATS_v1.Network
                     }
                     NetworkWorking?.Invoke();
                 }
+                IsMaybeWarpIgnore = false;
             }
             catch (WebSocketException e) when (e.WebSocketErrorCode == WebSocketError.ConnectionClosedPrematurely)
             {
@@ -672,8 +685,19 @@ namespace TatehamaATS_v1.Network
 
         public async Task Close()
         {
-            await _connection.StopAsync();
-            await _connection.DisposeAsync();
+            await connection.StopAsync();
+            await connection.DisposeAsync();
+        }
+
+        public void IsTherePreviousTrainIgnoreSet()
+        {
+            // 早着撤去無視フラグをセット、早着状態なら無視フラグ設定できる。
+            if (DataFromServer == null)
+            {
+                return;
+            }
+            IsTherePreviousTrainIgnore = DataFromServer.IsTherePreviousTrain;
+            IsMaybeWarpIgnore = DataFromServer.IsMaybeWarp;
         }
     }
 }
