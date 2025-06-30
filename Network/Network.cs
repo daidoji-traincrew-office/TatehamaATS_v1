@@ -159,6 +159,10 @@ namespace TatehamaATS_v1.Network
             }
         }
 
+        /// <summary>
+        /// インタラクティブ認証を行い、SignalR接続を試みる
+        /// </summary>
+        /// <returns>ユーザーのアクションが必要かどうか</returns>
         public async Task<bool> Authorize()
         {
             // 認証を行う
@@ -203,7 +207,8 @@ namespace TatehamaATS_v1.Network
                 // Ask OpenIddict to initiate the authentication flow (typically, by starting the system browser).
                 var result = await _service.ChallengeInteractivelyAsync(new()
                 {
-                    CancellationToken = source.Token
+                    CancellationToken = source.Token,
+                    Scopes = []
                 });
 
                 // Wait for the user to complete the authorization process.             
@@ -321,7 +326,7 @@ namespace TatehamaATS_v1.Network
         /// <summary>
         /// 再接続を試みます。
         /// </summary>
-        /// <returns></returns>
+        /// <returns>ユーザーによるアクションが必要かどうか(=すなわち、再接続ループを打ち切るべきかどうか)</returns>
         private async Task<bool> TryReconnectOnceAsync()
         {
             bool isActionNeeded;
@@ -371,16 +376,21 @@ namespace TatehamaATS_v1.Network
 
             // リフレッシュトークンが無効な場合
             Debug.WriteLine("Refresh token is invalid or expired.");
-            TaskDialog.ShowDialog(new TaskDialogPage
+            var e = new NetworkAuthorizeException(7, "アクセストークン/リフレッシュトークン無効");
+            AddExceptionAction.Invoke(e);
+            if (connectErrorDialog) return false;
+            connectErrorDialog = true;
+            DialogResult dialogResult = MessageBox.Show(
+                "トークンが切れました。\n再認証してください。\n※いいえを選択した場合、再認証にはATS再起動が必要です。",
+                "認証失敗 | 館浜ATS - ダイヤ運転会", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
+            if (dialogResult == DialogResult.Yes)
             {
-                Caption = "再認証が必要です",
-                Heading = "Discord再認証が必要です",
-                Icon = TaskDialogIcon.Warning,
-                Text = "認証情報の有効期限が切れました。再度ログインしてください。"
-            });
-            var result = await Authorize();
+                var r = await Authorize(); 
+                connectErrorDialog = false;
+                return r;
+            }
             Debug.WriteLine("Reconnected after re-authentication.");
-            return result;
+            return true;
         }
 
 
@@ -391,10 +401,11 @@ namespace TatehamaATS_v1.Network
         /// <returns></returns>
         private async Task RefreshTokenWithHandlingAsync(CancellationToken cancellationToken)
         {
-            if(string.IsNullOrEmpty(_refreshToken))
+            if (string.IsNullOrEmpty(_refreshToken))
             {
                 throw new InvalidOperationException("Refresh token is not set.");
             }
+
             var result = await _service.AuthenticateWithRefreshTokenAsync(new()
             {
                 CancellationToken = cancellationToken,
