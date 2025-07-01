@@ -521,6 +521,16 @@ namespace TatehamaATS_v1.Network
 
                     connectErrorDialog = false;
                 }
+                // Disposeされた接続を使用しようとした場合のエラー(呼び出し側にインスタンス再作成を促すため、breakでループを止める)
+                catch (InvalidOperationException ex)
+                {
+                    Debug.WriteLine("Maybe using diposed connection");
+                    connected = false;
+                    ConnectionStatusChanged?.Invoke(connected);
+                    var e = new NetworkConnectException(7, "通信部接続失敗", ex);
+                    AddExceptionAction.Invoke(e);
+                    break;
+                }
                 catch (Exception ex)
                 {
                     Debug.WriteLine("_connection Error!!");
