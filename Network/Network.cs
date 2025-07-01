@@ -541,6 +541,8 @@ namespace TatehamaATS_v1.Network
                     ConnectionStatusChanged?.Invoke(connected);
                     var e = new NetworkConnectException(7, "通信部接続失敗", ex);
                     AddExceptionAction.Invoke(e);
+                    // 一旦接続を破棄して再初期化
+                    await DisposeAndStopConnectionAsync(CancellationToken.None);
                     InitializeConnection();
                 }
                 catch (Exception ex)
