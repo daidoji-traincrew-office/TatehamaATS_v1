@@ -442,7 +442,7 @@ namespace TatehamaATS_v1.Network
             }
 
             _connection = new HubConnectionBuilder()
-                .WithUrl($"{ServerAddress.SignalAddress}/hub/tid?access_token={_token}")
+                .WithUrl($"{ServerAddress.SignalAddress}/hub/train?access_token={_token}")
                 .Build();
         }
 
