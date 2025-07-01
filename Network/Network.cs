@@ -23,6 +23,7 @@ namespace TatehamaATS_v1.Network
         private static string _token = "";
         private string _refreshToken = "";
         private DateTimeOffset _tokenExpiration = DateTimeOffset.MinValue;
+        private bool _eventHandlersSet = false;
 
         public static bool connected { get; set; } = false;
 
@@ -336,6 +337,11 @@ namespace TatehamaATS_v1.Network
                 Debug.WriteLine("Try reconnect with current token...");
                 isActionNeeded = await Connect();
                 Debug.WriteLine("Reconnected with current token.");
+                if (isActionNeeded)
+                {
+                    return true; // アクションが必要な場合はtrueを返す
+                }
+                SetEventHandlers(); // イベントハンドラを設定
                 return isActionNeeded;
             }
 
@@ -444,6 +450,7 @@ namespace TatehamaATS_v1.Network
             _connection = new HubConnectionBuilder()
                 .WithUrl($"{ServerAddress.SignalAddress}/hub/train?access_token={_token}")
                 .Build();
+            _eventHandlersSet = false;
         }
 
         // SignalR接続のイベントハンドラ設定
@@ -452,6 +459,10 @@ namespace TatehamaATS_v1.Network
             if (_connection == null)
             {
                 throw new InvalidOperationException("_connection is not initialized.");
+            }
+            if (_eventHandlersSet)
+            {
+                return; // イベントハンドラは一度だけ設定する
             }
 
             _connection.Closed += async (error) =>
@@ -468,13 +479,14 @@ namespace TatehamaATS_v1.Network
                 // 接続が切れた場合、再接続を試みる
                 await TryReconnectAsync();
             };
+            _eventHandlersSet = true;
         }
 
 
         /// <summary>
         /// 接続処理
         /// </summary>
-        /// <returns></returns>
+        /// <returns>ユーザーのアクションが必要かどうか</returns>
         private async Task<bool> Connect()
         {
             AddExceptionAction?.Invoke(new NetworkConnectException(7, "通信部接続失敗"));
@@ -521,15 +533,15 @@ namespace TatehamaATS_v1.Network
 
                     connectErrorDialog = false;
                 }
-                // Disposeされた接続を使用しようとした場合のエラー(呼び出し側にインスタンス再作成を促すため、breakでループを止める)
+                // Disposeされた接続を使用しようとした場合のエラー
                 catch (InvalidOperationException ex)
                 {
-                    Debug.WriteLine("Maybe using diposed connection");
+                    Debug.WriteLine("Maybe using disposed connection");
                     connected = false;
                     ConnectionStatusChanged?.Invoke(connected);
                     var e = new NetworkConnectException(7, "通信部接続失敗", ex);
                     AddExceptionAction.Invoke(e);
-                    break;
+                    InitializeConnection();
                 }
                 catch (Exception ex)
                 {
