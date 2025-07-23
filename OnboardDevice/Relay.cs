@@ -65,9 +65,7 @@ namespace TatehamaATS_v1.OnboardDevice
         private int BeforeBrake = 0;
 
         private List<SignalData> SignalDatas = new List<SignalData>();
-        private List<Route> ServerRoutes = new List<Route>();
         private List<Route> TrainCrewRoutes = new List<Route>();
-        private int RouteCounta = 0;
 
         private Dictionary<string, string> StaNameById = new Dictionary<string, string>()
         {
