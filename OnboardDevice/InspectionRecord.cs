@@ -177,6 +177,7 @@ namespace TatehamaATS_v1.OnboardDevice
                 }
                 switch (exception.ToCode())
                 {
+                    case "395":
                     case "397":
                     case "5CC":
                     case "7ED":
