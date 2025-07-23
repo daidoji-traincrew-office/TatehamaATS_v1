@@ -487,7 +487,7 @@ namespace TatehamaATS_v1.OnboardDevice
                 }
                 SetStaStop(OverrideDiaName);
                 Debug.WriteLine($"☆API送信: SetRoute/{route.TcName}");
-                SendSingleCommand("SetRoute", [staName, routeName, indicator, TcData.myTrainData.diaName, StaStopById[r[0]]);
+                SendSingleCommand("SetRoute", [staName, routeName, indicator, TcData.myTrainData.diaName, StaStopById[r[0]]]);
             }
             catch (Exception ex)
             {
