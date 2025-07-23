@@ -480,13 +480,13 @@ namespace TatehamaATS_v1.OnboardDevice
                         break;
                     case RouteType.Departure:
                         indicator = TypeString(OverrideDiaName);
+                        SetStaStop(indicator);
                         break;
                     default:
                         indicator = "";
                         break;
                 }
-                SetStaStop(OverrideDiaName);
-                Debug.WriteLine($"☆API送信: SetRoute/{route.TcName}");
+                Debug.WriteLine($"☆API送信: SetRoute/{route.TcName}/{StaStopById[r[0]]}");
                 SendSingleCommand("SetRoute", [staName, routeName, indicator, TcData.myTrainData.diaName, StaStopById[r[0]]]);
             }
             catch (Exception ex)
