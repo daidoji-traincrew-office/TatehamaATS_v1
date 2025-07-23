@@ -86,6 +86,23 @@ namespace TatehamaATS_v1.OnboardDevice
             {"TH58","赤山町"}
         };
 
+        private Dictionary<string, string> StaStopById = new Dictionary<string, string>()
+        {
+            {"TH76","停車"},
+            {"TH75","停車"},
+            {"TH71","停車"},
+            {"TH70","停車"},
+            {"TH67","停車"},
+            {"TH66S","停車"},
+            {"TH65","停車"},
+            {"TH64","停車"},
+            {"TH63","停車"},
+            {"TH62","停車"},
+            {"TH61","停車"},
+            {"TH59","停車"},
+            {"TH58","停車"}
+        };
+
         /// <summary>
         /// 運転会列番
         /// </summary>
@@ -468,8 +485,9 @@ namespace TatehamaATS_v1.OnboardDevice
                         indicator = "";
                         break;
                 }
+                SetStaStop(OverrideDiaName);
                 Debug.WriteLine($"☆API送信: SetRoute/{route.TcName}");
-                SendSingleCommand("SetRoute", [staName, routeName, indicator, TcData.myTrainData.diaName, "停車"]);
+                SendSingleCommand("SetRoute", [staName, routeName, indicator, TcData.myTrainData.diaName, StaStopById[r[0]]);
             }
             catch (Exception ex)
             {
@@ -543,6 +561,121 @@ namespace TatehamaATS_v1.OnboardDevice
                 return "普通";
             }
             return "回送";
+        }
+
+        private void SetStaStop(string name)
+        {
+            switch (name)
+            {
+                case "普通":
+                    StaStopById = new Dictionary<string, string>()
+                        {
+                            {"TH76","停車"},
+                            {"TH75","停車"},
+                            {"TH71","停車"},
+                            {"TH70","停車"},
+                            {"TH67","停車"},
+                            {"TH66S","停車"},
+                            {"TH65","停車"},
+                            {"TH64","停車"},
+                            {"TH63","停車"},
+                            {"TH62","停車"},
+                            {"TH61","停車"},
+                            {"TH59","停車"},
+                            {"TH58","停車"}
+                        };
+                    break;
+                case "準急":
+                    StaStopById = new Dictionary<string, string>()
+                        {
+                            {"TH76","停車"},
+                            {"TH75","停車"},
+                            {"TH71","通過"},
+                            {"TH70","停車"},
+                            {"TH67","停車"},
+                            {"TH66S","停車"},
+                            {"TH65","停車"},
+                            {"TH64","停車"},
+                            {"TH63","停車"},
+                            {"TH62","停車"},
+                            {"TH61","停車"},
+                            {"TH59","停車"},
+                            {"TH58","停車"}
+                        };
+                    break;
+                case "急行":
+                    StaStopById = new Dictionary<string, string>()
+                        {
+                            {"TH76","停車"},
+                            {"TH75","通過"},
+                            {"TH71","通過"},
+                            {"TH70","通過"},
+                            {"TH67","停車"},
+                            {"TH66S","停車"},
+                            {"TH65","停車"},
+                            {"TH64","停車"},
+                            {"TH63","停車"},
+                            {"TH62","停車"},
+                            {"TH61","停車"},
+                            {"TH59","停車"},
+                            {"TH58","停車"}
+                        };
+                    break;
+                case "快速急行":
+                    StaStopById = new Dictionary<string, string>()
+                        {
+                            {"TH76","停車"},
+                            {"TH75","通過"},
+                            {"TH71","通過"},
+                            {"TH70","通過"},
+                            {"TH67","停車"},
+                            {"TH66S","停車"},
+                            {"TH65","停車"},
+                            {"TH64","停車"},
+                            {"TH63","停車"},
+                            {"TH62","通過"},
+                            {"TH61","停車"},
+                            {"TH59","通過"},
+                            {"TH58","停車"}
+                        };
+                    break;
+                case "A特":
+                    StaStopById = new Dictionary<string, string>()
+                        {
+                            {"TH76","停車"},
+                            {"TH75","通過"},
+                            {"TH71","通過"},
+                            {"TH70","通過"},
+                            {"TH67","通過"},
+                            {"TH66S","通過"},
+                            {"TH65","通過"},
+                            {"TH64","通過"},
+                            {"TH63","通過"},
+                            {"TH62","通過"},
+                            {"TH61","通過"},
+                            {"TH59","通過"},
+                            {"TH58","通過"}
+                        };
+                    break;
+                case "回送":
+                    StaStopById = new Dictionary<string, string>()
+                        {
+                            {"TH76","停車"},
+                            {"TH75","通過"},
+                            {"TH71","通過"},
+                            {"TH70","通過"},
+                            {"TH67","通過"},
+                            {"TH66S","停車"},
+                            {"TH65","通過"},
+                            {"TH64","通過"},
+                            {"TH63","通過"},
+                            {"TH62","通過"},
+                            {"TH61","通過"},
+                            {"TH59","通過"},
+                            {"TH58","通過"}
+                        };
+                    break;
+            }
         }
 
         internal async Task SendSingleCommand(string command, string[] request)
