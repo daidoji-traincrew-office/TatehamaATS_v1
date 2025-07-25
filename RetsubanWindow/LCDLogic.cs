@@ -15,6 +15,8 @@ namespace TatehamaATS_v1.RetsubanWindow
         private List<string> LCDFontList = new List<string>();
 
         private bool nowUnkoSetting = false;
+        private bool nowStopSetting = false;
+        private int nowStopCount = 0;
 
         private bool nowVerDisplay = false;
 
@@ -26,6 +28,14 @@ namespace TatehamaATS_v1.RetsubanWindow
         private AudioWrapper beep1;
         private AudioWrapper beep2;
         private AudioWrapper beep3;
+
+        private string しあしあ欲しいものリスト公開待機;
+
+        /// <summary>
+        /// 設定情報変更
+        /// </summary>                                 
+        internal event Action<string, string> SetType;
+        internal event Action<string, string> SetStaStop;
 
         internal LCDLogic(PictureBox lcd)
         {
@@ -130,6 +140,11 @@ namespace TatehamaATS_v1.RetsubanWindow
             }
 
             return displayList;
+        }
+
+        private string GetUnkoString()
+        {
+            return GetAvailableChar("シュベツ:" + ServerAddress.Version.Split('-')[0].Replace("v", "") + "\n" + (ServerAddress.Version.Contains("de") ? "DEV" : "PROD") + (ServerAddress.Version.Contains("standalone") ? "　STANDALONE" : ServerAddress.Version.Contains("handbuild") ? "　HAND-BUILD" : ""));
         }
 
         private string GetVerString()
@@ -290,18 +305,28 @@ namespace TatehamaATS_v1.RetsubanWindow
                     return;
                 case "Clear":
                     return;
-                case "UnkoSet":
-                    return;
-                case "StopSet":
-                    return;
                 case "VerDisplay":
                     nowVerDisplay = !nowVerDisplay;
+                    beep1.PlayOnce(1.0f);
+                    return;
+                case "UnkoSet":
+                    nowVerDisplay = false;
+                    nowUnkoSetting = true;
+                    nowStopSetting = false;
+                    beep1.PlayOnce(1.0f);
+                    return;
+                case "StopSet":
+                    nowVerDisplay = false;
+                    nowUnkoSetting = false;
+                    nowStopSetting = true;
                     beep1.PlayOnce(1.0f);
                     return;
                 case "RetsuSet":
                 case "CarSet":
                 case "TimeSet":
                     nowVerDisplay = false;
+                    nowUnkoSetting = false;
+                    nowStopSetting = false;
                     return;
             }
         }

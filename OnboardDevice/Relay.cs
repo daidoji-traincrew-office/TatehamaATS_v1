@@ -67,39 +67,6 @@ namespace TatehamaATS_v1.OnboardDevice
         private List<SignalData> SignalDatas = new List<SignalData>();
         private List<Route> TrainCrewRoutes = new List<Route>();
 
-        private Dictionary<string, string> StaNameById = new Dictionary<string, string>()
-        {
-            {"TH76","館浜"},
-            {"TH75","駒野"},
-            {"TH71","津崎"},
-            {"TH70","浜園"},
-            {"TH67","新野崎"},
-            {"TH66S","江ノ原信号場"},
-            {"TH65","大道寺"},
-            {"TH64","藤江"},
-            {"TH63","水越"},
-            {"TH62","高見沢"},
-            {"TH61","日野森"},
-            {"TH59","西赤山"},
-            {"TH58","赤山町"}
-        };
-
-        private Dictionary<string, string> StaStopById = new Dictionary<string, string>()
-        {
-            {"TH76","停車"},
-            {"TH75","停車"},
-            {"TH71","停車"},
-            {"TH70","停車"},
-            {"TH67","停車"},
-            {"TH66S","停車"},
-            {"TH65","停車"},
-            {"TH64","停車"},
-            {"TH63","停車"},
-            {"TH62","停車"},
-            {"TH61","停車"},
-            {"TH59","停車"},
-            {"TH58","停車"}
-        };
 
         /// <summary>
         /// 運転会列番
