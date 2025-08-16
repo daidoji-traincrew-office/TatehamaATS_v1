@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using TakumiteAudioWrapper;
+using TatehamaATS_v1.OnboardDevice;
 using TrainCrewAPI;
 
 namespace TatehamaATS_v1.RetsubanWindow
@@ -20,6 +21,8 @@ namespace TatehamaATS_v1.RetsubanWindow
 
         private bool nowVerDisplay = false;
 
+        internal StopPassManager StopPassManager;
+
         private PictureBox LCD { get; set; }
         private string Retsuban;
         private string Car;
@@ -28,8 +31,6 @@ namespace TatehamaATS_v1.RetsubanWindow
         private AudioWrapper beep1;
         private AudioWrapper beep2;
         private AudioWrapper beep3;
-
-        private string しあしあ欲しいものリスト公開待機;
 
         /// <summary>
         /// 設定情報変更
@@ -71,6 +72,7 @@ namespace TatehamaATS_v1.RetsubanWindow
         public void SetRetsuban(string retsuban)
         {
             Retsuban = retsuban.Replace("X", "x").Replace("Y", "y").Replace("Z", "z");
+            StopPassManager.TypeString(Retsuban);
         }
 
         public void SetCar(string car)
