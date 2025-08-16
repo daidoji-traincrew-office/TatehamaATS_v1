@@ -95,7 +95,7 @@ namespace TatehamaATS_v1.RetsubanWindow
                 }
             }
         }
-             
+
         /// <summary>
         /// 時間部描画
         /// </summary>
@@ -158,6 +158,7 @@ namespace TatehamaATS_v1.RetsubanWindow
                         var newHour = Int32.Parse(NewHour);
                         newHour = newHour + 24;
                         ShiftTime = TimeSpan.FromHours(newHour - DateTime.Now.Hour);
+                        nowSetting = false;
                         beep2.PlayOnce(1.0f);
                     }
                     return;
