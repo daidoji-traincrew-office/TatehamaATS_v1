@@ -13,6 +13,7 @@ using System.Windows.Documents;
 using System.Windows.Forms;
 using TakumiteAudioWrapper;
 using TatehamaATS_v1.Exceptions;
+using TatehamaATS_v1.OnboardDevice;
 using TrainCrewAPI;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -34,6 +35,7 @@ namespace TatehamaATS_v1.RetsubanWindow
 
     public partial class RetsubanWindow : Form
     {
+        internal StopPassManager StopPassManager;
         private RetsubanLogic retsubanLogic;
         private TimeLogic timeLogic;
         private LCDLogic LCDLogic;
@@ -57,7 +59,7 @@ namespace TatehamaATS_v1.RetsubanWindow
             retsubanLogic = new RetsubanLogic(Retsuban_Head, new PictureBox[] { Retsuban_4, Retsuban_3, Retsuban_2, Retsuban_1 }, Retsuban_Tail, Car_2, Car_1);
             retsubanLogic.SetDiaNameAction += OnSetDiaName;
             timeLogic = new TimeLogic(Time_h2, Time_h1, Time_m2, Time_m1, Time_s2, Time_s1);
-            LCDLogic = new LCDLogic(LCD);
+            LCDLogic = new LCDLogic(LCD) { StopPassManager = StopPassManager };
             retsubanLogic.SetCarAction += LCDLogic.SetCar;
         }
         private void OnSetDiaName(string retsuban)

@@ -25,7 +25,6 @@ namespace TatehamaATS_v1.MainWindow
         private bool isLongPressHandled = false; // 長押し処理を1回だけ実行するためのフラグ
 
         private CableIO CableIO;
-        private RetsubanWindow.RetsubanWindow retsubanWindow = new RetsubanWindow.RetsubanWindow();
 
         //TopMost切替用
         private const int HOTKEY_ID = 1; // ホットキーID
@@ -103,9 +102,6 @@ namespace TatehamaATS_v1.MainWindow
             CableIO.isTransferChenge += TransferLamp;
             CableIO.isNetworkChenge += NetworkLamp;
             Application.ApplicationExit += new EventHandler(Application_ApplicationExit);
-
-            retsubanWindow.AddExceptionAction += CableIO.AddException;
-            retsubanWindow.SetDiaNameAction += CableIO.RetsubanSet;
         }
 
         /// <summary>
@@ -214,14 +210,7 @@ namespace TatehamaATS_v1.MainWindow
 
         private void Image_Retsuban_Click(object sender, EventArgs e)
         {
-            if (retsubanWindow.Visible)
-            {
-                retsubanWindow.Hide();
-            }
-            else
-            {
-                retsubanWindow.Show();
-            }
+            CableIO.RetsubanWinChenge();
         }
 
         private void Image_Kokuchi_Click(object sender, EventArgs e)

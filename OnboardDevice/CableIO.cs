@@ -18,7 +18,7 @@ namespace TatehamaATS_v1.OnboardDevice
         /// <summary>
         /// 継電部
         /// </summary>
-        Relay Relay = new Relay();
+        Relay Relay;
 
         /// <summary>
         /// LED制御部
@@ -38,12 +38,14 @@ namespace TatehamaATS_v1.OnboardDevice
         /// <summary>
         /// 運転告知器
         /// </summary>
-        KokuchiWindow.KokuchiWindow KokuchiWindow = new KokuchiWindow.KokuchiWindow();
+        KokuchiWindow.KokuchiWindow KokuchiWindow;
 
         /// <summary>
         /// 試験用ウィンドウ
         /// </summary>
-        TestWindow.TestWindow TestWindow = new TestWindow.TestWindow();
+        TestWindow.TestWindow TestWindow;
+
+        private RetsubanWindow.RetsubanWindow RetsubanWindow;
 
         /// <summary>
         /// ゲーム内時間
@@ -121,6 +123,8 @@ namespace TatehamaATS_v1.OnboardDevice
             Speaker = new ConsoleSpeaker();
             ATSPower_On();
 
+            var stopPassManager = new StopPassManager();
+
             Network = new Network(service);
             Network.AddExceptionAction += AddException;
             Network.NetworkWorking += NetworkWorking;
@@ -128,7 +132,10 @@ namespace TatehamaATS_v1.OnboardDevice
             Network.ConnectionStatusChanged += NetworkStatesChenged;
             Network.RetsubanInOutStatusChanged += ForceStopSignal;
 
-            Relay = new Relay();
+            Relay = new Relay()
+            {
+                StopPassManager = stopPassManager,
+            };
             Relay.AddExceptionAction += AddException;
             Relay.TrainCrewDataUpdated += RelayUpdatad;
             Relay.ConnectionStatusChanged += RelayStatesChenged;
@@ -141,8 +148,12 @@ namespace TatehamaATS_v1.OnboardDevice
             KokuchiWindow = new KokuchiWindow.KokuchiWindow();
             KokuchiWindow.Hide();
 
+            RetsubanWindow = new RetsubanWindow.RetsubanWindow() { StopPassManager = stopPassManager };
+            RetsubanWindow.AddExceptionAction += AddException;
+            RetsubanWindow.SetDiaNameAction += RetsubanSet;
+
             TestWindow = new TestWindow.TestWindow();
-            KokuchiWindow.Hide();
+            TestWindow.Hide();
 
             ControlLED.AddExceptionAction += AddException;
         }
@@ -289,6 +300,21 @@ namespace TatehamaATS_v1.OnboardDevice
         }
 
         /// <summary>
+        /// 列番Win表示指示指令線
+        /// </summary>
+        internal void RetsubanWinChenge()
+        {
+            if (RetsubanWindow.Visible)
+            {
+                RetsubanWindow.Hide();
+            }
+            else
+            {
+                RetsubanWindow.Show();
+            }
+        }
+
+        /// <summary>
         /// LEDWin表示指示指令線
         /// </summary>
         internal void LEDWinChenge()
@@ -302,6 +328,7 @@ namespace TatehamaATS_v1.OnboardDevice
                 ControlLED.LEDShow();
             }
         }
+
         /// <summary>
         /// 告知Win表示指示指令線
         /// </summary>
