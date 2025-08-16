@@ -148,7 +148,7 @@ namespace TatehamaATS_v1.OnboardDevice
             KokuchiWindow = new KokuchiWindow.KokuchiWindow();
             KokuchiWindow.Hide();
 
-            RetsubanWindow = new RetsubanWindow.RetsubanWindow() { StopPassManager = stopPassManager };
+            RetsubanWindow = new RetsubanWindow.RetsubanWindow(stopPassManager);
             RetsubanWindow.AddExceptionAction += AddException;
             RetsubanWindow.SetDiaNameAction += RetsubanSet;
 

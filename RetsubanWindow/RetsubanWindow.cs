@@ -35,7 +35,6 @@ namespace TatehamaATS_v1.RetsubanWindow
 
     public partial class RetsubanWindow : Form
     {
-        internal StopPassManager StopPassManager;
         private RetsubanLogic retsubanLogic;
         private TimeLogic timeLogic;
         private LCDLogic LCDLogic;
@@ -50,7 +49,7 @@ namespace TatehamaATS_v1.RetsubanWindow
         /// </summary>
         internal event Action<string> SetDiaNameAction;
 
-        public RetsubanWindow()
+        internal RetsubanWindow(StopPassManager stopPassManager)
         {
             InitializeComponent();
             this.Load += Loaded;
@@ -59,7 +58,7 @@ namespace TatehamaATS_v1.RetsubanWindow
             retsubanLogic = new RetsubanLogic(Retsuban_Head, new PictureBox[] { Retsuban_4, Retsuban_3, Retsuban_2, Retsuban_1 }, Retsuban_Tail, Car_2, Car_1);
             retsubanLogic.SetDiaNameAction += OnSetDiaName;
             timeLogic = new TimeLogic(Time_h2, Time_h1, Time_m2, Time_m1, Time_s2, Time_s1);
-            LCDLogic = new LCDLogic(LCD) { StopPassManager = StopPassManager };
+            LCDLogic = new LCDLogic(LCD) { StopPassManager = stopPassManager };
             retsubanLogic.SetCarAction += LCDLogic.SetCar;
         }
         private void OnSetDiaName(string retsuban)

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,6 +10,7 @@ namespace TatehamaATS_v1.OnboardDevice
     internal class StopPassManager
     {
         internal String TypeName = "";
+        internal String TypeNameKana = "";
 
         private Dictionary<string, string> StaNameById = new Dictionary<string, string>()
         {{"TH76","館浜"},{"TH75","駒野"},{"TH74","河原崎"},{"TH73","海岸公園"},{"TH72","虹ケ浜"},{"TH71","津崎"},{"TH70","浜園"},{"TH69","羽衣橋"},{"TH68","新井川"},{"TH67","新野崎"},{"TH66","江ノ原"},{"TH66S","江ノ原信号場"},{"TH65","大道寺"},{"TH64","藤江"},{"TH63","水越"},{"TH62","高見沢"},{"TH61","日野森"},{"TH60","奥峯口"},{"TH59","西赤山"},{"TH58","赤山町"},{"TH57","三郷"},{"TH56","明神川"},{"TH55S","珠川信号場"},{"TH55","珠川温泉"},{"TH54","上吉沢"},{"TH53","下吉沢"},{"TH52","名田"},{"TH51","三石"},{"TH50","二木戸"},{"TH49","白石町"},{"TH48","東井"},{"TH47","桜坂"},{"TH46","新大路"},{"TH45","大路"},{"TH44","常盤通"},{"TH43","広小路"},{"TH42","田村"},{"TH41","二ツ山"},{"TH40","小沼"},{"TH39","六日市町"},{"TH38","朝日ヶ丘"},{"TH37","大野宮"},{"TH36","沢井"},{"TH35","箕田"},{"TH34","江西"},{"TH33","大和田町"},{"TH32","木之本"},{"TH31","新長野公園"},{"TH30","長野本町"},{"TH29","高砂町"},{"TH28","東福"},{"TH27","千里が丘"},{"TH26","矢木"},{"TH25","北美"},{"TH24","緑ヶ丘"},{"TH23","町沢"},{"TH22","大原"},{"TH21","本郷"},{"TH20","五十川"},{"TH19","出屋敷前"},{"TH18","佐川"},{"TH17","夕陽が丘"},{"TH16","五日市"},{"TH15","南五日市"},{"TH14","高井戸八幡"},{"TH13","南八幡"},{"TH12","学院前"},{"TH11","中道"},{"TH10","佐野"},{"TH09","小手川"},{"TH08","南吉岡"},{"TH07","宮の前"},{"TH06","神宮橋"},{"TH05","宮松町"},{"TH04","青木町"},{"TH03","新町"},{"TH02","三番街"},{"TH01","大手橋"},{"TH00","ダミー"},}
@@ -67,51 +69,61 @@ namespace TatehamaATS_v1.OnboardDevice
             if (Retsuban == "9999")
             {
                 TypeName = "";
+                TypeNameKana = "";
                 return;
             }
             if (Retsuban.Contains("溝月"))
             {
                 TypeName = "回送";
+                TypeNameKana = "ミゾツキレイル";
                 return;
             }
             if (Retsuban.StartsWith("回"))
             {
                 TypeName = "回送";
+                TypeNameKana = "カイソウ";
                 return;
             }
             if (Retsuban.StartsWith("試"))
             {
                 TypeName = "回送";
+                TypeNameKana = "シウンテン";
                 return;
             }
             if (Retsuban.Contains("A"))
             {
                 TypeName = "D特";
+                TypeNameKana = "D特";
                 return;
             }
             if (Retsuban.Contains("K"))
             {
                 TypeName = "快速急行";
+                TypeNameKana = "カイキュウ";
                 return;
             }
             if (Retsuban.Contains("B"))
             {
                 TypeName = "急行";
+                TypeNameKana = "キュウコウ";
                 return;
             }
             if (Retsuban.Contains("C"))
             {
                 TypeName = "準急";
+                TypeNameKana = "ジュンキュウ";
                 return;
             }
             if (Retsuban.StartsWith("臨"))
             {
                 TypeName = "回送";
+                TypeNameKana = "リンジ";
                 return;
             }
             if (int.TryParse(Retsuban, null, out _))
             {
                 TypeName = "普通";
+                TypeNameKana = "フツウ";
                 return;
             }
             TypeName = "回送";
@@ -256,7 +268,7 @@ namespace TatehamaATS_v1.OnboardDevice
             //宮の前
             //　急行と同じ
             //大手橋   
-            if (TypeName == "快急")
+            if (TypeName == "快速急行")
             {
                 // 快急停車駅までで抜ける
                 return;
@@ -265,11 +277,11 @@ namespace TatehamaATS_v1.OnboardDevice
             //館浜
             //　快急と同じ
             //新井川
-            SetStopDataById("TH68", "通過");  //新野崎
+            SetStopDataById("TH67", "通過");  //新野崎
             //江ノ原　通過済み
             //大道寺
             SetStopDataById("TH65", "通過");  //藤江
-            SetStopDataById("TH64", "通過");  //水越
+            SetStopDataById("TH63", "通過");  //水越
             //高見沢　通過済み
             SetStopDataById("TH61", "通過");  //日野森
             //奥峯口
@@ -344,6 +356,11 @@ namespace TatehamaATS_v1.OnboardDevice
             {
                 StopDataById[key] = "停車"; // 全ての駅の停車データを「停車」にリセット
             }
+        }
+
+        public override string ToString()
+        {
+            return TypeName + " " + string.Join(" ", StopDataById.Select(kv => $"{kv.Key}:{kv.Value}"));
         }
     }
 }

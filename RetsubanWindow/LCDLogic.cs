@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -73,6 +74,8 @@ namespace TatehamaATS_v1.RetsubanWindow
         {
             Retsuban = retsuban.Replace("X", "x").Replace("Y", "y").Replace("Z", "z");
             StopPassManager.TypeString(Retsuban);
+            StopPassManager.TypeToStop();
+            Debug.WriteLine(StopPassManager);
         }
 
         public void SetCar(string car)
@@ -159,7 +162,7 @@ namespace TatehamaATS_v1.RetsubanWindow
             if (string.IsNullOrEmpty(Retsuban)) return GetAvailableChar($"レツバン ミセッテイ\nセッテイシテクダサイ");
             if (Retsuban == "9999") return GetAvailableChar($"9999 フテイリョウスウ\nダミーレツバン\n");
             if (string.IsNullOrEmpty(Car)) return GetAvailableChar($"リョウスウ ミセッテイ\nセッテイシテクダサイ");
-            return GetAvailableChar($"{Retsuban} {Car}リョウ\nレッシャジョウホウヒョウジ\nタイオウサギョウチュウ");
+            return GetAvailableChar($"{Retsuban} {Car}リョウ\n{StopPassManager.TypeNameKana} イキサキフメイ");
         }
 
         /// <summary>
