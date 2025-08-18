@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using TakumiteAudioWrapper;
 using TatehamaATS_v1.OnboardDevice;
 using TrainCrewAPI;
@@ -16,9 +17,11 @@ namespace TatehamaATS_v1.RetsubanWindow
 
         private List<string> LCDFontList = new List<string>();
 
-        private bool nowUnkoSetting = false;
-        private bool nowStopSetting = false;
+        private int nowUnkoSetting = -1;
+        private int nowStopSetting = -1;
         private int nowStopCount = 0;
+
+        private string nowInput;
 
         private bool nowVerDisplay = false;
 
@@ -74,6 +77,8 @@ namespace TatehamaATS_v1.RetsubanWindow
         {
             Retsuban = retsuban.Replace("X", "x").Replace("Y", "y").Replace("Z", "z");
             StopPassManager.TypeString(Retsuban);
+            StopPassManager.TypeNameTC = StopPassManager.TypeStringTC(StopPassManager.TypeName);
+            StopPassManager.TypeNameKana = StopPassManager.TypeStringKana(StopPassManager.TypeName);
             StopPassManager.TypeToStop();
             Debug.WriteLine(StopPassManager);
         }
@@ -118,10 +123,24 @@ namespace TatehamaATS_v1.RetsubanWindow
 
         private List<string> GetDisplayList()
         {
+            var displayList = new List<string>();
+            //表示文字列がないタイプ
+            if (nowStopSetting >= 0)
+            {
+                // Ver表示
+                displayList = GetStopString();
+                return displayList;
+            }
 
             //表示文字列があるタイプ
             string displayString;
-            if (nowVerDisplay)
+            //運行設定
+            if (nowUnkoSetting >= 0)
+            {
+                // Ver表示
+                displayString = GetUnkoString();
+            }
+            else if (nowVerDisplay)
             {
                 // Ver表示
                 displayString = GetVerString();
@@ -138,7 +157,6 @@ namespace TatehamaATS_v1.RetsubanWindow
                 displayStringList.Add(line);
             }
 
-            var displayList = new List<string>();
             for (int i = 0; i < displayStringList.Count; i++)
             {
                 displayList.SetDisplayData(displayStringList[i], 0, i, false); // 横書きで配置
@@ -149,12 +167,59 @@ namespace TatehamaATS_v1.RetsubanWindow
 
         private string GetUnkoString()
         {
-            return GetAvailableChar("シュベツ:" + ServerAddress.Version.Split('-')[0].Replace("v", "") + "\n" + (ServerAddress.Version.Contains("de") ? "DEV" : "PROD") + (ServerAddress.Version.Contains("standalone") ? "　STANDALONE" : ServerAddress.Version.Contains("handbuild") ? "　HAND-BUILD" : ""));
+            if (nowUnkoSetting == 0)
+            {
+                if (DateTime.Now.Second % 2 == 0)
+                {
+                    return GetAvailableChar($"{Retsuban} ウンコウセッテイ\n{StopPassManager.TypeNameKana}\nシハツ→シュウチャク");
+                }
+                else
+                {
+                    return GetAvailableChar($"{Retsuban} ウンコウセッテイ\nシュベツ：1\nシハツ：2 イキサキ：3");
+                }
+            }
+            if (nowUnkoSetting == 1)
+            {
+                if (DateTime.Now.Millisecond < 500)
+                {
+                    var input = StopPassManager.TypeStringKana(nowInput);
+                    if (input.Contains("？"))
+                    {
+                        return GetAvailableChar($"ウンコウセッテイ シュベツ\nレツバン：{Retsuban}\nセッテイ：{input.Replace("？", "■")}");
+                    }
+                    else
+                    {
+                        return GetAvailableChar($"ウンコウセッテイ シュベツ\nレツバン：{Retsuban}\nセッテイ：{input}■");
+                    }
+                }
+                else
+                {
+                    return GetAvailableChar($"ウンコウセッテイ シュベツ\nレツバン：{Retsuban}\nセッテイ：{StopPassManager.TypeStringKana(nowInput)}");
+                }
+            }
+            return GetAvailableChar($"ウンコウセッテイ\nミテイギリョウイキ");
+        }
+
+        private List<string> GetStopString()
+        {
+            var displayList = new List<string>();
+            if (nowStopSetting == 0)
+            {
+                displayList.SetDisplayData("テイシャセッテイ　　シュヨウエキ", 0, 0, false);
+                displayList.SetDisplayData("1ミオ…タハ2リカ…ナノ3ムイ…", 0, 1, false);
+                displayList.SetDisplayData("…オオ4ナタ…シワ5フエ…タイ6", 0, 2, false);
+            }
+            else
+            {
+                displayList.SetDisplayData("テイシャセッテイ", 0, 0, false);
+                displayList.SetDisplayData("ミテイギリョウイキ", 0, 0, false);
+            }
+            return displayList;
         }
 
         private string GetVerString()
         {
-            return GetAvailableChar("ソフトバージョン\nV." + ServerAddress.Version.Split('-')[0].Replace("v", "") + "\n" + (ServerAddress.Version.Contains("de") ? "DEV" : "PROD") + (ServerAddress.Version.Contains("standalone") ? "　STANDALONE" : ServerAddress.Version.Contains("handbuild") ? "　HAND-BUILD" : ""));
+            return GetAvailableChar($"ソフトバージョン\nV.{ServerAddress.Version.Split('-')[0].Replace("v", "")}\n{(ServerAddress.SignalAddress.Contains("dev") ? "DEV" : "PROD")}　{(ServerAddress.Version.Contains("standalone") ? "STANDALONE" : ServerAddress.Version.Contains("handbuild") ? "HAND-BUILD" : "")}");
         }
 
         private string GetNormalString()
@@ -162,7 +227,7 @@ namespace TatehamaATS_v1.RetsubanWindow
             if (string.IsNullOrEmpty(Retsuban)) return GetAvailableChar($"レツバン ミセッテイ\nセッテイシテクダサイ");
             if (Retsuban == "9999") return GetAvailableChar($"9999 フテイリョウスウ\nダミーレツバン\n");
             if (string.IsNullOrEmpty(Car)) return GetAvailableChar($"リョウスウ ミセッテイ\nセッテイシテクダサイ");
-            return GetAvailableChar($"{Retsuban} {Car}リョウ\n{StopPassManager.TypeNameKana} イキサキフメイ");
+            return GetAvailableChar($"{Retsuban} {Car}リョウ\n{StopPassManager.TypeNameKana}\nクカンタイオウチュウ");
         }
 
         /// <summary>
@@ -300,39 +365,178 @@ namespace TatehamaATS_v1.RetsubanWindow
             }
             return enlargedImage;
         }
+
         internal void Buttons_Func(string Name)
         {
             switch (Name)
             {
                 case "Set":
+                    if (nowUnkoSetting == 1)
+                    {
+                        if (nowInput is not "" or "特急" or "C特")
+                        {
+                            StopPassManager.TypeName = nowInput;
+                            StopPassManager.TypeNameTC = StopPassManager.TypeStringTC(StopPassManager.TypeName);
+                            StopPassManager.TypeNameKana = StopPassManager.TypeStringKana(StopPassManager.TypeName);
+                            StopPassManager.TypeToStop();
+                            Debug.WriteLine(StopPassManager);
+                            beep2.PlayOnce(1.0f);
+                            nowUnkoSetting = 0;
+                        }
+                    }
                     return;
                 case "Del":
+                    if (nowUnkoSetting == 1)
+                    {
+                        if (nowInput is "C特1" or "C特2" or "C特3" or "C特4")
+                        {
+                            nowInput = "C特";
+                            beep1.PlayOnce(1.0f);
+                        }
+                        else if (nowInput is "A特" or "B特" or "C特" or "D特")
+                        {
+                            nowInput = "特急";
+                            beep1.PlayOnce(1.0f);
+                        }
+                        else if (nowInput is "")
+                        {
+                            beep3.PlayOnce(1.0f);
+                        }
+                        else
+                        {
+                            nowInput = "";
+                            beep1.PlayOnce(1.0f);
+                        }
+                    }
                     return;
                 case "Clear":
+                    if (nowUnkoSetting >= 1)
+                    {
+                        nowUnkoSetting = 0;
+                    }
                     return;
                 case "VerDisplay":
                     nowVerDisplay = !nowVerDisplay;
+                    nowUnkoSetting = -1;
+                    nowStopSetting = -1;
                     beep1.PlayOnce(1.0f);
                     return;
                 case "UnkoSet":
                     nowVerDisplay = false;
-                    nowUnkoSetting = true;
-                    nowStopSetting = false;
+                    nowUnkoSetting = 0;
+                    nowStopSetting = -1;
+                    nowInput = "";
                     beep1.PlayOnce(1.0f);
                     return;
                 case "StopSet":
                     nowVerDisplay = false;
-                    nowUnkoSetting = false;
-                    nowStopSetting = true;
+                    nowUnkoSetting = -1;
+                    nowStopSetting = 0;
+                    nowStopCount = 1;
                     beep1.PlayOnce(1.0f);
                     return;
                 case "RetsuSet":
                 case "CarSet":
                 case "TimeSet":
                     nowVerDisplay = false;
-                    nowUnkoSetting = false;
-                    nowStopSetting = false;
+                    nowUnkoSetting = -1;
+                    nowStopSetting = -1;
                     return;
+            }
+        }
+
+        internal void Buttons_Digit(string Digit)
+        {
+            if (nowUnkoSetting == 0)
+            {
+                switch (Digit)
+                {
+                    case "1":
+                        nowUnkoSetting = 1;
+                        beep1.PlayOnce(1.0f);
+                        return;
+                    case "2":
+                        nowUnkoSetting = 2;
+                        beep1.PlayOnce(1.0f);
+                        return;
+                    case "3":
+                        nowUnkoSetting = 3;
+                        beep1.PlayOnce(1.0f);
+                        return;
+                }
+            }
+            else if (nowUnkoSetting == 1)
+            {
+                if (nowInput == "C特")
+                {
+                    switch (Digit)
+                    {
+                        case "1":
+                            nowInput = "C特1";
+                            beep1.PlayOnce(1.0f);
+                            return;
+                        case "2":
+                            nowInput = "C特2";
+                            beep1.PlayOnce(1.0f);
+                            return;
+                        case "3":
+                            nowInput = "C特3";
+                            beep1.PlayOnce(1.0f);
+                            return;
+                        case "4":
+                            nowInput = "C特4";
+                            beep1.PlayOnce(1.0f);
+                            return;
+                    }
+                }
+            }
+        }
+        internal void Buttons_StopPass(string Digit)
+        {
+            if (nowUnkoSetting == 1 && Digit == "停")
+            {
+                nowInput = "普通";
+            }
+        }
+        internal void Buttons_RetsuTailType(string Name)
+        {
+            if (nowUnkoSetting == 1)
+            {
+                switch (Name)
+                {
+                    case "A":
+                        nowInput = nowInput == "特急" ? "A特" : "特急";
+                        beep1.PlayOnce(1.0f);
+                        break;
+                    case "B":
+                        nowInput = nowInput == "特急" ? "B特" : "急行";
+                        beep1.PlayOnce(1.0f);
+                        break;
+                    case "C":
+                        nowInput = nowInput == "特急" ? "C特" : "準急";
+                        beep1.PlayOnce(1.0f);
+                        break;
+                    case "D":
+                        nowInput = nowInput == "特急" ? "D特" : "区急";
+                        beep1.PlayOnce(1.0f);
+                        break;
+                    case "K":
+                        nowInput = "快速急行";
+                        beep1.PlayOnce(1.0f);
+                        break;
+                }
+            }
+        }
+        internal void Buttons_RetsuTailOther(string Name)
+        {
+            if (nowUnkoSetting == 1)
+            {
+                switch (Name)
+                {
+                    case "特":
+                        nowInput = "特急";
+                        break;
+                }
             }
         }
     }

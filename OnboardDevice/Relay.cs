@@ -465,7 +465,7 @@ namespace TatehamaATS_v1.OnboardDevice
             try
             {
                 var r = route.TcName.Split('_').ToList();
-                // staID仮対応                                         
+                // staID仮対応          
                 var staName = StopPassManager.GetStationNameById(r[0]) + "連動装置";
 
                 // 末尾が "S[A-Z]" または "T[A-Z]" の場合に "[A-Z]" の部分だけを残す

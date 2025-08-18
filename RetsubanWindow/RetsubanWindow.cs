@@ -124,20 +124,24 @@ namespace TatehamaATS_v1.RetsubanWindow
                 case ButtonType.Digit:
                     retsubanLogic.Buttons_Digit(Name);
                     timeLogic.Buttons_Digit(Name);
+                    LCDLogic.Buttons_Digit(Name);
                     break;
                 case ButtonType.StopPass:
+                    LCDLogic.Buttons_StopPass(Name);
                     break;
                 case ButtonType.RetsuHead:
                     retsubanLogic.Buttons_RetsuHead(Name);
                     break;
                 case ButtonType.RetsuTailType:
                     retsubanLogic.Buttons_RetsuTailType(Name);
+                    LCDLogic.Buttons_RetsuTailType(Name);
                     break;
                 case ButtonType.RetsuTailCompany:
                     retsubanLogic.Buttons_RetsuTailCompany(Name);
                     break;
                 case ButtonType.RetsuTailOther:
                     retsubanLogic.Buttons_RetsuTailOther(Name);
+                    LCDLogic.Buttons_RetsuTailOther(Name);
                     break;
                 case ButtonType.OtherInput:
                     break;
@@ -302,12 +306,12 @@ namespace TatehamaATS_v1.RetsubanWindow
 
         private void Button_Tei_Click(object sender, EventArgs e)
         {
-            Buttons_Click("停", ButtonType.Digit);
+            Buttons_Click("停", ButtonType.StopPass);
         }
 
         private void Button_Tsu_Click(object sender, EventArgs e)
         {
-            Buttons_Click("通", ButtonType.Digit);
+            Buttons_Click("通", ButtonType.StopPass);
         }
 
         private void Button_Set_Click(object sender, EventArgs e)

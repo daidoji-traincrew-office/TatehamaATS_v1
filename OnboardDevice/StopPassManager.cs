@@ -10,6 +10,7 @@ namespace TatehamaATS_v1.OnboardDevice
     internal class StopPassManager
     {
         internal String TypeName = "";
+        internal String TypeNameTC = "";
         internal String TypeNameKana = "";
 
         private Dictionary<string, string> StaNameById = new Dictionary<string, string>()
@@ -69,65 +70,179 @@ namespace TatehamaATS_v1.OnboardDevice
             if (Retsuban == "9999")
             {
                 TypeName = "";
-                TypeNameKana = "";
                 return;
             }
             if (Retsuban.Contains("溝月"))
             {
-                TypeName = "回送";
-                TypeNameKana = "ミゾツキレイル";
+                TypeName = "溝月";
                 return;
             }
             if (Retsuban.StartsWith("回"))
             {
                 TypeName = "回送";
-                TypeNameKana = "カイソウ";
                 return;
             }
             if (Retsuban.StartsWith("試"))
             {
-                TypeName = "回送";
-                TypeNameKana = "シウンテン";
+                TypeName = "試運転";
                 return;
             }
             if (Retsuban.Contains("A"))
             {
-                TypeName = "D特";
-                TypeNameKana = "D特";
+                if (Retsuban.StartsWith("臨"))
+                {
+                    TypeName = "臨時特急";
+                    return;
+                }
+                TypeName = "特急";
                 return;
             }
             if (Retsuban.Contains("K"))
             {
+                if (Retsuban.StartsWith("臨"))
+                {
+                    TypeName = "臨時快速急行";
+                    return;
+                }
                 TypeName = "快速急行";
-                TypeNameKana = "カイキュウ";
                 return;
             }
             if (Retsuban.Contains("B"))
             {
+                if (Retsuban.StartsWith("臨"))
+                {
+                    TypeName = "臨時急行";
+                    return;
+                }
                 TypeName = "急行";
-                TypeNameKana = "キュウコウ";
                 return;
             }
             if (Retsuban.Contains("C"))
             {
+                if (Retsuban.StartsWith("臨"))
+                {
+                    TypeName = "臨時準急";
+                    return;
+                }
                 TypeName = "準急";
-                TypeNameKana = "ジュンキュウ";
                 return;
             }
             if (Retsuban.StartsWith("臨"))
             {
-                TypeName = "回送";
-                TypeNameKana = "リンジ";
+                TypeName = "臨時";
                 return;
             }
             if (int.TryParse(Retsuban, null, out _))
             {
                 TypeName = "普通";
-                TypeNameKana = "フツウ";
                 return;
             }
-            TypeName = "回送";
+            TypeName = "不明";
             return;
+
+        }
+
+        internal string TypeStringTC(string TypeName)
+        {
+            string TypeNameTC;
+            switch (TypeName)
+            {
+                case "回送":
+                case "A特":
+                case "B特":
+                case "C特1":
+                case "C特2":
+                case "C特3":
+                case "C特4":
+                case "D特":
+                case "快速急行":
+                case "急行":
+                case "区急":
+                case "準急":
+                case "普通":
+                    TypeNameTC = TypeName;
+                    break;
+                case "試運転":
+                case "臨時":
+                    TypeNameTC = "回送";
+                    break;
+                case "C特":
+                    TypeNameTC = "C特4";
+                    break;
+                case "特急":
+                    TypeNameTC = "D特";
+                    break;
+                default:
+                    TypeNameTC = ""; // その他のケースはそのまま
+                    break;
+            }
+            return TypeNameTC;
+        }
+
+        internal string TypeStringKana(string TypeName)
+        {
+            string TypeNameKana;
+            switch (TypeName)
+            {
+                case "回送":
+                    TypeNameKana = "カイソウ";
+                    break;
+                case "試運転":
+                    TypeNameKana = "シウンテン";
+                    break;
+                case "臨時":
+                    TypeNameKana = "リンジ";
+                    break;
+                case "A特":
+                case "B特":
+                case "C特1":
+                case "C特2":
+                case "C特3":
+                case "C特4":
+                case "D特":
+                    TypeNameKana = TypeName;
+                    break;
+                case "C特":
+                    TypeNameKana = "C特？";
+                    break;
+                case "臨時特急":
+                    TypeNameKana = "リンジ？特";
+                    break;
+                case "特急":
+                    TypeNameKana = "？特";
+                    break;
+                case "臨時快速急行":
+                    TypeNameKana = "リンジカイソクキュウコウ";
+                    break;
+                case "快速急行":
+                    TypeNameKana = "カイソクキュウコウ";
+                    break;
+                case "臨時急行":
+                    TypeNameKana = "リンジキュウコウ";
+                    break;
+                case "急行":
+                    TypeNameKana = "キュウコウ";
+                    break;
+                case "臨時区急":
+                    TypeNameKana = "リンジクカンキュウコウ";
+                    break;
+                case "区急":
+                    TypeNameKana = "クカンキュウコウ";
+                    break;
+                case "臨時準急":
+                    TypeNameKana = "リンジジュンキュウ";
+                    break;
+                case "準急":
+                    TypeNameKana = "ジュンキュウ";
+                    break;
+                case "普通":
+                    TypeNameKana = "フツウ";
+                    break;
+                default:
+                    TypeNameKana = "？"; // その他のケースはそのまま
+                    break;
+            }
+            return TypeNameKana;
         }
 
         internal void TypeToStop()
