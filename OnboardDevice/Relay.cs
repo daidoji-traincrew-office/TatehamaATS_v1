@@ -219,7 +219,7 @@ namespace TatehamaATS_v1.OnboardDevice
                 {
                     // StaNameByIdを逆向きに使用して、interlockData.Nameを駅IDにする
                     // interlockData.Nameには"連動装置"が末尾に含まれているため、削除してから検索する
-                    var stationId = StopPassManager.GetStationNameById(interlockData.Name.Replace("連動装置", ""));
+                    var stationId = StopPassManager.GetStationIdByName(interlockData.Name.Replace("連動装置", ""));
                     var route = new Route
                     {
 

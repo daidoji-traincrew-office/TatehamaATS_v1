@@ -29,6 +29,16 @@ namespace TatehamaATS_v1.OnboardDevice
             return StaNameById.Keys.ToList();
         }
 
+        internal string GetStationIdByName(string name)
+        {
+            var entry = StaNameById.FirstOrDefault(x => x.Value == name);
+            if (entry.Key != null)
+            {
+                return entry.Key;
+            }
+            return "TH00";
+        }
+
         internal string GetStationNameById(string id)
         {
             if (StaNameById.TryGetValue(id, out string name))
