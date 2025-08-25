@@ -180,7 +180,6 @@ namespace TatehamaATS_v1.OnboardDevice
                     case "395":
                     case "397":
                     case "5CC":
-                    case "7ED":
                         return;
                     default:
                         var log = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] " +
