@@ -180,21 +180,22 @@ namespace TatehamaATS_v1.RetsubanWindow
             }
             if (nowUnkoSetting == 1)
             {
+                var input = StopPassManager.TypeStringKana(nowInput);
+                input = input == "リンジ" ? "リンジ？" : input;
                 if (DateTime.Now.Millisecond < 500)
                 {
-                    var input = StopPassManager.TypeStringKana(nowInput);
                     if (input.Contains("？"))
                     {
-                        return GetAvailableChar($"ウンコウセッテイ シュベツ\nレツバン：{Retsuban}\nセッテイ：{input.Replace("？", "■")}");
+                        return GetAvailableChar($"ウンコウセッテイ シュベツ\nレツバン：{Retsuban}\n→{input.Replace("？", "■")}");
                     }
                     else
                     {
-                        return GetAvailableChar($"ウンコウセッテイ シュベツ\nレツバン：{Retsuban}\nセッテイ：{input}■");
+                        return GetAvailableChar($"ウンコウセッテイ シュベツ\nレツバン：{Retsuban}\n→{input}■");
                     }
                 }
                 else
                 {
-                    return GetAvailableChar($"ウンコウセッテイ シュベツ\nレツバン：{Retsuban}\nセッテイ：{StopPassManager.TypeStringKana(nowInput)}");
+                    return GetAvailableChar($"ウンコウセッテイ シュベツ\nレツバン：{Retsuban}\n→{input}");
                 }
             }
             return GetAvailableChar($"ウンコウセッテイ\nミテイギリョウイキ");
@@ -388,6 +389,27 @@ namespace TatehamaATS_v1.RetsubanWindow
                 case "Del":
                     if (nowUnkoSetting == 1)
                     {
+                        var Head = "";
+                        //接頭辞のみ処理
+                        if (nowInput is "臨時" or "だんじり")
+                        {
+                            nowInput = "";
+                            beep1.PlayOnce(1.0f);
+                            return;
+                        }
+
+                        //接頭辞処理
+                        if (nowInput.Contains("臨時"))
+                        {
+                            Head = "臨時";
+                            nowInput = nowInput.Replace("臨時", "");
+                        }
+                        else if (nowInput.Contains("だんじり"))
+                        {
+                            Head = "だんじり";
+                            nowInput = nowInput.Replace("だんじり", "");
+                        }
+                        //種別本体処理
                         if (nowInput is "C特1" or "C特2" or "C特3" or "C特4")
                         {
                             nowInput = "C特";
@@ -407,6 +429,7 @@ namespace TatehamaATS_v1.RetsubanWindow
                             nowInput = "";
                             beep1.PlayOnce(1.0f);
                         }
+                        nowInput = Head + nowInput;
                     }
                     return;
                 case "Clear":
@@ -467,24 +490,15 @@ namespace TatehamaATS_v1.RetsubanWindow
             }
             else if (nowUnkoSetting == 1)
             {
-                if (nowInput == "C特")
+                if (nowInput.Contains("C特"))
                 {
                     switch (Digit)
                     {
                         case "1":
-                            nowInput = "C特1";
-                            beep1.PlayOnce(1.0f);
-                            return;
                         case "2":
-                            nowInput = "C特2";
-                            beep1.PlayOnce(1.0f);
-                            return;
                         case "3":
-                            nowInput = "C特3";
-                            beep1.PlayOnce(1.0f);
-                            return;
                         case "4":
-                            nowInput = "C特4";
+                            nowInput += Digit;
                             beep1.PlayOnce(1.0f);
                             return;
                     }
@@ -495,35 +509,79 @@ namespace TatehamaATS_v1.RetsubanWindow
         {
             if (nowUnkoSetting == 1 && Digit == "停")
             {
-                nowInput = "普通";
+                if (nowInput is "" or "臨時" or "だんじり")
+                {
+                    nowInput += "普通";
+                    beep1.PlayOnce(1.0f);
+                }
             }
         }
-        internal void Buttons_RetsuTailType(string Name)
+        internal void Buttons_RetsuHead(string Name)
         {
             if (nowUnkoSetting == 1)
             {
                 switch (Name)
                 {
-                    case "A":
-                        nowInput = nowInput == "特急" ? "A特" : "特急";
+                    case "回":
+                        nowInput = "回送";
                         beep1.PlayOnce(1.0f);
                         break;
-                    case "B":
-                        nowInput = nowInput == "特急" ? "B特" : "急行";
+                    case "臨":
+                        nowInput = "臨時";
                         beep1.PlayOnce(1.0f);
                         break;
-                    case "C":
-                        nowInput = nowInput == "特急" ? "C特" : "準急";
+                    case "試":
+                        nowInput = "試運転";
                         beep1.PlayOnce(1.0f);
                         break;
-                    case "D":
-                        nowInput = nowInput == "特急" ? "D特" : "区急";
-                        beep1.PlayOnce(1.0f);
-                        break;
-                    case "K":
-                        nowInput = "快速急行";
-                        beep1.PlayOnce(1.0f);
-                        break;
+                }
+            }
+        }
+
+        internal void Buttons_RetsuTailType(string Name)
+        {
+            if (nowUnkoSetting == 1)
+            {
+                if (nowInput is "" or "臨時" or "だんじり")
+                {
+                    switch (Name)
+                    {
+                        case "A":
+                            nowInput += "特急";
+                            break;
+                        case "B":
+                            nowInput += "急行";
+                            break;
+                        case "C":
+                            nowInput += "準急";
+                            break;
+                        case "D":
+                            nowInput += "区間急行";
+                            break;
+                        case "K":
+                            nowInput += "快速急行";
+                            break;
+                    }
+                    beep1.PlayOnce(1.0f);
+                }
+                else if (nowInput.Contains("特急"))
+                {
+                    switch (Name)
+                    {
+                        case "A":
+                            nowInput = nowInput.Replace("特急", "A特");
+                            break;
+                        case "B":
+                            nowInput = nowInput.Replace("特急", "B特");
+                            break;
+                        case "C":
+                            nowInput = nowInput.Replace("特急", "C特");
+                            break;
+                        case "D":
+                            nowInput = nowInput.Replace("特急", "D特");
+                            break;
+                    }
+                    beep1.PlayOnce(1.0f);
                 }
             }
         }
@@ -534,7 +592,15 @@ namespace TatehamaATS_v1.RetsubanWindow
                 switch (Name)
                 {
                     case "特":
-                        nowInput = "特急";
+                        if (nowInput is "" or "臨時" or "だんじり")
+                        {
+                            nowInput += "特急";
+                            beep1.PlayOnce(1.0f);
+                        }
+                        break;
+                    case "だんじり":
+                        nowInput = "だんじり";
+                        beep1.PlayOnce(1.0f);
                         break;
                 }
             }

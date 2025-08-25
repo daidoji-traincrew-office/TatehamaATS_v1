@@ -113,7 +113,7 @@ namespace TatehamaATS_v1.RetsubanWindow
 
         private void Buttons_Click(string Name, ButtonType buttonType)
         {
-            Debug.WriteLine($"押下：{Name}");
+            Debug.WriteLine($"押下：{Name}/{buttonType}");
             switch (buttonType)
             {
                 case ButtonType.Function:
@@ -131,6 +131,7 @@ namespace TatehamaATS_v1.RetsubanWindow
                     break;
                 case ButtonType.RetsuHead:
                     retsubanLogic.Buttons_RetsuHead(Name);
+                    LCDLogic.Buttons_RetsuHead(Name);
                     break;
                 case ButtonType.RetsuTailType:
                     retsubanLogic.Buttons_RetsuTailType(Name);

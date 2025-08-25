@@ -191,17 +191,29 @@ namespace TatehamaATS_v1.OnboardDevice
 
         internal string TypeStringKana(string TypeName)
         {
-            string TypeNameKana;
+            var TypeNameKana = "";
+            if (TypeName == "臨時")
+            {
+                TypeNameKana = "リンジ";
+                return TypeNameKana;
+            }
+            if (TypeName.Contains("臨時"))
+            {
+                TypeNameKana = "リンジ";
+                TypeName = TypeName.Replace("臨時", "");
+            }
+            else if (TypeName.Contains("だんじり"))
+            {
+                TypeNameKana = "ダンジリ";
+                TypeName = TypeName.Replace("だんじり", "");
+            }
             switch (TypeName)
             {
                 case "回送":
-                    TypeNameKana = "カイソウ";
+                    TypeNameKana += "カイソウ";
                     break;
                 case "試運転":
-                    TypeNameKana = "シウンテン";
-                    break;
-                case "臨時":
-                    TypeNameKana = "リンジ";
+                    TypeNameKana += "シウンテン";
                     break;
                 case "A特":
                 case "B特":
@@ -210,46 +222,31 @@ namespace TatehamaATS_v1.OnboardDevice
                 case "C特3":
                 case "C特4":
                 case "D特":
-                    TypeNameKana = TypeName;
+                    TypeNameKana += TypeName;
                     break;
                 case "C特":
-                    TypeNameKana = "C特？";
-                    break;
-                case "臨時特急":
-                    TypeNameKana = "リンジ？特";
+                    TypeNameKana += "C特？";
                     break;
                 case "特急":
-                    TypeNameKana = "？特";
-                    break;
-                case "臨時快速急行":
-                    TypeNameKana = "リンジカイソクキュウコウ";
+                    TypeNameKana += "？特";
                     break;
                 case "快速急行":
-                    TypeNameKana = "カイソクキュウコウ";
-                    break;
-                case "臨時急行":
-                    TypeNameKana = "リンジキュウコウ";
+                    TypeNameKana += "カイソクキュウコウ";
                     break;
                 case "急行":
-                    TypeNameKana = "キュウコウ";
+                    TypeNameKana += "キュウコウ";
                     break;
-                case "臨時区急":
-                    TypeNameKana = "リンジクカンキュウコウ";
-                    break;
-                case "区急":
-                    TypeNameKana = "クカンキュウコウ";
-                    break;
-                case "臨時準急":
-                    TypeNameKana = "リンジジュンキュウ";
+                case "区間急行":
+                    TypeNameKana += "クカンキュウコウ";
                     break;
                 case "準急":
-                    TypeNameKana = "ジュンキュウ";
+                    TypeNameKana += "ジュンキュウ";
                     break;
                 case "普通":
-                    TypeNameKana = "フツウ";
+                    TypeNameKana += "フツウ";
                     break;
                 default:
-                    TypeNameKana = "？"; // その他のケースはそのまま
+                    TypeNameKana += "？"; // その他のケースはそのまま
                     break;
             }
             return TypeNameKana;
@@ -257,9 +254,21 @@ namespace TatehamaATS_v1.OnboardDevice
 
         internal void TypeToStop()
         {
+            var Head = "";
+            var Main = TypeName;
+            if (Main.Contains("臨時"))
+            {
+                Main = Main.Replace("臨時", "");
+                Head = "臨時";
+            }
+            if (Main.Contains("だんじり"))
+            {
+                Main = Main.Replace("だんじり", "");
+                Head = "だんじり";
+            }
             // 一旦全部停車にする
             ClearAllStopDataById();
-            if (TypeName == "普通")
+            if (Main == "普通")
             {
                 // 普通は全て停車
                 return;
@@ -306,7 +315,7 @@ namespace TatehamaATS_v1.OnboardDevice
             SetStopDataById("TH03", "通過");  //新町
             //三番街
             //大手橋
-            if (TypeName == "準急")
+            if (Main == "準急")
             {
                 // 準急停車駅までで抜ける
                 return;
@@ -324,7 +333,7 @@ namespace TatehamaATS_v1.OnboardDevice
             SetStopDataById("TH32", "通過");  //木之本
             //新長野公園
             //　以降準急と同じ
-            if (TypeName == "区急")
+            if (Main == "区急")
             {
                 // 区急停車駅までで抜ける
                 return;
@@ -335,7 +344,9 @@ namespace TatehamaATS_v1.OnboardDevice
             //河原崎
             //　通過済み
             //津崎
-            SetStopDataById("TH70", "通過");  //浜園
+
+            if (Head != "だんじり")
+                SetStopDataById("TH70", "通過");  //浜園
             //羽衣橋
             //　準急と同じ
             //大路
@@ -344,13 +355,13 @@ namespace TatehamaATS_v1.OnboardDevice
             SetStopDataById("TH42", "通過");
             SetStopDataById("TH41", "通過");
             SetStopDataById("TH40", "通過");  //小沼
-            //六日市町
-            //　区急と同じ
-            //江西
+                                            //六日市町
+                                            //　区急と同じ
+                                            //江西
             SetStopDataById("TH33", "通過");  //大和田町
             //木之本
             //　以降区急と同じ   
-            if (TypeName == "急行")
+            if (Main == "急行")
             {
                 // 急行停車駅までで抜ける
                 return;
@@ -360,40 +371,40 @@ namespace TatehamaATS_v1.OnboardDevice
             //　急行と同じ
             //新野崎
             SetStopDataById("TH66", "通過");  //江ノ原
-            //大道寺
-            //藤江
-            //水越
+                                            //大道寺
+                                            //藤江
+                                            //水越
             SetStopDataById("TH62", "通過");  //高見沢
-            //日野森
+                                            //日野森
             SetStopDataById("TH60", "通過");  //奥峯口
             SetStopDataById("TH59", "通過");  //西赤山
-            //赤山町
+                                            //赤山町
             SetStopDataById("TH57", "通過");  //三郷
             SetStopDataById("TH56", "通過");  //明神川
             SetStopDataById("TH55", "通過");  //珠川温泉
             SetStopDataById("TH54", "通過");  //上吉沢
             SetStopDataById("TH53", "通過");  //下吉沢
-            //名田
-            //　各駅に停車
-            //東井
+                                            //名田
+                                            //　各駅に停車
+                                            //東井
             SetStopDataById("TH48", "通過");  //桜坂
-            //新大路
-            //大路
-            //　急行と同じ
-            //新長野公園
+                                            //新大路
+                                            //大路
+                                            //　急行と同じ
+                                            //新長野公園
             SetStopDataById("TH30", "通過");  //長野本町
-            //高砂町
-            //　急行と同じ
-            //夕陽が丘
+                                            //高砂町
+                                            //　急行と同じ
+                                            //夕陽が丘
             SetStopDataById("TH16", "通過");  //五日市
-            //南五日市
-            //　急行と同じ
-            //小手川
+                                            //南五日市
+                                            //　急行と同じ
+                                            //小手川
             SetStopDataById("TH09", "通過");  //南吉岡
             //宮の前
             //　急行と同じ
             //大手橋   
-            if (TypeName == "快速急行")
+            if (Main == "快速急行")
             {
                 // 快急停車駅までで抜ける
                 return;
@@ -403,72 +414,72 @@ namespace TatehamaATS_v1.OnboardDevice
             //　快急と同じ
             //新井川
             SetStopDataById("TH67", "通過");  //新野崎
-            //江ノ原　通過済み
-            //大道寺
-            SetStopDataById("TH65", "通過");  //藤江
+                                            //江ノ原　通過済み
+                                            //大道寺
+            SetStopDataById("TH64", "通過");  //藤江
             SetStopDataById("TH63", "通過");  //水越
-            //高見沢　通過済み
+                                            //高見沢　通過済み
             SetStopDataById("TH61", "通過");  //日野森
-            //奥峯口
-            //　快急と同じ
-            //明神川
-            //珠川温泉　C特2・C特3・D特停車
-            //上吉沢
-            //　快急と同じ
-            //名田
+                                            //奥峯口
+                                            //　快急と同じ
+                                            //明神川
+                                            //珠川温泉　C特2・C特3・D特停車
+                                            //上吉沢
+                                            //　快急と同じ
+                                            //名田
             SetStopDataById("TH52", "通過");  //三石
             SetStopDataById("TH51", "通過");  //二木戸
             SetStopDataById("TH50", "通過");  //白石町
-            //東井
-            //　快急と同じ
-            //小沼
+                                            //東井
+                                            //　快急と同じ
+                                            //小沼
             SetStopDataById("TH40", "通過");  //六日市町
-            //朝日ヶ丘
-            //　快急と同じ
-            //北美
+                                            //朝日ヶ丘
+                                            //　快急と同じ
+                                            //北美
             SetStopDataById("TH24", "通過");  //緑ヶ丘
-            //町沢
-            //　快急と同じ
-            //五十川
+                                            //町沢
+                                            //　快急と同じ
+                                            //五十川
             SetStopDataById("TH20", "通過");  //出屋敷前
             //佐川
             //　快急と同じ
             //大手橋
 
             //ここから各パターンで割り振り    
-            if (TypeName is "A特" or "C特4" or "回送")
+            if (Main is "A特" or "C特4" or "回送")
             {
                 SetStopDataById("TH65", "通過");  //大道寺
             }
-            if (TypeName is "A特" or "C特2" or "C特3" or "回送")
+            if (Main is "A特" or "C特2" or "C特3" or "回送")
             {
                 SetStopDataById("TH58", "通過");  //赤山町
             }
-            if (TypeName is "C特2" or "C特3" or "D特")
+            if (Main is "C特2" or "C特3" or "D特")
             {
                 SetStopDataById("TH55", "停車");  //珠川温泉
             }
-            if (TypeName is "A特" or "C特2" or "C特3" or "回送")
+            if (Main is "A特" or "C特2" or "C特3" or "回送")
             {
                 SetStopDataById("TH53", "通過");  //名田
             }
-            if (TypeName is "A特" or "C特1" or "回送")
+            if (Main is "A特" or "C特1" or "回送")
             {
                 SetStopDataById("TH49", "通過");  //東井
             }
-            if (TypeName is "A特" or "C特1" or "C特2" or "回送")
+            if (Main is "A特" or "C特1" or "C特2" or "回送")
             {
                 SetStopDataById("TH45", "通過");  //大路
             }
-            if (TypeName is "A特" or "C特3" or "C特4" or "回送")
+            if (Main is "A特" or "C特3" or "C特4" or "回送")
             {
                 SetStopDataById("TH31", "通過");  //新長野公園
             }
-            if (TypeName is "A特" or "C特1" or "回送")
+            if (Main is "A特" or "C特1" or "回送")
             {
                 SetStopDataById("TH14", "通過");  //高井戸八幡
             }
-            if (TypeName is "A特" or "C特1" or "C特3" or "C特4" or "回送")
+            if (Main is "A特" or "C特1" or "C特3" or "C特4" or "回送")
             {
                 SetStopDataById("TH06", "通過");  //神宮橋
             }
