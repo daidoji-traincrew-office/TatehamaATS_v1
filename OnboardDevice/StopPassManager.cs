@@ -155,6 +155,20 @@ namespace TatehamaATS_v1.OnboardDevice
         internal string TypeStringTC(string TypeName)
         {
             string TypeNameTC;
+
+            if (TypeName == "臨時")
+            {
+                TypeNameTC = "回送";
+                return TypeNameTC;
+            }
+            if (TypeName.Contains("臨時"))
+            {
+                TypeName = TypeName.Replace("臨時", "");
+            }
+            else if (TypeName.Contains("だんじり"))
+            {
+                TypeName = TypeName.Replace("だんじり", "");
+            }
             switch (TypeName)
             {
                 case "回送":

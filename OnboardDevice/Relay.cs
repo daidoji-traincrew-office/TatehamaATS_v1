@@ -445,13 +445,13 @@ namespace TatehamaATS_v1.OnboardDevice
                         indicator = route.Indicator;
                         break;
                     case RouteType.Departure:
-                        indicator = StopPassManager.TypeName;
+                        indicator = StopPassManager.TypeNameTC;
                         break;
                     default:
                         indicator = "";
                         break;
                 }
-                Debug.WriteLine($"☆API送信: SetRoute/{route.TcName}/{StopPassManager.GetStopDataById(r[0])}");
+                Debug.WriteLine($"☆API送信: SetRoute/{route.TcName}/{StopPassManager.GetStopDataById(r[0])}/{indicator}");
                 SendSingleCommand("SetRoute", [staName, routeName, indicator, TcData.myTrainData.diaName, StopPassManager.GetStopDataById(r[0])]);
             }
             catch (Exception ex)
