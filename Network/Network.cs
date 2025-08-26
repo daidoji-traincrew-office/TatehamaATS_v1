@@ -146,7 +146,7 @@ namespace TatehamaATS_v1.Network
                 {
                     if (!connected)
                     {
-                        AddExceptionAction.Invoke(new NetworkConnectException(7, "未接続"));
+                        AddExceptionAction.Invoke(new NetworkNonConnectException(7, "未接続"));
                         continue;
                     }
 
@@ -391,7 +391,7 @@ namespace TatehamaATS_v1.Network
                 "認証失敗 | 館浜ATS - ダイヤ運転会", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
             if (dialogResult == DialogResult.Yes)
             {
-                var r = await Authorize(); 
+                var r = await Authorize();
                 connectErrorDialog = false;
                 return r;
             }
