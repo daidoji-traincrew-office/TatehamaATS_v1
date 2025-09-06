@@ -154,3 +154,20 @@ jobs:
           make_latest: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
           files: ${{ steps.get_files.outputs.FILES }}
           prerelease: ${{ github.event_name != 'push' || github.ref != 'refs/heads/master' }}
+  notify_discord:
+    runs-on: ubuntu-latest
+    name: "Notify Discord"
+    needs:
+      - calc_version
+      - create_new_release
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    steps:
+      - name: Send Discord Notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          VERSION: ${{ needs.calc_version.outputs.VERSION }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          curl -H "Content-Type: application/json" -X POST -d '{
+            "content": "<@&1351159468536238130> <@&1281827843541831740> <@&1302155862965620756>\n「${{ env.VERSION }}」をリリースしました。\n${{ env.PR_BODY }}"
+          }' $DISCORD_WEBHOOK
