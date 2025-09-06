@@ -160,6 +160,7 @@ jobs:
     needs:
       - calc_version
       - create_new_release
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     steps:
       - name: Send Discord Notification
         env:
