@@ -48,7 +48,22 @@ namespace TatehamaATS_v1.Network
         /// <summary>
         /// 運転会列番
         /// </summary>
-        internal string OverrideDiaName;
+        internal string OverrideDiaName { get; set; }
+
+        /// <summary>
+        /// 運転会種別
+        /// </summary>
+        internal string OverrideTypeID { get; set; }
+
+        /// <summary>
+        /// 運転会始発駅
+        /// </summary>
+        internal string OverrideDepStaID { get; set; }
+
+        /// <summary>
+        /// 運転会行先駅
+        /// </summary>
+        internal string OverrideForStaID { get; set; }
 
         /// <summary>
         /// 防護無線発報状態
@@ -99,6 +114,8 @@ namespace TatehamaATS_v1.Network
             _service = service;
             StartUpdateLoop();
             OverrideDiaName = "9999";
+            OverrideDepStaID = "TH00";
+            OverrideForStaID = "TH00";
             TcData = new TrainCrewStateData();
             IsBougo = false;
             SendData = new DataToServer();
@@ -391,7 +408,7 @@ namespace TatehamaATS_v1.Network
                 "認証失敗 | 館浜ATS - ダイヤ運転会", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
             if (dialogResult == DialogResult.Yes)
             {
-                var r = await Authorize(); 
+                var r = await Authorize();
                 connectErrorDialog = false;
                 return r;
             }

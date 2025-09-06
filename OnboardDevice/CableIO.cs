@@ -448,6 +448,15 @@ namespace TatehamaATS_v1.OnboardDevice
         }
 
         /// <summary>
+        /// 列車情報変更線
+        /// </summary>
+        internal void TrainInfoSet(string DepStaID, string ForStaID)
+        {
+            Network.OverrideDepStaID = DepStaID;
+            Network.OverrideForStaID = ForStaID;
+        }
+
+        /// <summary>
         /// 強制前方停止司令線
         /// </summary>
         internal void ForceStopSignal(bool IsStop)

@@ -72,7 +72,7 @@ namespace TatehamaATS_v1.OnboardDevice
         /// <summary>
         /// 運転会列番
         /// </summary>
-        internal string OverrideDiaName;
+        internal string OverrideDiaName { get; set; }
 
         // イベント
         internal event Action<TimeSpan> TC_TimeUpdated;
