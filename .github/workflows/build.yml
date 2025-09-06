@@ -1,6 +1,8 @@
 name: Build
 on:
   push: { }
+  pull_request:
+    types: [closed]
 
 env:
   APP_NAME: "TatehamaATS"
@@ -160,7 +162,7 @@ jobs:
     needs:
       - calc_version
       - create_new_release
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    if: github.event.pull_request.merged == true
     steps:
       - name: Send Discord Notification
         env:
