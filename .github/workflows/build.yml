@@ -162,30 +162,11 @@ jobs:
       - create_new_release
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     steps:
-      - name: Install GitHub CLI
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gh jq
-      - name: Get Last Merged PR Body
-        id: pr_body
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh auth setup-git
-          PR_JSON=$(gh pr list --state merged --sort merged-desc --limit 1 --json body)
-          PR_BODY=$(echo "$PR_JSON" | jq -r '.[0].body')
-          # 空の場合は代替文
-          if [ -z "$PR_BODY" ]; then
-            PR_BODY="このアップデートに関する情報を取得できませんでした。"
-          fi
-          echo "PR_BODY<<EOF" >> $GITHUB_ENV
-          echo "$PR_BODY" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
       - name: Send Discord Notification
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
           VERSION: ${{ needs.calc_version.outputs.VERSION }}
-          PR_BODY: ${{ env.PR_BODY }}
+          PR_BODY: ${{ github.event.pull_request.body }}
         run: |
           curl -H "Content-Type: application/json" -X POST -d '{
             "content": "<@&1351159468536238130> <@&1281827843541831740> <@&1302155862965620756>\n「${{ env.VERSION }}」をリリースしました。\n${{ env.PR_BODY }}"
