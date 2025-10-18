@@ -207,13 +207,19 @@ namespace TatehamaATS_v1.RetsubanWindow
             if (nowStopSetting == 0)
             {
                 displayList.SetDisplayData("テイシャセッテイ　　シュヨウエキ", 0, 0, false);
-                displayList.SetDisplayData("1ミオ…タハ2リカ…ナノ3ムイ…", 0, 1, false);
-                displayList.SetDisplayData("…オオ4ナタ…シワ5フエ…タイ6", 0, 2, false);
+                displayList.SetDisplayData("1ミオ｜タハ2リカ｜ナノ3ムイ｜", 0, 1, false);
+                displayList.SetDisplayData("｜オオ4ナタ｜シワ5フエ｜タイ6", 0, 2, false);
+            }
+            if (nowStopSetting == 6)
+            {
+                displayList.SetDisplayData("停　テコワカニツハハラノエラタ", 0, 0, false);
+                displayList.SetDisplayData("通　ハマサカハサソモイキラシイ5", 0, 1, false);
+                displayList.SetDisplayData("6｜停通通通通停通通停停停通停→", 0, 2, false);
             }
             else
             {
                 displayList.SetDisplayData("テイシャセッテイ", 0, 0, false);
-                displayList.SetDisplayData("ミテイギリョウイキ", 0, 0, false);
+                displayList.SetDisplayData("ミテイキ゛リョウイキ", 0, 0, false);
             }
             return displayList;
         }
@@ -502,6 +508,36 @@ namespace TatehamaATS_v1.RetsubanWindow
                             beep1.PlayOnce(1.0f);
                             return;
                     }
+                }
+            }
+            else if (nowStopSetting == 0)
+            {
+                switch (Digit)
+                {
+                    case "1":
+                        nowStopSetting = 1;
+                        beep1.PlayOnce(1.0f);
+                        return;
+                    case "2":
+                        nowStopSetting = 2;
+                        beep1.PlayOnce(1.0f);
+                        return;
+                    case "3":
+                        nowStopSetting = 3;
+                        beep1.PlayOnce(1.0f);
+                        return;
+                    case "4":
+                        nowStopSetting = 4;
+                        beep1.PlayOnce(1.0f);
+                        return;
+                    case "5":
+                        nowStopSetting = 5;
+                        beep1.PlayOnce(1.0f);
+                        return;
+                    case "6":
+                        nowStopSetting = 6;
+                        beep1.PlayOnce(1.0f);
+                        return;
                 }
             }
         }
