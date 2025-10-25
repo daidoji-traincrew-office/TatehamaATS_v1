@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using TakumiteAudioWrapper;
 using TatehamaATS_v1.OnboardDevice;
+using TrainCrew;
 using TrainCrewAPI;
 
 namespace TatehamaATS_v1.RetsubanWindow
@@ -19,7 +20,7 @@ namespace TatehamaATS_v1.RetsubanWindow
 
         private int nowUnkoSetting = -1;
         private int nowStopSetting = -1;
-        private int nowStopCount = 0;
+        private int nowStopCount = 2;
 
         private string nowInput;
 
@@ -206,15 +207,39 @@ namespace TatehamaATS_v1.RetsubanWindow
             var displayList = new List<string>();
             if (nowStopSetting == 0)
             {
+                displayList.SetDisplayData("停　テコワカニツハハラノエラタ", 0, 0, false);
+                displayList.SetDisplayData("通　ハマサカハサソモイキラシイ5", 0, 1, false);
+                displayList.SetDisplayData("6｜停通通通通停通通停停停通停→", 0, 2, false);
                 displayList.SetDisplayData("テイシャセッテイ　　シュヨウエキ", 0, 0, false);
                 displayList.SetDisplayData("1ミオ｜タハ2リカ｜ナノ3ムイ｜", 0, 1, false);
                 displayList.SetDisplayData("｜オオ4ナタ｜シワ5フエ｜タイ6", 0, 2, false);
             }
-            if (nowStopSetting == 6)
+            else if (nowStopSetting <= 6)
             {
-                displayList.SetDisplayData("停　テコワカニツハハラノエラタ", 0, 0, false);
-                displayList.SetDisplayData("通　ハマサカハサソモイキラシイ5", 0, 1, false);
-                displayList.SetDisplayData("6｜停通通通通停通通停停停通停→", 0, 2, false);
+                //基礎表示
+                displayList.SetDisplayData($"停通{nowStopSetting}", 0, 0, true);
+                displayList.SetDisplayData($"　{nowStopSetting - 1}→", 15, 0, true);
+                displayList.SetDisplayData($"　{nowStopSetting + 1}←", 1, 0, true);
+                if (nowStopSetting == 1) displayList.SetDisplayData($"　　｜", 15, 0, true);
+                if (nowStopSetting == 6) displayList.SetDisplayData($"　　｜", 1, 0, true);
+                for (int i = 0; i < 13; i++)
+                {
+                    List<string> stationIds = StopPassManager.GetAllStationIds();
+                    string stationId = stationIds[i + 13 * (6 - nowStopSetting)];
+                    string stationKana = StopPassManager.GetStationKanaById(stationId);
+                    string stationStop = StopPassManager.GetStopDataById(stationId);
+                    displayList.SetDisplayData(stationKana, i + 2, 0, true);
+                    displayList.SetDisplayData(stationStop, i + 2, 2, true);
+                }
+
+                if (DateTime.Now.Millisecond < 500)
+                {
+                    displayList.SetDisplayData("　　", nowStopCount + 2, 0, true);
+                }
+                else
+                {
+                    displayList.SetDisplayData("■", nowStopCount + 2, 2, true);
+                }
             }
             else
             {
@@ -510,7 +535,7 @@ namespace TatehamaATS_v1.RetsubanWindow
                     }
                 }
             }
-            else if (nowStopSetting == 0)
+            else if (0 == nowStopSetting)
             {
                 switch (Digit)
                 {
@@ -540,6 +565,70 @@ namespace TatehamaATS_v1.RetsubanWindow
                         return;
                 }
             }
+            else if (1 <= nowStopSetting)
+            {
+                switch (Digit)
+                {
+                    case "7":
+                        if (nowStopCount == 0 && nowStopSetting == 6)
+                        {
+                            beep3.PlayOnce(1.0f);
+                            return;
+                        }
+                        nowStopCount--;
+                        if (nowStopCount <= -1)
+                        {
+                            nowStopCount = nowStopCount + 13;
+                            nowStopSetting++;
+                        }
+                        beep1.PlayOnce(1.0f);
+                        return;
+                    case "9":
+                        if (nowStopCount == 12 && nowStopSetting == 1)
+                        {
+                            beep3.PlayOnce(1.0f);
+                            return;
+                        }
+                        nowStopCount++;
+                        if (nowStopCount >= 13)
+                        {
+                            nowStopCount = nowStopCount - 13;
+                            nowStopSetting--;
+                        }
+                        beep1.PlayOnce(1.0f);
+                        return;
+                    case "1":
+                        nowStopSetting = 1;
+                        nowStopCount = 12;
+                        beep1.PlayOnce(1.0f);
+                        return;
+                    case "2":
+                        nowStopSetting = 2;
+                        nowStopCount = 2;
+                        beep1.PlayOnce(1.0f);
+                        return;
+                    case "3":
+                        nowStopSetting = 3;
+                        nowStopCount = 8;
+                        beep1.PlayOnce(1.0f);
+                        return;
+                    case "4":
+                        nowStopSetting = 4;
+                        nowStopCount = 6;
+                        beep1.PlayOnce(1.0f);
+                        return;
+                    case "5":
+                        nowStopSetting = 5;
+                        nowStopCount = 6;
+                        beep1.PlayOnce(1.0f);
+                        return;
+                    case "6":
+                        nowStopSetting = 6;
+                        nowStopCount = 0;
+                        beep1.PlayOnce(1.0f);
+                        return;
+                }
+            }
         }
         internal void Buttons_StopPass(string Digit)
         {
@@ -550,6 +639,20 @@ namespace TatehamaATS_v1.RetsubanWindow
                     nowInput += "普通";
                     beep1.PlayOnce(1.0f);
                 }
+            }
+            else if (1 <= nowStopSetting && Digit == "停")
+            {
+                List<string> stationIds = StopPassManager.GetAllStationIds();
+                string stationId = stationIds[nowStopCount + 13 * (6 - nowStopSetting)];
+                StopPassManager.SetStopDataById(stationId, "停車");
+                beep2.PlayOnce(1.0f);
+            }
+            else if (1 <= nowStopSetting && Digit == "通")
+            {
+                List<string> stationIds = StopPassManager.GetAllStationIds();
+                string stationId = stationIds[nowStopCount + 13 * (6 - nowStopSetting)];
+                StopPassManager.SetStopDataById(stationId, "通過");
+                beep2.PlayOnce(1.0f);
             }
         }
         internal void Buttons_RetsuHead(string Name)
