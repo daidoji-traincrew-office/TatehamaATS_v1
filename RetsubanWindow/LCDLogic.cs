@@ -541,26 +541,32 @@ namespace TatehamaATS_v1.RetsubanWindow
                 {
                     case "1":
                         nowStopSetting = 1;
+                        nowStopCount = 12;
                         beep1.PlayOnce(1.0f);
                         return;
                     case "2":
                         nowStopSetting = 2;
+                        nowStopCount = 2;
                         beep1.PlayOnce(1.0f);
                         return;
                     case "3":
                         nowStopSetting = 3;
+                        nowStopCount = 8;
                         beep1.PlayOnce(1.0f);
                         return;
                     case "4":
                         nowStopSetting = 4;
+                        nowStopCount = 6;
                         beep1.PlayOnce(1.0f);
                         return;
                     case "5":
                         nowStopSetting = 5;
+                        nowStopCount = 6;
                         beep1.PlayOnce(1.0f);
                         return;
                     case "6":
                         nowStopSetting = 6;
+                        nowStopCount = 0;
                         beep1.PlayOnce(1.0f);
                         return;
                 }
