@@ -20,6 +20,11 @@ namespace TatehamaATS_v1.RetsubanWindow
 
         public bool nowSetting;
 
+        /// <summary>
+        /// 設定情報変更
+        /// </summary>
+        internal event Action<TimeSpan> SetShiftTime;
+
         private AudioManager AudioManager;
         private AudioWrapper beep1;
         private AudioWrapper beep2;
@@ -158,6 +163,7 @@ namespace TatehamaATS_v1.RetsubanWindow
                         var newHour = Int32.Parse(NewHour);
                         newHour = newHour + 24;
                         ShiftTime = TimeSpan.FromHours(newHour - DateTime.Now.Hour);
+                        SetShiftTime.Invoke(ShiftTime);
                         nowSetting = false;
                         beep2.PlayOnce(1.0f);
                     }
