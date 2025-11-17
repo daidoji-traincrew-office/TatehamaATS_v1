@@ -89,6 +89,16 @@ jobs:
         uses: actions/setup-dotnet@v4.3.1
         with:
           dotnet-version: '8.0.x'
+      - name: Create global.json for .NET 8.0.x
+        run: |
+          cat <<EOF > ./global.json
+          {
+            "sdk": {
+              "version": "8.0.0",
+              "rollForward": "latestFeature"
+            }
+          }
+          EOF
       - name: Build Exe
         run: |
           dotnet publish -c Release \
