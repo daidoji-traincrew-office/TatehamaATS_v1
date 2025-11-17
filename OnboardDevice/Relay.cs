@@ -181,7 +181,7 @@ namespace TatehamaATS_v1.OnboardDevice
         /// <param name="requestValues"></param>
         /// <returns></returns>
         private static bool IsValidCommand(string requestValues) =>
-            new[] { "DataRequest", "SetEmergencyLight", "SetSignalPhase", "mode_req", "SetRoute", "DeleteRoute", "DeleteRoute2" }.Contains(requestValues);
+            new[] { "DataRequest", "SetEmergencyLight", "SetSignalPhase", "mode_req", "SetRoute", "DeleteRoute", "DeleteRoute2", "realtimeoffset" }.Contains(requestValues);
 
         /// <summary>
         /// リクエストの検証
@@ -201,12 +201,14 @@ namespace TatehamaATS_v1.OnboardDevice
                 case "SetSignalPhase":
                     return requestValues.Length == 2 && (requestValues[1] == "None" || requestValues[1] == "R" || requestValues[1] == "YY" || requestValues[1] == "Y" || requestValues[1] == "YG" || requestValues[1] == "G");
                 case "mode_req":
-                    return requestValues.Length == 1 && (requestValues[0] == "hide_other" || requestValues[0] == "show_other" || requestValues[0] == "route_manual" || requestValues[0] == "route_auto");
+                    return requestValues.Length == 1 && (requestValues[0] == "hide_other" || requestValues[0] == "show_other" || requestValues[0] == "route_manual" || requestValues[0] == "route_auto" || requestValues[0] == "realtimemode_on");
                 case "SetRoute":
                     return requestValues.Length == 5;
                 case "DeleteRoute":
                 case "DeleteRoute2":
                     return requestValues.Length == 2;
+                case "realtimeoffset":
+                    return requestValues.Length == 1;
                 default:
                     return false;
             }
@@ -233,6 +235,7 @@ namespace TatehamaATS_v1.OnboardDevice
             {
                 SetRouteMode(true);
                 SetOther(true);
+                SetTimeMode();
             }
             // TrainCrewRoutesにTcData.interlockDataListから展開した進路情報を格納する
             TrainCrewRoutes = ConvertToRoutes(TcData.interlockDataList);
@@ -394,6 +397,8 @@ namespace TatehamaATS_v1.OnboardDevice
                     args = request
                 };
 
+                Debug.WriteLine(requestCommand);
+
                 // JSON形式にシリアライズ
                 string json = JsonConvert.SerializeObject(requestCommand, JsonSerializerSettings);
                 byte[] bytes = _encoding.GetBytes(json);
@@ -445,6 +450,11 @@ namespace TatehamaATS_v1.OnboardDevice
         internal void SetRouteMode(bool isManual)
         {
             SendSingleCommand("mode_req", new string[] { isManual ? "route_manual" : "route_auto" });
+        }
+
+        internal void SetTimeMode()
+        {
+            SendSingleCommand("mode_req", new string[] { "realtimemode_on" });
         }
 
         internal void UpdateRoute(List<Route> routes)
@@ -538,6 +548,19 @@ namespace TatehamaATS_v1.OnboardDevice
 
                 Debug.WriteLine($"☆API送信: DeleteRoute2/{route.TcName}");
                 SendSingleCommand("DeleteRoute2", [staName, routeName]);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"{ex.Message}{ex.InnerException}");
+            }
+        }
+
+        internal void SetTime(int shiftTime)
+        {
+            try
+            {
+                Debug.WriteLine($"☆API送信: realtimeoffset/{shiftTime}");
+                SendSingleCommand("realtimeoffset", [$"{shiftTime}"]);
             }
             catch (Exception ex)
             {

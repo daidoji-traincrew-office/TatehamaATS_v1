@@ -106,6 +106,7 @@ namespace TatehamaATS_v1.MainWindow
 
             retsubanWindow.AddExceptionAction += CableIO.AddException;
             retsubanWindow.SetDiaNameAction += CableIO.RetsubanSet;
+            retsubanWindow.SetShiftTime += CableIO.SetTime;
         }
 
         /// <summary>
