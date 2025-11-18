@@ -54,7 +54,7 @@ namespace TatehamaATS_v1
         /// <summary>
         /// 進路情報
         /// </summary>
-        public List<Route> RouteData { get; set; } = new();
+        public List<Route> RouteData { get; set; } = [];
         /// <summary>
         /// 踏みつぶし状態
         /// </summary>
@@ -71,10 +71,27 @@ namespace TatehamaATS_v1
         /// 編成構成不一致
         /// </summary>
         public bool IsCarMismatch;
+        /// <summary>
+        /// サーバーモード
+        /// </summary>
+        public ServerMode ServerMode { get; set; } = ServerMode.Off;
         public override string ToString()
         {
             return $"BougoState:{BougoState}/{OperationNotificationData}/{RouteData}/{string.Join(",", NextSignalData)}/{string.Join(",", DoubleNextSignalData)}";
         }
+    }
+
+    public class ServerToATSDataBySchedule
+    {
+        /// <summary>
+        /// TST時差
+        /// </summary>
+        public int TimeOffset { get; set; }
+
+        /// <summary>
+        /// 進路情報
+        /// </summary>
+        public List<Route> RouteData { get; set; } = [];
     }
 
     public class EmergencyLightData
@@ -142,5 +159,12 @@ namespace TatehamaATS_v1
     {
         Drop,
         Raise
+    }
+
+    public enum ServerMode
+    {
+        Off,
+        Private,
+        Public
     }
 }
