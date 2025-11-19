@@ -4,6 +4,7 @@ using OpenIddict.Client;
 namespace TatehamaATS_v1.Network
 {
     using Microsoft.AspNetCore.SignalR.Client;
+    using Microsoft.EntityFrameworkCore.Migrations.Operations;
     using System;
     using System.Diagnostics;
     using System.Net;
@@ -464,6 +465,12 @@ namespace TatehamaATS_v1.Network
             {
                 return; // イベントハンドラは一度だけ設定する
             }
+
+            // サーバーからのデータ受信イベントハンドラ
+            _connection.On<DataFromServerBySchedule>("ReceiveData", async (data) =>
+            {
+
+            });
 
             _connection.Closed += async (error) =>
             {

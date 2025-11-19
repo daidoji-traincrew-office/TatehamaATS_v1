@@ -8,6 +8,8 @@ namespace TatehamaATS_v1.OnboardDevice
     using System;
     using System.Diagnostics;
     using TatehamaATS_v1.Network;
+    using TatehamaATS_v1.RetsubanWindow;
+
     public class CableIO
     {
         /// <summary>
@@ -38,7 +40,12 @@ namespace TatehamaATS_v1.OnboardDevice
         /// <summary>
         /// 運転告知器
         /// </summary>
-        KokuchiWindow.KokuchiWindow KokuchiWindow = new KokuchiWindow.KokuchiWindow();
+        RetsubanWindow RetsubanWindow = new RetsubanWindow();
+
+        /// <summary>
+        /// 運転告知器
+        /// </summary>
+        KokuchiWindow.KokuchiWindow KokuchiWindow = new();
 
         /// <summary>
         /// 試験用ウィンドウ
@@ -74,7 +81,6 @@ namespace TatehamaATS_v1.OnboardDevice
         /// 他車防護無線
         /// </summary>
         bool OtherBougoState;
-
 
         /// <summary>
         /// 教官添乗状態
@@ -138,6 +144,11 @@ namespace TatehamaATS_v1.OnboardDevice
 
             TestWindow = new TestWindow.TestWindow();
             KokuchiWindow.Hide();
+
+            RetsubanWindow = new RetsubanWindow();
+            RetsubanWindow.AddExceptionAction += AddException;
+            RetsubanWindow.SetDiaNameAction += RetsubanSet;
+            RetsubanWindow.SetShiftTime += SetTime;
 
             ControlLED.AddExceptionAction += AddException;
         }
@@ -365,18 +376,24 @@ namespace TatehamaATS_v1.OnboardDevice
             OtherBougoState = dataFromServer.BougoState;
             Speaker.ChengeBougoState(MyBougoState, OtherBougoState);
             KokuchiWindow.SetData(dataFromServer.OperationNotificationData);
-            if (!ForceStop)
-            {
-                var signalDataList = new List<SignalData>(dataFromServer.NextSignalData);
-                signalDataList.AddRange(dataFromServer.DoubleNextSignalData);
-                Relay.SignalSet(signalDataList);
-                Relay.UpdateRoute(dataFromServer.RouteData);
-            }
             TherePrevious = dataFromServer.IsTherePreviousTrain;
             MaybeWarp = dataFromServer.IsMaybeWarp;
             ControlLED.OnPreviousTrain = dataFromServer.IsOnPreviousTrain;
             ControlLED.TherePreviousTrain = dataFromServer.IsTherePreviousTrain;
             ControlLED.MaybeWarp = dataFromServer.IsMaybeWarp;
+        }
+
+        /// <summary>
+        /// 定時信号制御情報指令線
+        /// </summary>
+        /// <param name="dataFromServer"></param>
+        internal void ServerDataScheduleUpdate(DataFromServerBySchedule dataFromServer)
+        {
+            dataFromServer.TimeOffset;
+            //var signalDataList = new List<SignalData>(dataFromServer.NextSignalData);
+            //signalDataList.AddRange(dataFromServer.DoubleNextSignalData);
+            //Relay.SignalSet(signalDataList);
+            //Relay.UpdateRoute(dataFromServer.RouteData);
         }
 
         /// <summary>

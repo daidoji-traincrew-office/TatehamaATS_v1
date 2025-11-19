@@ -81,7 +81,7 @@ namespace TatehamaATS_v1
         }
     }
 
-    public class ServerToATSDataBySchedule
+    public class DataFromServerBySchedule
     {
         /// <summary>
         /// TST時差

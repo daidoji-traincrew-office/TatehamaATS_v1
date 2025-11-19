@@ -202,5 +202,10 @@ namespace TatehamaATS_v1.RetsubanWindow
                     return;
             }
         }
+
+        internal void TimeSet(int shiftTime)
+        {
+            ShiftTime = TimeSpan.FromHours(shiftTime);
+        }
     }
 }
