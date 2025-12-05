@@ -34,6 +34,11 @@ namespace TatehamaATS_v1
         internal bool MaybeWarp;
 
         /// <summary>
+        /// 強制切断
+        /// </summary>
+        internal bool ForcedDisconnect;
+
+        /// <summary>
         /// 故障発生
         /// </summary>
         internal event Action<ATSCommonException> AddExceptionAction;
@@ -195,6 +200,10 @@ namespace TatehamaATS_v1
                     if (ExceptionCodes.Count != 0)
                     {
                         L3List = ExceptionCodes;
+                    }
+                    else if (ForcedDisconnect)
+                    {
+                        L3List = new List<string> { "強制", "切断" };
                     }
                     else if (OnPreviousTrain)
                     {
@@ -420,6 +429,10 @@ namespace TatehamaATS_v1
                     return 64;
                 case "ワープ？":
                     return 65;
+                case "強制":
+                    return 66;
+                case "切断":
+                    return 67;
                 default:
                     throw new LEDDisplayStringAbnormal(8, $"未定義:{str}　ControlLED.cs@ConvertToLEDNumber()");
             }

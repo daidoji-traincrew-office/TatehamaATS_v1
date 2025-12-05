@@ -371,9 +371,10 @@ namespace TatehamaATS_v1.OnboardDevice
             CurrentStatusFlags = dataFromServer.StatusFlags;
 
             // LED表示用にフラグを設定
-            ControlLED.OnPreviousTrain = dataFromServer.StatusFlags.HasFlag(ServerStatusFlags.IsOnPreviousTrain);
+            ControlLED.OnPreviousTrain = dataFromServer.StatusFlags.HasFlag(ServerStatusFlags.IsOnPreviousTrain) || dataFromServer.StatusFlags.HasFlag(ServerStatusFlags.IsLocked);
             ControlLED.TherePreviousTrain = dataFromServer.StatusFlags.HasFlag(ServerStatusFlags.IsTherePreviousTrain);
             ControlLED.MaybeWarp = dataFromServer.StatusFlags.HasFlag(ServerStatusFlags.IsMaybeWarp);
+            ControlLED.ForcedDisconnect = dataFromServer.StatusFlags.HasFlag(ServerStatusFlags.IsDisconnected);
         }
 
         /// <summary>
