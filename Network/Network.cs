@@ -675,7 +675,7 @@ namespace TatehamaATS_v1.Network
                     DataFromServer dataFromServer;
                     dataFromServer = await _connection.InvokeAsync<DataFromServer>("SendData_ATS", SendData);
 
-                    if (dataFromServer.IsOnPreviousTrain)
+                    if (dataFromServer.StatusFlags.HasFlag(ServerStatusFlags.IsOnPreviousTrain))
                     {
                         currentStatus = true;
                     }
@@ -790,7 +790,7 @@ namespace TatehamaATS_v1.Network
                 return;
             }
 
-            IsTherePreviousTrainIgnore = DataFromServer.IsTherePreviousTrain;
+            IsTherePreviousTrainIgnore = DataFromServer.StatusFlags.HasFlag(ServerStatusFlags.IsTherePreviousTrain);
         }
 
         public void IsMaybeWarpIgnoreSet()
@@ -800,7 +800,7 @@ namespace TatehamaATS_v1.Network
                 return;
             }
 
-            IsMaybeWarpIgnore = DataFromServer.IsMaybeWarp;
+            IsMaybeWarpIgnore = DataFromServer.StatusFlags.HasFlag(ServerStatusFlags.IsMaybeWarp);
         }
     }
 }

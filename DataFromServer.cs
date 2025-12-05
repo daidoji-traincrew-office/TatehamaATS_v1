@@ -87,31 +87,9 @@ namespace TatehamaATS_v1
         /// </summary>
         public List<Route> RouteData { get; set; } = new();
         /// <summary>
-        /// 踏みつぶし状態
-        /// </summary>
-        public bool IsOnPreviousTrain { get; set; } = false;
-        /// <summary>
-        /// 同一運番状態
-        /// </summary>
-        public bool IsTherePreviousTrain { get; set; } = false;
-        /// <summary>
-        /// ワープの可能性あり状態
-        /// </summary>
-        public bool IsMaybeWarp { get; set; } = false;
-        /// <summary>
         /// 編成構成不一致
         /// </summary>
         public bool IsCarMismatch;
-
-        /// <summary>
-        /// 接続拒否状態
-        /// </summary>
-        public bool IsDisconnected { get; set; } = false;
-
-        /// <summary>
-        /// 鎖錠状態
-        /// </summary>
-        public bool IsLocked { get; set; } = false;
 
         /// <summary>
         /// ステータスフラグ(ビットフラグ)
