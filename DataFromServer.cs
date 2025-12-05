@@ -29,6 +29,37 @@ namespace TatehamaATS_v1
         }
     }
 
+    [Flags]
+    public enum ServerStatusFlags
+    {
+        None = 0,
+
+        /// <summary>
+        /// 踏みつぶし状態
+        /// </summary>
+        IsOnPreviousTrain = 1 << 0,
+
+        /// <summary>
+        /// 同一運番状態
+        /// </summary>
+        IsTherePreviousTrain = 1 << 1,
+
+        /// <summary>
+        /// ワープの可能性あり状態
+        /// </summary>
+        IsMaybeWarp = 1 << 2,
+
+        /// <summary>
+        /// 接続拒否状態
+        /// </summary>
+        IsDisconnected = 1 << 3,
+
+        /// <summary>
+        /// 鎖錠状態
+        /// </summary>
+        IsLocked = 1 << 4
+    }
+
     public class DataFromServer
     {
         /// <summary>
@@ -71,6 +102,22 @@ namespace TatehamaATS_v1
         /// 編成構成不一致
         /// </summary>
         public bool IsCarMismatch;
+
+        /// <summary>
+        /// 接続拒否状態
+        /// </summary>
+        public bool IsDisconnected { get; set; } = false;
+
+        /// <summary>
+        /// 鎖錠状態
+        /// </summary>
+        public bool IsLocked { get; set; } = false;
+
+        /// <summary>
+        /// ステータスフラグ(ビットフラグ)
+        /// </summary>
+        public ServerStatusFlags StatusFlags { get; set; } = ServerStatusFlags.None;
+
         public override string ToString()
         {
             return $"BougoState:{BougoState}/{OperationNotificationData}/{RouteData}/{string.Join(",", NextSignalData)}/{string.Join(",", DoubleNextSignalData)}";
