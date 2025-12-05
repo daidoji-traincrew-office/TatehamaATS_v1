@@ -479,6 +479,19 @@ namespace TatehamaATS_v1.Network
                 // 接続が切れた場合、再接続を試みる
                 await TryReconnectAsync();
             };
+
+
+            // ReceiveDataイベントハンドラ
+            _connection.On<DataFromServerBySchedule>("ReceiveData", async (data) =>
+            {
+                // ここに定時処理を受信したときの処理を書く。メソッドを呼んでもよい。
+            });
+
+            // ReceiveSignalDataイベントハンドラ
+            _connection.On<List<SignalData>>("ReceiveSignalData", async (signalData) =>
+            {
+                // ここに定時処理を受信したときの処理を書く。メソッドを呼んでもよい。
+            });
             _eventHandlersSet = true;
         }
 

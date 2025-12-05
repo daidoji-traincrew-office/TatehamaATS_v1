@@ -77,6 +77,19 @@ namespace TatehamaATS_v1
         }
     }
 
+    public class DataFromServerBySchedule
+    {
+        /// <summary>
+        /// TST時差
+        /// </summary>
+        public int TimeOffset { get; set; }
+
+        /// <summary>
+        /// 進路情報
+        /// </summary>
+        public List<Route> RouteData { get; set; } = [];
+    }
+
     public class EmergencyLightData
     {
         public string Name { get; set; }
