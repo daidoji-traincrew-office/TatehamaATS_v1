@@ -122,6 +122,8 @@ namespace TatehamaATS_v1.OnboardDevice
             Network.ServerDataUpdate += ServerDataUpdate;
             Network.ConnectionStatusChanged += NetworkStatesChenged;
             Network.RetsubanInOutStatusChanged += ForceStopSignal;
+            Network.ReceiveDataUpdate += ReceiveData;
+            Network.ReceiveSignalDataUpdate += ReceiveSignalData;
 
             Relay = new Relay();
             Relay.AddExceptionAction += AddException;
@@ -370,13 +372,29 @@ namespace TatehamaATS_v1.OnboardDevice
                 var signalDataList = new List<SignalData>(dataFromServer.NextSignalData);
                 signalDataList.AddRange(dataFromServer.DoubleNextSignalData);
                 Relay.SignalSet(signalDataList);
-                Relay.UpdateRoute(dataFromServer.RouteData);
             }
             TherePrevious = dataFromServer.IsTherePreviousTrain;
             MaybeWarp = dataFromServer.IsMaybeWarp;
             ControlLED.OnPreviousTrain = dataFromServer.IsOnPreviousTrain;
             ControlLED.TherePreviousTrain = dataFromServer.IsTherePreviousTrain;
             ControlLED.MaybeWarp = dataFromServer.IsMaybeWarp;
+        }
+
+        internal void ReceiveData(DataFromServerBySchedule data, bool ForceStop)
+        {
+            Relay.SetTime(data.TimeOffset);
+            if (!ForceStop)
+            {
+                Relay.UpdateRoute(data.RouteData);
+            }
+        }
+
+        internal void ReceiveSignalData(List<SignalData> data, bool ForceStop)
+        {
+            if (!ForceStop)
+            {
+                Relay.SignalSet(data);
+            }
         }
 
         /// <summary>

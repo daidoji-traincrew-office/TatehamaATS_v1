@@ -81,6 +81,16 @@ namespace TatehamaATS_v1.Network
         internal event Action<DataFromServer, bool> ServerDataUpdate;
 
         /// <summary>
+        /// 信号制御情報変化
+        /// </summary>
+        internal event Action<DataFromServerBySchedule, bool> ReceiveDataUpdate;
+
+        /// <summary>
+        /// 信号制御情報変化
+        /// </summary>
+        internal event Action<List<SignalData>, bool> ReceiveSignalDataUpdate;
+
+        /// <summary>
         /// 通信部疎通確認
         /// </summary>
         internal event Action NetworkWorking;
@@ -484,13 +494,13 @@ namespace TatehamaATS_v1.Network
             // ReceiveDataイベントハンドラ
             _connection.On<DataFromServerBySchedule>("ReceiveData", async (data) =>
             {
-                // ここに定時処理を受信したときの処理を書く。メソッドを呼んでもよい。
+                await ReceiveData(data);
             });
 
             // ReceiveSignalDataイベントハンドラ
             _connection.On<List<SignalData>>("ReceiveSignalData", async (signalData) =>
             {
-                // ここに定時処理を受信したときの処理を書く。メソッドを呼んでもよい。
+                await ReceiveSignalData(signalData);
             });
             _eventHandlersSet = true;
         }
@@ -504,13 +514,6 @@ namespace TatehamaATS_v1.Network
         {
             AddExceptionAction?.Invoke(new NetworkConnectException(7, "通信部接続失敗"));
             ConnectionStatusChanged?.Invoke(connected);
-
-            //_connection.On<DataFromServer>("ReceiveData_ATS", DataFromServer =>
-            //{
-            //    Debug.WriteLine("受信");
-            //    Debug.WriteLine(DataFromServer.ToString());
-            //    ServerDataUpdate?.Invoke(DataFromServer);
-            //});
 
             var result = false;
             while (!connected)
@@ -734,6 +737,24 @@ namespace TatehamaATS_v1.Network
                 var e = new NetworkDataException(7, "", ex);
                 AddExceptionAction.Invoke(e);
             }
+        }
+
+        /// <summary>
+        /// サーバーからデータ
+        /// </summary>
+        /// <returns></returns>
+        public async Task ReceiveData(DataFromServerBySchedule data)
+        {
+            ReceiveDataUpdate?.Invoke(data, previousStatus);
+        }
+
+        /// <summary>
+        /// サーバーから信号現示データ
+        /// </summary>
+        /// <returns></returns>
+        public async Task ReceiveSignalData(List<SignalData> signalDatas)
+        {
+            ReceiveSignalDataUpdate?.Invoke(signalDatas, previousStatus);
         }
 
         public async void DriverGetsOff()
