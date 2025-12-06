@@ -56,14 +56,9 @@ namespace TatehamaATS_v1.OnboardDevice
         bool InspectionRecordEmBrakeState;
 
         /// <summary>
-        /// 交代前状態
+        /// サーバーステータスフラグ
         /// </summary>
-        bool TherePrevious;
-
-        /// <summary>
-        /// ワープ疑い
-        /// </summary>
-        bool MaybeWarp;
+        ServerStatusFlags CurrentStatusFlags = ServerStatusFlags.None;
 
         /// <summary>
         /// 自車防護無線
@@ -275,7 +270,7 @@ namespace TatehamaATS_v1.OnboardDevice
             bool emBrakeState;
             if (ATSPowerState)
             {
-                emBrakeState = InspectionRecordEmBrakeState || TherePrevious || MaybeWarp;
+                emBrakeState = InspectionRecordEmBrakeState || CurrentStatusFlags != ServerStatusFlags.None;
             }
             else
             {
@@ -367,11 +362,14 @@ namespace TatehamaATS_v1.OnboardDevice
             OtherBougoState = dataFromServer.BougoState;
             Speaker.ChengeBougoState(MyBougoState, OtherBougoState);
             KokuchiWindow.SetData(dataFromServer.OperationNotificationData);
-            TherePrevious = dataFromServer.IsTherePreviousTrain;
-            MaybeWarp = dataFromServer.IsMaybeWarp;
-            ControlLED.OnPreviousTrain = dataFromServer.IsOnPreviousTrain;
-            ControlLED.TherePreviousTrain = dataFromServer.IsTherePreviousTrain;
-            ControlLED.MaybeWarp = dataFromServer.IsMaybeWarp;
+            // StatusFlagsを保持してEmBrakeStateChenge()で判定する
+            CurrentStatusFlags = dataFromServer.StatusFlags;
+
+            // LED表示用にフラグを設定
+            ControlLED.OnPreviousTrain = dataFromServer.StatusFlags.HasFlag(ServerStatusFlags.IsOnPreviousTrain) || dataFromServer.StatusFlags.HasFlag(ServerStatusFlags.IsLocked);
+            ControlLED.TherePreviousTrain = dataFromServer.StatusFlags.HasFlag(ServerStatusFlags.IsTherePreviousTrain);
+            ControlLED.MaybeWarp = dataFromServer.StatusFlags.HasFlag(ServerStatusFlags.IsMaybeWarp);
+            ControlLED.ForcedDisconnect = dataFromServer.StatusFlags.HasFlag(ServerStatusFlags.IsDisconnected);
         }
 
         internal void ReceiveData(DataFromServerBySchedule data, bool ForceStop)
