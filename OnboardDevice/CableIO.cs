@@ -367,12 +367,6 @@ namespace TatehamaATS_v1.OnboardDevice
             OtherBougoState = dataFromServer.BougoState;
             Speaker.ChengeBougoState(MyBougoState, OtherBougoState);
             KokuchiWindow.SetData(dataFromServer.OperationNotificationData);
-            if (!ForceStop)
-            {
-                var signalDataList = new List<SignalData>(dataFromServer.NextSignalData);
-                signalDataList.AddRange(dataFromServer.DoubleNextSignalData);
-                Relay.SignalSet(signalDataList);
-            }
             TherePrevious = dataFromServer.IsTherePreviousTrain;
             MaybeWarp = dataFromServer.IsMaybeWarp;
             ControlLED.OnPreviousTrain = dataFromServer.IsOnPreviousTrain;
