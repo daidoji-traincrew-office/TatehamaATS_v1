@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Routing;
 using System.ComponentModel;
 using System.Configuration;
 using Microsoft.AspNetCore.Components.Routing;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 
 namespace TatehamaATS_v1.OnboardDevice
 {
@@ -68,6 +69,7 @@ namespace TatehamaATS_v1.OnboardDevice
         private List<Route> ServerRoutes = new List<Route>();
         private List<Route> TrainCrewRoutes = new List<Route>();
         private int RouteCounta = 0;
+        private int shiftTime = 0;
 
         private Dictionary<string, string> StaNameById = new Dictionary<string, string>()
         {
@@ -397,7 +399,7 @@ namespace TatehamaATS_v1.OnboardDevice
                     args = request
                 };
 
-                Debug.WriteLine(requestCommand);
+                //Debug.WriteLine(requestCommand);
 
                 // JSON形式にシリアライズ
                 string json = JsonConvert.SerializeObject(requestCommand, JsonSerializerSettings);
@@ -417,20 +419,35 @@ namespace TatehamaATS_v1.OnboardDevice
 
         internal void SignalSet(List<SignalData> signalDatas)
         {
-            foreach (var signalData in signalDatas.ToList())
+            if (signalDatas == null)
+            {
+                SignalDatas = signalDatas;
+                Debug.WriteLine("signalDatas is null. Skipping SignalSet.");
+                return;
+            }
+
+            // 差分計算
+            var addedSignals = signalDatas
+                .Where(newSignal => !SignalDatas.Any(existingSignal => existingSignal.Name == newSignal.Name && existingSignal.phase == newSignal.phase))
+                .ToList();
+
+            var removedSignals = SignalDatas
+                .Where(existingSignal => !signalDatas.Any(newSignal => newSignal.Name == existingSignal.Name))
+                .ToList();
+
+            // 追加された信号の現示を送信
+            foreach (var signalData in addedSignals)
             {
                 _ = SendSingleCommand("SetSignalPhase", new string[] { signalData.Name, signalData.phase.ToString() });
             }
 
-            //情報の送られてこなくなった信号機の現示をNoneにする
-            var outSignals = SignalDatas
-                .Where(s2 => !signalDatas.Any(s1 => s1.Name == s2.Name))
-                .ToList();
-            foreach (var signalData in outSignals.ToList())
+            // 削除された信号の現示をNoneに設定して送信
+            foreach (var signalData in removedSignals)
             {
                 _ = SendSingleCommand("SetSignalPhase", new string[] { signalData.Name, Phase.None.ToString() });
             }
 
+            // 現在の信号データを更新
             SignalDatas = signalDatas;
         }
 
@@ -559,6 +576,11 @@ namespace TatehamaATS_v1.OnboardDevice
         {
             try
             {
+                if (this.shiftTime == shiftTime)
+                {
+                    return;
+                }
+                this.shiftTime = shiftTime;
                 Debug.WriteLine($"☆API送信: realtimeoffset/{shiftTime}");
                 SendSingleCommand("realtimeoffset", [$"{shiftTime}"]);
             }
