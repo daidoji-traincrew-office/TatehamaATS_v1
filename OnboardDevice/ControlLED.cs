@@ -372,32 +372,34 @@ namespace TatehamaATS_v1
                     return 11;
                 case "C特4":
                     return 12;
-                case "D特":
+                case "C特5":
                     return 13;
-                case "準特":
+                case "D特":
                     return 14;
-                case "回送":
+                case "準特":
                     return 15;
+                case "回送":
+                    return 16;
                 case "だんじり急行":
-                    return 17;
-                case "だんじり快急":
                     return 18;
-                case "だんじりA特":
+                case "だんじり快急":
                     return 19;
-                case "だんじりB特":
+                case "だんじりA特":
                     return 20;
-                case "だんじりC特1":
+                case "だんじりB特":
                     return 21;
-                case "だんじりC特2":
+                case "だんじりC特1":
                     return 22;
-                case "だんじりC特3":
+                case "だんじりC特2":
                     return 23;
-                case "だんじりC特4":
+                case "だんじりC特3":
                     return 24;
-                case "だんじりD特":
+                case "だんじりC特4":
                     return 25;
-                case "だんじり準特":
+                case "だんじりD特":
                     return 26;
+                case "だんじり準特":
+                    return 27;
                 case "F":
                     return 122;// 本来はFだが、見た目上110にする。
                     return 126;

@@ -69,7 +69,7 @@ namespace TatehamaATS_v1.OnboardDevice
         private List<Route> ServerRoutes = new List<Route>();
         private List<Route> TrainCrewRoutes = new List<Route>();
         private int RouteCounta = 0;
-        private int shiftTime = 0;
+        internal static int shiftTime = 0;
 
         private Dictionary<string, string> StaNameById = new Dictionary<string, string>()
         {
@@ -576,11 +576,11 @@ namespace TatehamaATS_v1.OnboardDevice
         {
             try
             {
-                if (this.shiftTime == shiftTime)
+                if (Relay.shiftTime == shiftTime)
                 {
                     return;
                 }
-                this.shiftTime = shiftTime;
+                Relay.shiftTime = shiftTime;
                 Debug.WriteLine($"☆API送信: realtimeoffset/{shiftTime}");
                 SendSingleCommand("realtimeoffset", [$"{shiftTime}"]);
             }
