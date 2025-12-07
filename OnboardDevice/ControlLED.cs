@@ -39,6 +39,11 @@ namespace TatehamaATS_v1
         internal bool ForcedDisconnect;
 
         /// <summary>
+        /// 地上装置停止中
+        /// </summary>
+        internal bool ServerStopped;
+
+        /// <summary>
         /// 故障発生
         /// </summary>
         internal event Action<ATSCommonException> AddExceptionAction;

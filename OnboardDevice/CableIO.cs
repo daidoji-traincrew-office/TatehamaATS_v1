@@ -370,6 +370,7 @@ namespace TatehamaATS_v1.OnboardDevice
             ControlLED.TherePreviousTrain = dataFromServer.StatusFlags.HasFlag(ServerStatusFlags.IsTherePreviousTrain);
             ControlLED.MaybeWarp = dataFromServer.StatusFlags.HasFlag(ServerStatusFlags.IsMaybeWarp);
             ControlLED.ForcedDisconnect = dataFromServer.StatusFlags.HasFlag(ServerStatusFlags.IsDisconnected);
+            ControlLED.ServerStopped = dataFromServer.StatusFlags.HasFlag(ServerStatusFlags.IsServerStopped);
         }
 
         internal void ReceiveData(DataFromServerBySchedule data, bool ForceStop)
