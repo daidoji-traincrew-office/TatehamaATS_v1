@@ -419,7 +419,7 @@ namespace TatehamaATS_v1.OnboardDevice
 
         internal void SignalSet(List<SignalData> signalDatas)
         {
-            if (!TcData.gameScreen.HasFlag(TrainCrewAPI.GameScreen.MainGame) || TcData.gameScreen.HasFlag(TrainCrewAPI.GameScreen.MainGame_Pause))
+            if (!(TcData.gameScreen.HasFlag(TrainCrewAPI.GameScreen.MainGame) || TcData.gameScreen.HasFlag(TrainCrewAPI.GameScreen.MainGame_Pause)))
             {
                 return;
             }
@@ -486,7 +486,7 @@ namespace TatehamaATS_v1.OnboardDevice
 
         internal void UpdateRoute(List<Route> routes)
         {
-            if (!TcData.gameScreen.HasFlag(TrainCrewAPI.GameScreen.MainGame) || TcData.gameScreen.HasFlag(TrainCrewAPI.GameScreen.MainGame_Pause))
+            if (!(TcData.gameScreen.HasFlag(TrainCrewAPI.GameScreen.MainGame) || TcData.gameScreen.HasFlag(TrainCrewAPI.GameScreen.MainGame_Pause)))
             {
                 return;
             }
@@ -532,7 +532,7 @@ namespace TatehamaATS_v1.OnboardDevice
         {
             try
             {
-                if (!TcData.gameScreen.HasFlag(TrainCrewAPI.GameScreen.MainGame) || TcData.gameScreen.HasFlag(TrainCrewAPI.GameScreen.MainGame_Pause))
+                if (!(TcData.gameScreen.HasFlag(TrainCrewAPI.GameScreen.MainGame) || TcData.gameScreen.HasFlag(TrainCrewAPI.GameScreen.MainGame_Pause)))
                 {
                     return;
                 }
@@ -581,7 +581,7 @@ namespace TatehamaATS_v1.OnboardDevice
         {
             try
             {
-                if (!TcData.gameScreen.HasFlag(TrainCrewAPI.GameScreen.MainGame) || TcData.gameScreen.HasFlag(TrainCrewAPI.GameScreen.MainGame_Pause))
+                if (!(TcData.gameScreen.HasFlag(TrainCrewAPI.GameScreen.MainGame) || TcData.gameScreen.HasFlag(TrainCrewAPI.GameScreen.MainGame_Pause)))
                 {
                     return;
                 }
