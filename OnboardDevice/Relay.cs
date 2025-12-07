@@ -419,6 +419,10 @@ namespace TatehamaATS_v1.OnboardDevice
 
         internal void SignalSet(List<SignalData> signalDatas)
         {
+            if (status != ConnectionState.Connected)
+            {
+                return;
+            }
             if (signalDatas == null)
             {
                 SignalDatas = signalDatas;
@@ -517,6 +521,10 @@ namespace TatehamaATS_v1.OnboardDevice
         {
             try
             {
+                if (status != ConnectionState.Connected)
+                {
+                    return;
+                }
                 var r = route.TcName.Split('_').ToList();
                 // staID仮対応
                 var staName = StaNameById[r[0]] + "連動装置";
@@ -556,6 +564,10 @@ namespace TatehamaATS_v1.OnboardDevice
         {
             try
             {
+                if (status != ConnectionState.Connected)
+                {
+                    return;
+                }
                 var r = route.TcName.Split('_').ToList();
                 // staID仮対応
                 var staName = StaNameById[r[0]] + "連動装置";
