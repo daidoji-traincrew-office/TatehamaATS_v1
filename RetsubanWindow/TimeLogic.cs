@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using TakumiteAudioWrapper;
 using TatehamaATS_v1.Exceptions;
+using TatehamaATS_v1.OnboardDevice;
 using TrainCrewAPI;
 
 namespace TatehamaATS_v1.RetsubanWindow
@@ -78,6 +79,7 @@ namespace TatehamaATS_v1.RetsubanWindow
 
         public void ClockTimer_Tick()
         {
+            ShiftTime = TimeSpan.FromHours(Relay.shiftTime);
             var tst_time = DateTime.Now + ShiftTime;
             TimeData timeData = new TimeData()
             {
