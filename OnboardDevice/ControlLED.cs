@@ -44,6 +44,11 @@ namespace TatehamaATS_v1
         internal bool ServerStopped;
 
         /// <summary>
+        /// 鎖錠状態
+        /// </summary>
+        internal bool Locked;
+
+        /// <summary>
         /// 故障発生
         /// </summary>
         internal event Action<ATSCommonException> AddExceptionAction;
