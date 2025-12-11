@@ -147,13 +147,6 @@ jobs:
           EOF
           sed -i "s/\${exe_name}/$exe_name/g" "$out_dir/TatehamaATS_v1(Prod).bat"
 
-          # 環境選択用
-          cat > "$out_dir/TatehamaATS_v1(選択).bat" << 'EOF'
-          @echo off
-          start "" "%~dp0${exe_name}"
-          EOF
-          sed -i "s/\${exe_name}/$exe_name/g" "$out_dir/TatehamaATS_v1(選択).bat"
-
           # batファイルをWindows改行コード(CRLF)に変換
           for bat in "$out_dir"/*.bat; do
             if [ -f "$bat" ]; then
