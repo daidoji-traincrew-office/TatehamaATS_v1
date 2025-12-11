@@ -16,6 +16,30 @@ namespace TatehamaATS_v1
         [STAThread]
         static async Task Main()
         {
+            // To customize application configuration such as set high DPI settings or default font,
+            // see https://aka.ms/applicationconfiguration.
+            ApplicationConfiguration.Initialize();
+
+            // 1. 環境選択ダイアログ表示
+            Config.EnvironmentType selectedEnvironment;
+            using (var selectForm = new MainWindow.EnvironmentSelectForm())
+            {
+                if (selectForm.ShowDialog() != DialogResult.OK)
+                {
+                    return; // キャンセルされた場合は終了
+                }
+
+                selectedEnvironment = selectForm.SelectedEnvironment;
+            }
+
+            // 2. ServerAddressクラスを初期化
+            Config.EnvironmentDefinition.Initialize(selectedEnvironment);
+
+            // 3. 環境別のDBファイル名を生成
+            var envName = selectedEnvironment.ToString().ToLower();
+            var dbFileName = $"trancrew-multiats-{envName}.sqlite3";
+
+            // 4. DI設定
             var host = new HostBuilder()
                 .ConfigureLogging(options => options.AddDebug())
                 .ConfigureServices(services =>
@@ -23,7 +47,7 @@ namespace TatehamaATS_v1
                     services.AddDbContext<DbContext>(options =>
                     {
                         options.UseSqlite(
-                            $"Filename={Path.Combine(Directory.GetCurrentDirectory(), "trancrew-multiats-client.sqlite3")}");
+                            $"Filename={Path.Combine(Directory.GetCurrentDirectory(), dbFileName)}");
                         options.UseOpenIddict();
                     });
 
@@ -79,9 +103,7 @@ namespace TatehamaATS_v1
                 .ConfigureWinForms<MainWindow.MainWindow>()
                 .UseWinFormsLifetime()
                 .Build();
-            // To customize application configuration such as set high DPI settings or default font,
-            // see https://aka.ms/applicationconfiguration.
-            ApplicationConfiguration.Initialize();
+
             await host.RunAsync();
         }
     }
