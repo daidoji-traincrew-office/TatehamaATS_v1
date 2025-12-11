@@ -44,7 +44,7 @@ namespace TatehamaATS_v1.MainWindow
             //
             // buttonConnect
             //
-            this.buttonConnect.Location = new System.Drawing.Point(150, 200);
+            this.buttonConnect.Location = new System.Drawing.Point(150, 230);
             this.buttonConnect.Name = "buttonConnect";
             this.buttonConnect.Size = new System.Drawing.Size(100, 30);
             this.buttonConnect.TabIndex = 1;
@@ -54,7 +54,7 @@ namespace TatehamaATS_v1.MainWindow
             //
             // buttonCancel
             //
-            this.buttonCancel.Location = new System.Drawing.Point(260, 200);
+            this.buttonCancel.Location = new System.Drawing.Point(260, 230);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(100, 30);
             this.buttonCancel.TabIndex = 2;
@@ -66,7 +66,7 @@ namespace TatehamaATS_v1.MainWindow
             //
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(400, 250);
+            this.ClientSize = new System.Drawing.Size(400, 280);
             this.Controls.Add(this.buttonCancel);
             this.Controls.Add(this.buttonConnect);
             this.Controls.Add(this.labelTitle);

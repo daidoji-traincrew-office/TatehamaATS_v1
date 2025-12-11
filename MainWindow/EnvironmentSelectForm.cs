@@ -16,6 +16,7 @@ public partial class EnvironmentSelectForm : Form
         InitializeComponent();
         SetupEnvironmentRadioButtons();
         SetupLocalUrlInput();
+        UpdateLocalUrlVisibility(); // 初期表示状態を更新
     }
 
     private void SetupEnvironmentRadioButtons()
@@ -63,7 +64,7 @@ public partial class EnvironmentSelectForm : Form
         _localUrlLabel = new Label
         {
             Text = "ローカルURL:",
-            Location = new Point(50, 165),
+            Location = new Point(30, 165),
             AutoSize = true,
             Visible = false
         };
@@ -71,8 +72,8 @@ public partial class EnvironmentSelectForm : Form
 
         _localUrlTextBox = new TextBox
         {
-            Location = new Point(50, 185),
-            Size = new Size(300, 25),
+            Location = new Point(30, 185),
+            Size = new Size(340, 23),
             Text = ServerAddress.LocalUrl,
             Visible = false
         };
@@ -84,14 +85,18 @@ public partial class EnvironmentSelectForm : Form
         if (sender is RadioButton rb && rb.Checked)
         {
             _selectedEnvironment = (EnvironmentType)rb.Tag!;
+            UpdateLocalUrlVisibility();
+        }
+    }
 
-            // Local環境の場合はURL入力欄を表示
-            if (_localUrlTextBox != null && _localUrlLabel != null)
-            {
-                bool isLocal = _selectedEnvironment == EnvironmentType.Local;
-                _localUrlTextBox.Visible = isLocal;
-                _localUrlLabel.Visible = isLocal;
-            }
+    private void UpdateLocalUrlVisibility()
+    {
+        // Local環境の場合はURL入力欄を表示
+        if (_localUrlTextBox != null && _localUrlLabel != null && _selectedEnvironment.HasValue)
+        {
+            bool isLocal = _selectedEnvironment == EnvironmentType.Local;
+            _localUrlTextBox.Visible = isLocal;
+            _localUrlLabel.Visible = isLocal;
         }
     }
 
