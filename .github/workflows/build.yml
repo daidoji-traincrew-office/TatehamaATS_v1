@@ -61,28 +61,30 @@ jobs:
     strategy:
       matrix:
         standalone: [ false, true ]
-        dev: [ false, true ]
     steps:
       - name: Set Zip File Name
         run: |
           echo "APP_VERSION=${{ needs.calc_version.outputs.VERSION }}" >> $GITHUB_ENV
-          ZIP_FILE_BASE=${{ needs.calc_version.outputs.APP_PREFIX }}${{ (matrix.dev && '-dev') || ''}}${{ (matrix.standalone && '-standalone') || '' }}
+          ZIP_FILE_BASE=${{ needs.calc_version.outputs.APP_PREFIX }}${{ (matrix.standalone && '-standalone') || '' }}
           echo "ZIP_FILE_BASE=${ZIP_FILE_BASE}" >> $GITHUB_ENV
           echo "ZIP_FILE_NAME=${ZIP_FILE_BASE}.zip" >> $GITHUB_ENV
       - name: Checkout
         uses: actions/checkout@v4.2.2
       - name: Write ServerAddress.cs
         run: |
-          if [ "${{ matrix.dev }}" = "true" ]; then
-            SERVER_ADDRESS=${{ secrets.SERVER_ADDRESS_DEV }}
-          else
-            SERVER_ADDRESS=${{ secrets.SERVER_ADDRESS }}
-          fi
+          SERVER_ADDRESS_DEV="${{ secrets.SERVER_ADDRESS_DEV }}"
+          SERVER_ADDRESS_PROD="${{ secrets.SERVER_ADDRESS }}"
           cat <<EOF  > ./ServerAddress.cs
           namespace ${{ env.NAMESPACE }};
-          public static class ServerAddress {
-              public const string SignalAddress = "${SERVER_ADDRESS}"; 
+
+          public static class ServerAddress
+          {
               public const string Version = "${{ env.ZIP_FILE_BASE }}";
+              public const string LocalUrl = "https://localhost:7232";
+              public const string DevelopmentUrl = "${SERVER_ADDRESS_DEV}";
+              public const string ProductionUrl = "${SERVER_ADDRESS_PROD}";
+              public static string SignalAddress { get; set; } = "";
+              public static bool IsDebug { get; set; } = false;
           }
           EOF
       - name: Setup dotnet 8.0.x
@@ -107,6 +109,75 @@ jobs:
             -p:PublishSingleFile=true \
             -p:EnableWindowsTargeting=true \
             --self-contained ${{ matrix.standalone }}
+      - name: Create shortcuts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3
+
+          # Pythonスクリプトでショートカットを作成
+          python3 << 'PYTHON_SCRIPT'
+          import os
+          import struct
+          import sys
+
+          def create_windows_shortcut(target_path, shortcut_path, arguments="", working_dir=""):
+              """Windows .lnkファイルを作成（簡易版）"""
+              with open(shortcut_path, 'wb') as f:
+                  # ヘッダー
+                  f.write(b'\x4C\x00\x00\x00')  # Header size
+                  f.write(b'\x01\x14\x02\x00\x00\x00\x00\x00\xC0\x00\x00\x00\x00\x00\x00\x46')  # CLSID
+                  f.write(b'\x81\x00\x00\x00')  # Flags: HasLinkTargetIDList | IsUnicode
+                  f.write(b'\x00\x00\x00\x00' * 5)  # File attributes, creation time, etc.
+
+                  # IDList (簡易版)
+                  idlist = b'\x14\x00\x1F\x50\xE0\x4F\xD0\x20\xEA\x3A\x69\x10\xA2\xD8\x08\x00\x2B\x30\x30\x9D'
+                  f.write(struct.pack('<H', len(idlist) + 2))
+                  f.write(idlist)
+                  f.write(b'\x00\x00')
+
+                  # StringData: TargetPath
+                  target_utf16 = target_path.encode('utf-16le')
+                  f.write(struct.pack('<H', len(target_path)))
+                  f.write(target_utf16)
+
+                  # Arguments
+                  if arguments:
+                      args_utf16 = arguments.encode('utf-16le')
+                      f.write(struct.pack('<H', len(arguments)))
+                      f.write(args_utf16)
+
+          # EXEファイルを検索
+          exe_file = None
+          for root, dirs, files in os.walk('./out'):
+              for file in files:
+                  if file.endswith('.exe'):
+                      exe_file = os.path.join(root, file)
+                      break
+              if exe_file:
+                  break
+
+          if not exe_file:
+              print("Error: Executable not found")
+              sys.exit(1)
+
+          exe_name = os.path.basename(exe_file)
+          out_dir = os.path.dirname(exe_file)
+
+          # ショートカット定義
+          shortcuts = [
+              {'name': 'TatehamaATS_v1(ローカル).lnk', 'args': 'Local'},
+              {'name': 'TatehamaATS_v1(Dev).lnk', 'args': 'Development'},
+              {'name': 'TatehamaATS_v1(Prod).lnk', 'args': 'Production'},
+              {'name': 'TatehamaATS_v1(選択).lnk', 'args': ''}
+          ]
+
+          for sc in shortcuts:
+              shortcut_path = os.path.join(out_dir, sc['name'])
+              create_windows_shortcut(exe_name, shortcut_path, sc['args'], "")
+              print(f"Created shortcut: {sc['name']}")
+
+          print("All shortcuts created successfully")
+          PYTHON_SCRIPT
       - name: Zip binaries
         run: |
           cd out
@@ -134,8 +205,6 @@ jobs:
         id: get_files
         run: |
           files=(
-            "out/${{ needs.calc_version.outputs.APP_PREFIX }}-dev-standalone.zip"
-            "out/${{ needs.calc_version.outputs.APP_PREFIX }}-dev.zip"
             "out/${{ needs.calc_version.outputs.APP_PREFIX }}-standalone.zip"
             "out/${{ needs.calc_version.outputs.APP_PREFIX }}.zip"
           )
@@ -179,5 +248,5 @@ jobs:
           PR_BODY: ${{ github.event.pull_request.body }}
         run: |
           curl -H "Content-Type: application/json" -X POST -d '{
-            "content": "<@&1351159468536238130> <@&1281827843541831740> <@&1302155862965620756>\n�u${{ env.VERSION }}�v�������[�X���܂����B\n${{ env.PR_BODY }}"
+            "content": "<@&1351159468536238130> <@&1281827843541831740> <@&1302155862965620756>\n�u${{ env.VERSION }}�v�������[�X���܂����B\n${{ env.PR_BODY }}"
           }' $DISCORD_WEBHOOK
