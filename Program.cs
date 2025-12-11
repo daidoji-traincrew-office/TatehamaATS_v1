@@ -14,26 +14,41 @@ namespace TatehamaATS_v1
         ///  The main entry point for the application.
         /// </summary>
         [STAThread]
-        static async Task Main()
+        static async Task Main(string[] args)
         {
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
 
-            // 1. 環境選択ダイアログ表示
+            // 1. 環境選択（コマンドライン引数 or ダイアログ）
             Config.EnvironmentType selectedEnvironment;
-            using (var selectForm = new MainWindow.EnvironmentSelectForm())
+            string? customLocalUrl = null;
+
+            // コマンドライン引数で環境が指定されている場合
+            if (args.Length > 0 && Enum.TryParse<Config.EnvironmentType>(args[0], true, out var envFromArgs))
             {
+                selectedEnvironment = envFromArgs;
+                // Local環境でURLが指定されている場合
+                if (selectedEnvironment == Config.EnvironmentType.Local && args.Length > 1)
+                {
+                    customLocalUrl = args[1];
+                }
+            }
+            else
+            {
+                // ダイアログで環境選択
+                using var selectForm = new MainWindow.EnvironmentSelectForm();
                 if (selectForm.ShowDialog() != DialogResult.OK)
                 {
                     return; // キャンセルされた場合は終了
                 }
 
                 selectedEnvironment = selectForm.SelectedEnvironment;
+                customLocalUrl = selectForm.CustomLocalUrl;
             }
 
             // 2. ServerAddressクラスを初期化
-            Config.EnvironmentDefinition.Initialize(selectedEnvironment);
+            Config.EnvironmentDefinition.Initialize(selectedEnvironment, customLocalUrl);
 
             // 3. 環境別のDBファイル名を生成
             var envName = selectedEnvironment.ToString().ToLower();

@@ -58,10 +58,20 @@ public class EnvironmentDefinition
     }
 
     // 選択された環境でServerAddressを初期化
-    public static void Initialize(EnvironmentType environmentType)
+    public static void Initialize(EnvironmentType environmentType, string? customLocalUrl = null)
     {
         var environment = GetByType(environmentType);
-        ServerAddress.SignalAddress = environment.ServerUrl;
+
+        // Local環境でカスタムURLが指定されている場合はそちらを使用
+        if (environmentType == EnvironmentType.Local && !string.IsNullOrEmpty(customLocalUrl))
+        {
+            ServerAddress.SignalAddress = customLocalUrl;
+        }
+        else
+        {
+            ServerAddress.SignalAddress = environment.ServerUrl;
+        }
+
         ServerAddress.IsDebug = !environment.RequiresAuthentication;
     }
 }
