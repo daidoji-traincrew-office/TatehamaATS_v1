@@ -109,75 +109,60 @@ jobs:
             -p:PublishSingleFile=true \
             -p:EnableWindowsTargeting=true \
             --self-contained ${{ matrix.standalone }}
-      - name: Create shortcuts
+      - name: Create batch files
         run: |
-          sudo apt-get update
-          sudo apt-get install -y python3
-
-          # Pythonスクリプトでショートカットを作成
-          python3 << 'PYTHON_SCRIPT'
-          import os
-          import struct
-          import sys
-
-          def create_windows_shortcut(target_path, shortcut_path, arguments="", working_dir=""):
-              """Windows .lnkファイルを作成（簡易版）"""
-              with open(shortcut_path, 'wb') as f:
-                  # ヘッダー
-                  f.write(b'\x4C\x00\x00\x00')  # Header size
-                  f.write(b'\x01\x14\x02\x00\x00\x00\x00\x00\xC0\x00\x00\x00\x00\x00\x00\x46')  # CLSID
-                  f.write(b'\x81\x00\x00\x00')  # Flags: HasLinkTargetIDList | IsUnicode
-                  f.write(b'\x00\x00\x00\x00' * 5)  # File attributes, creation time, etc.
-
-                  # IDList (簡易版)
-                  idlist = b'\x14\x00\x1F\x50\xE0\x4F\xD0\x20\xEA\x3A\x69\x10\xA2\xD8\x08\x00\x2B\x30\x30\x9D'
-                  f.write(struct.pack('<H', len(idlist) + 2))
-                  f.write(idlist)
-                  f.write(b'\x00\x00')
-
-                  # StringData: TargetPath
-                  target_utf16 = target_path.encode('utf-16le')
-                  f.write(struct.pack('<H', len(target_path)))
-                  f.write(target_utf16)
-
-                  # Arguments
-                  if arguments:
-                      args_utf16 = arguments.encode('utf-16le')
-                      f.write(struct.pack('<H', len(arguments)))
-                      f.write(args_utf16)
-
           # EXEファイルを検索
-          exe_file = None
-          for root, dirs, files in os.walk('./out'):
-              for file in files:
-                  if file.endswith('.exe'):
-                      exe_file = os.path.join(root, file)
-                      break
-              if exe_file:
-                  break
+          exe_file=$(find ./out -name "*.exe" -type f | head -n 1)
 
-          if not exe_file:
-              print("Error: Executable not found")
-              sys.exit(1)
+          if [ -z "$exe_file" ]; then
+            echo "Error: Executable not found"
+            exit 1
+          fi
 
-          exe_name = os.path.basename(exe_file)
-          out_dir = os.path.dirname(exe_file)
+          exe_name=$(basename "$exe_file")
+          out_dir=$(dirname "$exe_file")
 
-          # ショートカット定義
-          shortcuts = [
-              {'name': 'TatehamaATS_v1(ローカル).lnk', 'args': 'Local'},
-              {'name': 'TatehamaATS_v1(Dev).lnk', 'args': 'Development'},
-              {'name': 'TatehamaATS_v1(Prod).lnk', 'args': 'Production'},
-              {'name': 'TatehamaATS_v1(選択).lnk', 'args': ''}
-          ]
+          echo "Found executable: $exe_name"
+          echo "Output directory: $out_dir"
 
-          for sc in shortcuts:
-              shortcut_path = os.path.join(out_dir, sc['name'])
-              create_windows_shortcut(exe_name, shortcut_path, sc['args'], "")
-              print(f"Created shortcut: {sc['name']}")
+          # 各環境用のbatファイルを作成
+          # Local環境用
+          cat > "$out_dir/TatehamaATS_v1(ローカル).bat" << 'EOF'
+          @echo off
+          start "" "%~dp0${exe_name}" Local
+          EOF
+          sed -i "s/\${exe_name}/$exe_name/g" "$out_dir/TatehamaATS_v1(ローカル).bat"
 
-          print("All shortcuts created successfully")
-          PYTHON_SCRIPT
+          # Dev環境用
+          cat > "$out_dir/TatehamaATS_v1(Dev).bat" << 'EOF'
+          @echo off
+          start "" "%~dp0${exe_name}" Development
+          EOF
+          sed -i "s/\${exe_name}/$exe_name/g" "$out_dir/TatehamaATS_v1(Dev).bat"
+
+          # Prod環境用
+          cat > "$out_dir/TatehamaATS_v1(Prod).bat" << 'EOF'
+          @echo off
+          start "" "%~dp0${exe_name}" Production
+          EOF
+          sed -i "s/\${exe_name}/$exe_name/g" "$out_dir/TatehamaATS_v1(Prod).bat"
+
+          # 環境選択用
+          cat > "$out_dir/TatehamaATS_v1(選択).bat" << 'EOF'
+          @echo off
+          start "" "%~dp0${exe_name}"
+          EOF
+          sed -i "s/\${exe_name}/$exe_name/g" "$out_dir/TatehamaATS_v1(選択).bat"
+
+          # batファイルをWindows改行コード(CRLF)に変換
+          for bat in "$out_dir"/*.bat; do
+            if [ -f "$bat" ]; then
+              unix2dos "$bat" 2>/dev/null || sed -i 's/$/\r/' "$bat"
+              echo "Created: $(basename "$bat")"
+            fi
+          done
+
+          echo "All batch files created successfully"
       - name: Zip binaries
         run: |
           cd out
