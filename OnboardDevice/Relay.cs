@@ -35,8 +35,12 @@ namespace TatehamaATS_v1.OnboardDevice
     /// <strong>継電部</strong>
     /// TCとのWS通信を担当
     /// </summary>
-    internal class Relay
+    internal partial class Relay
     {
+        // 正規表現
+        [System.Text.RegularExpressions.GeneratedRegex(@"[ST]([A-Z])$")]
+        private static partial System.Text.RegularExpressions.Regex NormalizeRouteRegex();
+
         // WebSocket関連のフィールド
         private ClientWebSocket _webSocket = new ClientWebSocket();
         private readonly Stopwatch _stopwatch = new Stopwatch();
@@ -57,7 +61,7 @@ namespace TatehamaATS_v1.OnboardDevice
         private string _command = "DataRequest";
         private string[] _request = { "tconlyontrain", "interlock" };
 
-        // プロパティ                                                                        
+        // プロパティ
         public TrainCrewStateData TcData { get; private set; } = new TrainCrewStateData();
         public RecvBeaconStateData BeaconData { get; private set; } = new RecvBeaconStateData();
 
@@ -350,7 +354,7 @@ namespace TatehamaATS_v1.OnboardDevice
         }
 
         /// <summary>
-        /// TraincrewにDataRequestの送信を行い、データの受信をする。 
+        /// TraincrewにDataRequestの送信を行い、データの受信をする。
         /// </summary>
         /// <returns></returns>
         private async Task SendAndReceiveDataRequest()
@@ -538,8 +542,25 @@ namespace TatehamaATS_v1.OnboardDevice
             var currentRoutes = TrainCrewRoutes.ToList();
             var newRoutes = routes.ToList();
 
-            var addedRoutes = newRoutes.Where(r => !currentRoutes.Any(r2 => r2.TcName == System.Text.RegularExpressions.Regex.Replace(r.TcName, @"[ST]([A-Z])$", "$1"))).ToList();
-            var removedRoutes = currentRoutes.Where(r => !newRoutes.Any(r2 => System.Text.RegularExpressions.Regex.Replace(r2.TcName, @"[ST]([A-Z])$", "$1") == r.TcName)).ToList();
+            // TrainCrewRoutesをDictionaryに変換
+            var currentRoutesByTcName = currentRoutes.ToDictionary(r => r.TcName);
+
+            // 新しいルートを正規化名でDictionaryに変換
+            var newRoutesByNormalizeName = newRoutes
+                .ToDictionary(
+                    r => NormalizeRouteRegex().Replace(r.TcName, "$1"),
+                    r => r
+                );
+
+            // 追加されたルート: newRoutesの正規化名がcurrentRoutesに存在しないもの)
+            var addedRoutes = newRoutes
+                .Where(r => !currentRoutesByTcName.ContainsKey(NormalizeRouteRegex().Replace(r.TcName, "$1")))
+                .ToList();
+
+            // 削除されたルート: currentRoutesの名前がnewRoutesの正規化名に存在しないもの
+            var removedRoutes = currentRoutes
+                .Where(r => !newRoutesByNormalizeName.ContainsKey(r.TcName))
+                .ToList();
 
             foreach (var route in addedRoutes.ToList())
             {
@@ -923,7 +944,7 @@ namespace TatehamaATS_v1.OnboardDevice
                             lock (TcData)
                             {
                                 UpdateFieldsAndProperties(TcData, _trainCrewStateData);
-                                // Form関連処理                           
+                                // Form関連処理
                                 TC_TimeUpdated?.Invoke(TcData.nowTime.ToTimeSpan());
                             }
 
@@ -1087,5 +1108,6 @@ namespace TatehamaATS_v1.OnboardDevice
                 }
             }
         }
+
     }
 }
