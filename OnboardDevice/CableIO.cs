@@ -150,6 +150,7 @@ namespace TatehamaATS_v1.OnboardDevice
             ExceptionCodesChenge(InspectionRecord.exceptions.Values.Select(e => e.ToCode()).ToList());
             Relay?.SetOther(true);
             Relay?.SetRouteMode(true);
+            Relay?.SetTimeMode();
         }
 
         /// <summary>

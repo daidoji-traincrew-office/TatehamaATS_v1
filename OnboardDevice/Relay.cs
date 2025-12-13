@@ -240,7 +240,7 @@ namespace TatehamaATS_v1.OnboardDevice
         private void ProcessingReceiveData()
         {
             TrainCrewDataUpdated.Invoke(TcData);
-            if (TcData.gameScreen == TrainCrewAPI.GameScreen.MainGame_Loading)
+            if (TcData.gameScreen == TrainCrewAPI.GameScreen.Menu)
             {
                 SetRouteMode(true);
                 SetOther(true);
