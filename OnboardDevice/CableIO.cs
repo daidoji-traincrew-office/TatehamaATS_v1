@@ -371,7 +371,6 @@ namespace TatehamaATS_v1.OnboardDevice
             ControlLED.MaybeWarp = dataFromServer.StatusFlags.HasFlag(ServerStatusFlags.IsMaybeWarp);
             ControlLED.ForcedDisconnect = dataFromServer.StatusFlags.HasFlag(ServerStatusFlags.IsDisconnected);
             ControlLED.ServerStopped = dataFromServer.StatusFlags.HasFlag(ServerStatusFlags.IsServerStopped);
-            ControlLED.Locked = dataFromServer.StatusFlags.HasFlag(ServerStatusFlags.IsLocked);
         }
 
         internal void ReceiveData(DataFromServerBySchedule data, bool ForceStop)
