@@ -65,7 +65,7 @@ namespace TatehamaATS_v1.OnboardDevice
         private ConnectionState status = ConnectionState.DisConnect;
         private int BeforeBrake = 0;
 
-        private List<SignalData> SignalDatas = new List<SignalData>();
+        private Dictionary<string, SignalData> SignalDatas = new Dictionary<string, SignalData>();
         private List<Route> ServerRoutes = new List<Route>();
         private List<Route> TrainCrewRoutes = new List<Route>();
         private int RouteCounta = 0;
@@ -434,7 +434,7 @@ namespace TatehamaATS_v1.OnboardDevice
 
             if (signalDatas == null)
             {
-                SignalDatas = signalDatas;
+                SignalDatas.Clear();
                 Debug.WriteLine("signalDatas is null. Skipping SignalSet.");
                 return;
             }
@@ -447,14 +447,17 @@ namespace TatehamaATS_v1.OnboardDevice
 
         private void SignalSetCore(List<SignalData> signalDatas)
         {
+            // 新しい信号データをDictionary化
+            var newSignalDict = signalDatas.ToDictionary(s => s.Name, s => s);
 
-            // 差分計算
-            var addedSignals = signalDatas
-                .Where(newSignal => !SignalDatas.Any(existingSignal => existingSignal.Name == newSignal.Name && existingSignal.phase == newSignal.phase))
+            // 追加・変更された信号
+            var addedSignals = newSignalDict.Values
+                .Where(newSignal => !SignalDatas.TryGetValue(newSignal.Name, out var existingSignal) || existingSignal.phase != newSignal.phase)
                 .ToList();
 
-            var removedSignals = SignalDatas
-                .Where(existingSignal => !signalDatas.Any(newSignal => newSignal.Name == existingSignal.Name))
+            // 削除された信号
+            var removedSignals = SignalDatas.Values
+                .Where(existingSignal => !newSignalDict.ContainsKey(existingSignal.Name))
                 .ToList();
 
             // 追加された信号の現示を送信
@@ -470,7 +473,7 @@ namespace TatehamaATS_v1.OnboardDevice
             }
 
             // 現在の信号データを更新
-            SignalDatas = signalDatas;
+            SignalDatas = newSignalDict;
         }
 
         internal void EMSet(List<EmergencyLightData> emergencyLightDatas)
