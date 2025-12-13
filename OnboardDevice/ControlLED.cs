@@ -222,6 +222,10 @@ namespace TatehamaATS_v1
                     {
                         L3List = new List<string> { "ワープ？" };
                     }
+                    else if (ServerStopped)
+                    {
+                        L3List = new List<string>() { "オフライン" };
+                    }
                     else
                     {
                         L3List = display.L3;
@@ -440,6 +444,8 @@ namespace TatehamaATS_v1
                     return 66;
                 case "切断":
                     return 67;
+                case "オフライン":
+                    return 359;
                 default:
                     throw new LEDDisplayStringAbnormal(8, $"未定義:{str}　ControlLED.cs@ConvertToLEDNumber()");
             }
