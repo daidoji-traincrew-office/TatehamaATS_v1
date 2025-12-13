@@ -71,6 +71,9 @@ namespace TatehamaATS_v1.OnboardDevice
         private int RouteCounta = 0;
         internal static int shiftTime = 0;
 
+        // SignalSet/UpdateRoute用の同時実行防止ロック
+        private readonly object _routeSignalLock = new object();
+
         private Dictionary<string, string> StaNameById = new Dictionary<string, string>()
         {
             {"TH76","館浜"},
@@ -436,6 +439,15 @@ namespace TatehamaATS_v1.OnboardDevice
                 return;
             }
 
+            lock (_routeSignalLock)
+            {
+                SignalSetCore(signalDatas);
+            }
+        }
+
+        private void SignalSetCore(List<SignalData> signalDatas)
+        {
+
             // 差分計算
             var addedSignals = signalDatas
                 .Where(newSignal => !SignalDatas.Any(existingSignal => existingSignal.Name == newSignal.Name && existingSignal.phase == newSignal.phase))
@@ -502,6 +514,15 @@ namespace TatehamaATS_v1.OnboardDevice
                 Debug.WriteLine("TrainCrewRoutes is null. Initializing empty list.");
                 TrainCrewRoutes = new List<Route>();
             }
+
+            lock (_routeSignalLock)
+            {
+                UpdateRouteCore(routes);
+            }
+        }
+
+        private void UpdateRouteCore(List<Route> routes)
+        {
 
             // デバッグ出力
             Debug.WriteLine("TrainCrewRoutes:");
