@@ -57,7 +57,12 @@ namespace TatehamaATS_v1
         /// <summary>
         /// 鎖錠状態
         /// </summary>
-        IsLocked = 1 << 4
+        IsLocked = 1 << 4,
+
+        /// <summary>
+        /// 地上装置停止中
+        /// </summary>
+        IsServerStopped = 1 << 5
     }
 
     public class DataFromServer

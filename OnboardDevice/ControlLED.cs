@@ -39,6 +39,11 @@ namespace TatehamaATS_v1
         internal bool ForcedDisconnect;
 
         /// <summary>
+        /// 地上装置停止中
+        /// </summary>
+        internal bool ServerStopped;
+
+        /// <summary>
         /// 故障発生
         /// </summary>
         internal event Action<ATSCommonException> AddExceptionAction;
@@ -216,6 +221,10 @@ namespace TatehamaATS_v1
                     else if (MaybeWarp)
                     {
                         L3List = new List<string> { "ワープ？" };
+                    }
+                    else if (ServerStopped)
+                    {
+                        L3List = new List<string>() { "オフライン" };
                     }
                     else
                     {
@@ -435,6 +444,8 @@ namespace TatehamaATS_v1
                     return 66;
                 case "切断":
                     return 67;
+                case "オフライン":
+                    return 359;
                 default:
                     throw new LEDDisplayStringAbnormal(8, $"未定義:{str}　ControlLED.cs@ConvertToLEDNumber()");
             }

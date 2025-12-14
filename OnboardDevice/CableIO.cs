@@ -150,6 +150,7 @@ namespace TatehamaATS_v1.OnboardDevice
             ExceptionCodesChenge(InspectionRecord.exceptions.Values.Select(e => e.ToCode()).ToList());
             Relay?.SetOther(true);
             Relay?.SetRouteMode(true);
+            Relay?.SetTimeMode();
         }
 
         /// <summary>
@@ -370,6 +371,7 @@ namespace TatehamaATS_v1.OnboardDevice
             ControlLED.TherePreviousTrain = dataFromServer.StatusFlags.HasFlag(ServerStatusFlags.IsTherePreviousTrain);
             ControlLED.MaybeWarp = dataFromServer.StatusFlags.HasFlag(ServerStatusFlags.IsMaybeWarp);
             ControlLED.ForcedDisconnect = dataFromServer.StatusFlags.HasFlag(ServerStatusFlags.IsDisconnected);
+            ControlLED.ServerStopped = dataFromServer.StatusFlags.HasFlag(ServerStatusFlags.IsServerStopped);
         }
 
         internal void ReceiveData(DataFromServerBySchedule data, bool ForceStop)
