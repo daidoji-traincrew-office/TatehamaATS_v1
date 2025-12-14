@@ -35,8 +35,12 @@ namespace TatehamaATS_v1.OnboardDevice
     /// <strong>継電部</strong>
     /// TCとのWS通信を担当
     /// </summary>
-    internal class Relay
+    internal partial class Relay
     {
+        // 正規表現
+        [System.Text.RegularExpressions.GeneratedRegex(@"[ST]([A-Z])$")]
+        private static partial System.Text.RegularExpressions.Regex NormalizeRouteRegex();
+
         // WebSocket関連のフィールド
         private ClientWebSocket _webSocket = new ClientWebSocket();
         private readonly Stopwatch _stopwatch = new Stopwatch();
@@ -57,7 +61,7 @@ namespace TatehamaATS_v1.OnboardDevice
         private string _command = "DataRequest";
         private string[] _request = { "tconlyontrain", "interlock" };
 
-        // プロパティ                                                                        
+        // プロパティ
         public TrainCrewStateData TcData { get; private set; } = new TrainCrewStateData();
         public RecvBeaconStateData BeaconData { get; private set; } = new RecvBeaconStateData();
 
@@ -65,11 +69,14 @@ namespace TatehamaATS_v1.OnboardDevice
         private ConnectionState status = ConnectionState.DisConnect;
         private int BeforeBrake = 0;
 
-        private List<SignalData> SignalDatas = new List<SignalData>();
+        private Dictionary<string, SignalData> SignalDatas = new Dictionary<string, SignalData>();
         private List<Route> ServerRoutes = new List<Route>();
         private List<Route> TrainCrewRoutes = new List<Route>();
         private int RouteCounta = 0;
         internal static int shiftTime = 0;
+
+        // SignalSet/UpdateRoute用の同時実行防止ロック
+        private readonly object _routeSignalLock = new object();
 
         private Dictionary<string, string> StaNameById = new Dictionary<string, string>()
         {
@@ -233,7 +240,7 @@ namespace TatehamaATS_v1.OnboardDevice
         private void ProcessingReceiveData()
         {
             TrainCrewDataUpdated.Invoke(TcData);
-            if (TcData.gameScreen == TrainCrewAPI.GameScreen.MainGame_Loading)
+            if (TcData.gameScreen == TrainCrewAPI.GameScreen.Menu)
             {
                 SetRouteMode(true);
                 SetOther(true);
@@ -347,7 +354,7 @@ namespace TatehamaATS_v1.OnboardDevice
         }
 
         /// <summary>
-        /// TraincrewにDataRequestの送信を行い、データの受信をする。 
+        /// TraincrewにDataRequestの送信を行い、データの受信をする。
         /// </summary>
         /// <returns></returns>
         private async Task SendAndReceiveDataRequest()
@@ -419,7 +426,7 @@ namespace TatehamaATS_v1.OnboardDevice
 
         internal void SignalSet(List<SignalData> signalDatas)
         {
-            if (!(TcData.gameScreen.HasFlag(TrainCrewAPI.GameScreen.MainGame) || TcData.gameScreen.HasFlag(TrainCrewAPI.GameScreen.MainGame_Pause)))
+            if (!(TcData.gameScreen == TrainCrewAPI.GameScreen.MainGame || TcData.gameScreen == TrainCrewAPI.GameScreen.MainGame_Pause))
             {
                 return;
             }
@@ -431,18 +438,30 @@ namespace TatehamaATS_v1.OnboardDevice
 
             if (signalDatas == null)
             {
-                SignalDatas = signalDatas;
+                SignalDatas.Clear();
                 Debug.WriteLine("signalDatas is null. Skipping SignalSet.");
                 return;
             }
 
-            // 差分計算
-            var addedSignals = signalDatas
-                .Where(newSignal => !SignalDatas.Any(existingSignal => existingSignal.Name == newSignal.Name && existingSignal.phase == newSignal.phase))
+            lock (_routeSignalLock)
+            {
+                SignalSetCore(signalDatas);
+            }
+        }
+
+        private void SignalSetCore(List<SignalData> signalDatas)
+        {
+            // 新しい信号データをDictionary化
+            var newSignalDict = signalDatas.ToDictionary(s => s.Name, s => s);
+
+            // 追加・変更された信号
+            var addedSignals = newSignalDict.Values
+                .Where(newSignal => !SignalDatas.TryGetValue(newSignal.Name, out var existingSignal) || existingSignal.phase != newSignal.phase)
                 .ToList();
 
-            var removedSignals = SignalDatas
-                .Where(existingSignal => !signalDatas.Any(newSignal => newSignal.Name == existingSignal.Name))
+            // 削除された信号
+            var removedSignals = SignalDatas.Values
+                .Where(existingSignal => !newSignalDict.ContainsKey(existingSignal.Name))
                 .ToList();
 
             // 追加された信号の現示を送信
@@ -458,7 +477,7 @@ namespace TatehamaATS_v1.OnboardDevice
             }
 
             // 現在の信号データを更新
-            SignalDatas = signalDatas;
+            SignalDatas = newSignalDict;
         }
 
         internal void EMSet(List<EmergencyLightData> emergencyLightDatas)
@@ -486,7 +505,7 @@ namespace TatehamaATS_v1.OnboardDevice
 
         internal void UpdateRoute(List<Route> routes)
         {
-            if (!(TcData.gameScreen.HasFlag(TrainCrewAPI.GameScreen.MainGame) || TcData.gameScreen.HasFlag(TrainCrewAPI.GameScreen.MainGame_Pause)))
+            if (!(TcData.gameScreen == TrainCrewAPI.GameScreen.MainGame || TcData.gameScreen == TrainCrewAPI.GameScreen.MainGame_Pause))
             {
                 return;
             }
@@ -503,6 +522,15 @@ namespace TatehamaATS_v1.OnboardDevice
                 TrainCrewRoutes = new List<Route>();
             }
 
+            lock (_routeSignalLock)
+            {
+                UpdateRouteCore(routes);
+            }
+        }
+
+        private void UpdateRouteCore(List<Route> routes)
+        {
+
             // デバッグ出力
             Debug.WriteLine("TrainCrewRoutes:");
             foreach (var route in TrainCrewRoutes.ToList())
@@ -514,8 +542,25 @@ namespace TatehamaATS_v1.OnboardDevice
             var currentRoutes = TrainCrewRoutes.ToList();
             var newRoutes = routes.ToList();
 
-            var addedRoutes = newRoutes.Where(r => !currentRoutes.Any(r2 => r2.TcName == System.Text.RegularExpressions.Regex.Replace(r.TcName, @"[ST]([A-Z])$", "$1"))).ToList();
-            var removedRoutes = currentRoutes.Where(r => !newRoutes.Any(r2 => System.Text.RegularExpressions.Regex.Replace(r2.TcName, @"[ST]([A-Z])$", "$1") == r.TcName)).ToList();
+            // TrainCrewRoutesをDictionaryに変換
+            var currentRoutesByTcName = currentRoutes.ToDictionary(r => r.TcName);
+
+            // 新しいルートを正規化名でDictionaryに変換
+            var newRoutesByNormalizeName = newRoutes
+                .ToDictionary(
+                    r => NormalizeRouteRegex().Replace(r.TcName, "$1"),
+                    r => r
+                );
+
+            // 追加されたルート: newRoutesの正規化名がcurrentRoutesに存在しないもの)
+            var addedRoutes = newRoutes
+                .Where(r => !currentRoutesByTcName.ContainsKey(NormalizeRouteRegex().Replace(r.TcName, "$1")))
+                .ToList();
+
+            // 削除されたルート: currentRoutesの名前がnewRoutesの正規化名に存在しないもの
+            var removedRoutes = currentRoutes
+                .Where(r => !newRoutesByNormalizeName.ContainsKey(r.TcName))
+                .ToList();
 
             foreach (var route in addedRoutes.ToList())
             {
@@ -899,7 +944,7 @@ namespace TatehamaATS_v1.OnboardDevice
                             lock (TcData)
                             {
                                 UpdateFieldsAndProperties(TcData, _trainCrewStateData);
-                                // Form関連処理                           
+                                // Form関連処理
                                 TC_TimeUpdated?.Invoke(TcData.nowTime.ToTimeSpan());
                             }
 
@@ -1063,5 +1108,6 @@ namespace TatehamaATS_v1.OnboardDevice
                 }
             }
         }
+
     }
 }
