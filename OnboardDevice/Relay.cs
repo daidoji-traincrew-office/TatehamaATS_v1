@@ -69,7 +69,6 @@ namespace TatehamaATS_v1.OnboardDevice
         private ConnectionState status = ConnectionState.DisConnect;
         private int BeforeBrake = 0;
 
-        private Dictionary<string, SignalData> SignalDatas = new Dictionary<string, SignalData>();
         private List<Route> ServerRoutes = new List<Route>();
         private List<Route> TrainCrewRoutes = new List<Route>();
         private int RouteCounta = 0;
@@ -436,13 +435,6 @@ namespace TatehamaATS_v1.OnboardDevice
                 return;
             }
 
-            if (signalDatas == null)
-            {
-                SignalDatas.Clear();
-                Debug.WriteLine("signalDatas is null. Skipping SignalSet.");
-                return;
-            }
-
             lock (_routeSignalLock)
             {
                 SignalSetCore(signalDatas);
@@ -453,14 +445,15 @@ namespace TatehamaATS_v1.OnboardDevice
         {
             // 新しい信号データをDictionary化
             var newSignalDict = signalDatas.ToDictionary(s => s.Name, s => s);
+            var nowSignalDict = TcData.signalDataList.ToDictionary(s => s.Name, s => s);
 
             // 追加・変更された信号
             var addedSignals = newSignalDict.Values
-                .Where(newSignal => !SignalDatas.TryGetValue(newSignal.Name, out var existingSignal) || existingSignal.phase != newSignal.phase)
+                .Where(newSignal => !nowSignalDict.TryGetValue(newSignal.Name, out var existingSignal) || existingSignal.phase != newSignal.phase)
                 .ToList();
 
             // 削除された信号
-            var removedSignals = SignalDatas.Values
+            var removedSignals = nowSignalDict.Values
                 .Where(existingSignal => !newSignalDict.ContainsKey(existingSignal.Name))
                 .ToList();
 
@@ -475,9 +468,6 @@ namespace TatehamaATS_v1.OnboardDevice
             {
                 _ = SendSingleCommand("SetSignalPhase", new string[] { signalData.Name, Phase.None.ToString() });
             }
-
-            // 現在の信号データを更新
-            SignalDatas = newSignalDict;
         }
 
         internal void EMSet(List<EmergencyLightData> emergencyLightDatas)
