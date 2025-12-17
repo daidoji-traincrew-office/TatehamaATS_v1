@@ -425,7 +425,7 @@ namespace TatehamaATS_v1.OnboardDevice
 
         internal void SignalSet(List<SignalData> signalDatas)
         {
-            if (!(TcData.gameScreen == TrainCrewAPI.GameScreen.MainGame || TcData.gameScreen == TrainCrewAPI.GameScreen.MainGame_Pause))
+            if (TcData.gameScreen is not (TrainCrewAPI.GameScreen.MainGame or TrainCrewAPI.GameScreen.MainGame_Pause))
             {
                 return;
             }
