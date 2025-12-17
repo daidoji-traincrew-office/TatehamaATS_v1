@@ -441,10 +441,10 @@ namespace TatehamaATS_v1.OnboardDevice
             }
         }
 
-        private void SignalSetCore(List<SignalData> signalDatas)
+        private void SignalSetCore(List<SignalData>? signalDatas)
         {
             // 新しい信号データをDictionary化
-            var newSignalDict = signalDatas.ToDictionary(s => s.Name, s => s);
+            var newSignalDict = (signalDatas ?? []).ToDictionary(s => s.Name, s => s);
             var nowSignalDict = TcData.signalDataList.ToDictionary(s => s.Name, s => s);
 
             // 追加・変更された信号
