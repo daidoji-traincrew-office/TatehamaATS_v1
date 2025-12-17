@@ -463,10 +463,10 @@ namespace TatehamaATS_v1.OnboardDevice
                 _ = SendSingleCommand("SetSignalPhase", new string[] { signalData.Name, signalData.phase.ToString() });
             }
 
-            // 削除された信号の現示をNoneに設定して送信
+            // 削除された信号の現示をRに設定して送信
             foreach (var signalData in removedSignals)
             {
-                _ = SendSingleCommand("SetSignalPhase", new string[] { signalData.Name, Phase.None.ToString() });
+                _ = SendSingleCommand("SetSignalPhase", new string[] { signalData.Name, Phase.R.ToString() });
             }
         }
 
