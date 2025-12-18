@@ -1273,7 +1273,7 @@ namespace TatehamaATS_v1.OnboardDevice
                 {
                     Debug.WriteLine("[SetSignalPhase] Starting ProcessSignalPhaseQueueAsync");
                     _isProcessingSignalQueue = true;
-                    Task.Run(ProcessSignalPhaseQueueAsync);
+                    _queueProcessingTask = Task.Run(ProcessSignalPhaseQueueAsync);
                 }
             }
         }
