@@ -1393,10 +1393,11 @@ namespace TatehamaATS_v1.OnboardDevice
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
                 // ここでの例外は握りつぶして処理ルーチンを継続可能にする
                 Debug.WriteLine("[ProcessQueue] Exception occurred in processor loop");
+                Debug.WriteLine("[ProcessQueue] {0}\n{1}",ex.Message, ex.StackTrace);
             }
             finally
             {
