@@ -470,7 +470,11 @@ namespace TatehamaATS_v1.OnboardDevice
         {
             // 新しい信号データをDictionary化
             var newSignalDict = (signalDatas ?? []).ToDictionary(s => s.Name, s => s);
-            var nowSignalDict = TcData.signalDataList.ToDictionary(s => s.Name, s => s);
+            Dictionary<string, SignalData> nowSignalDict;
+            lock (TcData)
+            {
+                nowSignalDict = TcData.signalDataList.ToDictionary(s => s.Name, s => s);
+            }
 
             // 追加・変更された信号
             var addedSignals = newSignalDict.Values
