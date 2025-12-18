@@ -59,7 +59,7 @@ namespace TatehamaATS_v1.OnboardDevice
 
         // データ関連フィールド
         private string _command = "DataRequest";
-        private string[] _request = { "tconlyontrain", "interlock" };
+        private string[] _request = { "tconlyontrain", "interlock", "signal" };
 
         // プロパティ
         public TrainCrewStateData TcData { get; private set; } = new TrainCrewStateData();
@@ -128,6 +128,30 @@ namespace TatehamaATS_v1.OnboardDevice
         internal event Action<ATSCommonException> AddExceptionAction;
 
         private int hasInvalidCharsTimes = 0;
+
+        // SetSignalPhase レート制限用
+        private const int MaxConcurrentSignalCommands = 3;           // 1バッチあたりの最大送信数
+        private const int SignalCommandBaseIntervalMs = 250;          // バッチの基準間隔    
+        private const int SignalCommandMaxBackoffMs = 200_000;         // 同一信号向けの最大バックオフ
+        private const double SignalCommandBackoffGrowFactor = 2.0;     // バックオフ増加係数（指数バックオフ）
+        private const double SignalCommandBackoffDecayFactor = 1.5 / SignalCommandBackoffGrowFactor;    // バックオフ減少係数（対数的減少）
+        private const int SignalHistoryTtlMs = 300_000;                 // 信号履歴の有効期間
+        private const int SignalQueueTtlMs = 150_000;                    // キューに残す指示の最大寿命
+        private readonly object _signalPhaseQueueLock = new object(); // キュー用ロック
+        private readonly Queue<SignalPhaseCommand> _signalPhaseQueue = new Queue<SignalPhaseCommand>();
+        private readonly Dictionary<string, SignalPhaseHistory> _signalPhaseHistory = new Dictionary<string, SignalPhaseHistory>();
+        private DateTime _lastSignalBatchTime = DateTime.MinValue;
+        private bool _isProcessingSignalQueue = false;               // キュー処理中フラグ
+        // 現示優先度（値が小さいほど「下位現示」＝より厳しい）
+        private static readonly Dictionary<Phase, int> SignalPhasePriority = new()
+        {
+            { Phase.R, 0 },
+            { Phase.YY, 1 },
+            { Phase.Y, 2 },
+            { Phase.YG, 3 },
+            { Phase.G, 4 },
+            { Phase.None, 5 },
+        };
 
         /// <summary>
         /// TrainCrew側データ要求コマンド
@@ -460,13 +484,15 @@ namespace TatehamaATS_v1.OnboardDevice
             // 追加された信号の現示を送信
             foreach (var signalData in addedSignals)
             {
-                _ = SendSingleCommand("SetSignalPhase", new string[] { signalData.Name, signalData.phase.ToString() });
+                // 個別信号の現示設定
+                SetSignalPhase(signalData.Name, signalData.phase);
             }
 
             // 削除された信号の現示をRに設定して送信
             foreach (var signalData in removedSignals)
             {
-                _ = SendSingleCommand("SetSignalPhase", new string[] { signalData.Name, Phase.R.ToString() });
+                // 削除信号は停止現示に戻す
+                SetSignalPhase(signalData.Name, Phase.R);
             }
         }
 
@@ -522,11 +548,11 @@ namespace TatehamaATS_v1.OnboardDevice
         {
 
             // デバッグ出力
-            Debug.WriteLine("TrainCrewRoutes:");
-            foreach (var route in TrainCrewRoutes.ToList())
-            {
-                Debug.WriteLine($"  TcName: {route.TcName}");
-            }
+            //Debug.WriteLine("TrainCrewRoutes:");
+            //foreach (var route in TrainCrewRoutes.ToList())
+            //{
+            //    Debug.WriteLine($"  TcName: {route.TcName}");
+            //}
 
             // 差分計算時もToList()でスナップショット
             var currentRoutes = TrainCrewRoutes.ToList();
@@ -603,7 +629,7 @@ namespace TatehamaATS_v1.OnboardDevice
                         break;
                 }
 
-                Debug.WriteLine($"☆API送信: SetRoute/{route.TcName}/{StaStopById[r[0]]}");
+                //Debug.WriteLine($"☆API送信: SetRoute/{route.TcName}/{StaStopById[r[0]]}");
                 SendSingleCommand("SetRoute", [staName, routeName, indicator, TcData.myTrainData.diaName, StaStopById[r[0]]]);
             }
             catch (Exception ex)
@@ -633,7 +659,7 @@ namespace TatehamaATS_v1.OnboardDevice
                 // 末尾が "S[A-Z]" または "T[A-Z]" の場合に "[A-Z]" の部分だけを残す
                 var routeName = System.Text.RegularExpressions.Regex.Replace(r[1], @"[ST]([A-Z])$", "$1");
 
-                Debug.WriteLine($"☆API送信: DeleteRoute2/{route.TcName}");
+                //Debug.WriteLine($"☆API送信: DeleteRoute2/{route.TcName}");
                 SendSingleCommand("DeleteRoute2", [staName, routeName]);
             }
             catch (Exception ex)
@@ -651,7 +677,7 @@ namespace TatehamaATS_v1.OnboardDevice
                     return;
                 }
                 Relay.shiftTime = shiftTime;
-                Debug.WriteLine($"☆API送信: realtimeoffset/{shiftTime}");
+                //Debug.WriteLine($"☆API送信: realtimeoffset/{shiftTime}");
                 SendSingleCommand("realtimeoffset", [$"{shiftTime}"]);
             }
             catch (Exception ex)
@@ -972,7 +998,7 @@ namespace TatehamaATS_v1.OnboardDevice
                     {
                         // Data_Base.DataをAPIMessage型にデシリアライズ
                         var _APIMessage = JsonConvert.DeserializeObject<APIMessage>(baseData.data.ToString());
-                        Debug.WriteLine($"☆API応答：{_APIMessage.title}：{_APIMessage.message}");
+                        //Debug.WriteLine($"☆API応答：{_APIMessage.title}：{_APIMessage.message}");
                     }
                     else
                     {
@@ -1088,16 +1114,314 @@ namespace TatehamaATS_v1.OnboardDevice
             TrainCrewInput.GetTrainState();
             foreach (var signalData in TrainCrewInput.signals.ToList())
             {
-                if (IsStop)
+                // 非常停止中は全信号R、それ以外は消灯
+                var phase = IsStop ? Phase.R : Phase.None;
+                SetSignalPhase(signalData.name, phase);
+            }
+        }
+
+        /// <summary>
+        /// 単一信号の現示を設定する
+        /// </summary>
+        /// <param name="signalName">信号機名</param>
+        /// <param name="phase">設定する現示</param>
+        internal void SetSignalPhase(string signalName, Phase phase)
+        {
+            if (signalName == "上り1閉塞")
+            {
+                return;
+            }
+            // 送信要求をキューに積んでレート制限付きで処理する
+            lock (_signalPhaseQueueLock)
+            {
+                var now = DateTime.UtcNow;
+
+                //Debug.WriteLine($"[SetSignalPhase] Enqueue request: {signalName} / {phase} at {now:HH:mm:ss:fff}");
+                //Debug.WriteLine($"[SetSignalPhase] Queue size before enqueue: {_signalPhaseQueue.Count}");
+
+                // 古い履歴を破棄（一定時間以上経過したもの）
+                var expiredKeys = _signalPhaseHistory
+                    .Where(kv => (now - kv.Value.CreatedAt).TotalMilliseconds > SignalHistoryTtlMs)
+                    .Select(kv => kv.Key)
+                    .ToList();
+                foreach (var key in expiredKeys)
                 {
-                    _ = SendSingleCommand("SetSignalPhase", new string[] { signalData.name, Phase.R.ToString() });
+                    _signalPhaseHistory.Remove(key);
+                }
+
+                // キューも古すぎるものは破棄（過去の指示が大量に残るのを防ぐ）
+                if (_signalPhaseQueue.Count > 0)
+                {
+                    var temp = new Queue<SignalPhaseCommand>();
+                    while (_signalPhaseQueue.Count > 0)
+                    {
+                        var cmd = _signalPhaseQueue.Dequeue();
+                        if ((now - cmd.EnqueuedAt).TotalMilliseconds <= SignalQueueTtlMs)
+                        {
+                            temp.Enqueue(cmd);
+                        }
+                    }
+                    while (temp.Count > 0)
+                    {
+                        _signalPhaseQueue.Enqueue(temp.Dequeue());
+                    }
+                }
+
+                // 既に同一内容の指示がキュー内にある場合は積まない
+                if (_signalPhaseQueue.Any(c => c.SignalName == signalName && c.Phase == phase))
+                {
+                    return;
+                }
+
+                // 履歴取得または作成
+                if (!_signalPhaseHistory.TryGetValue(signalName, out var history))
+                {
+                    history = new SignalPhaseHistory        
+                    {   
+                        BackoffMs = SignalCommandBaseIntervalMs,
+                        LastAttemptTime = DateTime.MinValue,
+                        CreatedAt = now
+                    };
+                    _signalPhaseHistory[signalName] = history;
+                    //Debug.WriteLine($"[SetSignalPhase] New history created for {signalName}, backoff={history.BackoffMs}ms");   
+                }
+
+                // TC側から送られてくる現在の現示と比較して、下位／上位を判定する
+                string relation = "First";
+                int newPriority = 0;
+                int prevPriority = 0;
+                // 現在の現示を TcData.signalDataList から取得 
+                var currentSignal = TcData.signalDataList.FirstOrDefault(s => s.Name == signalName);
+                if (currentSignal != null && SignalPhasePriority.TryGetValue(phase, out newPriority) && SignalPhasePriority.TryGetValue(currentSignal.phase, out prevPriority))
+                {
+                    relation = newPriority < prevPriority ? "Lower" :
+                                newPriority > prevPriority ? "Upper" :
+                                "Same";
+                    //Debug.WriteLine($"[SetSignalPhase] PriorityCheck {signalName}: current={currentSignal.phase}({prevPriority}), new={phase}({newPriority}) => {relation}");
                 }
                 else
                 {
-                    _ = SendSingleCommand("SetSignalPhase", new string[] { signalData.name, Phase.None.ToString() });
+                    //Debug.WriteLine($"[SetSignalPhase] PriorityCheck {signalName}: no current phase, new={phase}({newPriority})");
+                }   
+
+                // 次回許可時刻を計算（Upper/Same はバックオフ期間中は破棄、Lower は常に受付）
+                var nowMs = now;
+                var diffMs = (nowMs - history.LastAttemptTime).TotalMilliseconds;
+
+                if (relation == "Lower")
+                {
+                    // 下位現示はいつでも積む・バックオフもリセット
+                    history.BackoffMs = SignalCommandBaseIntervalMs;
+                }
+                else
+                {
+                    if (diffMs < history.BackoffMs)
+                    {
+                        // バックオフ期間中の Upper/Same 要求は、常にバックオフを増加させてドロップ（指数バックオフ）
+                        var nextBackoff = (int)Math.Min(history.BackoffMs * SignalCommandBackoffGrowFactor, SignalCommandMaxBackoffMs);
+                        //Debug.WriteLine($"[SetSignalPhase] Drop {signalName} ({phase}) by backoff. relation={relation}, diff={diffMs}ms, backoff {history.BackoffMs}ms -> {nextBackoff}ms");
+                        history.BackoffMs = nextBackoff;
+                        return;
+                    }
+
+                    // バックオフ期間を経過した Upper/Same 要求は受け付けるが、
+                    // 前回は期間内・今回は期間外（しきい値を初めて越えた）場合は一度増加させる。    
+                    // 前回も今回も期間外の場合のみ、対数的（係数指定）に減少させていく。
+                    if (history.BackoffMs > SignalCommandBaseIntervalMs && history.LastAttemptTime != DateTime.MinValue)
+                    {
+                        if (history.LastWasInWindow)
+                        {
+                            var grown = (int)Math.Min(history.BackoffMs * SignalCommandBackoffGrowFactor, SignalCommandMaxBackoffMs);
+                            //Debug.WriteLine($"[SetSignalPhase] Grow backoff for {signalName} after first cooldown crossing: {history.BackoffMs}ms -> {grown}ms, relation={relation}, diff={diffMs}ms");
+                            history.BackoffMs = grown;
+                        }
+                        else
+                        {
+                            // 緩やかにベース間隔へ近づける（下限は SignalCommandBaseIntervalMs）
+                            var decayed = (int)Math.Max(SignalCommandBaseIntervalMs, history.BackoffMs * SignalCommandBackoffDecayFactor);
+                            //Debug.WriteLine($"[SetSignalPhase] Decay backoff for {signalName} from {history.BackoffMs}ms to {decayed}ms after cooldown. relation={relation}, diff={diffMs}ms");
+                            history.BackoffMs = decayed;
+                        }
+                    }
+                }
+
+                // 今回評価時に「期間内」だったかどうかを保存しておく
+                history.LastWasInWindow = diffMs < history.BackoffMs;
+
+                var nextAllowed = nowMs.AddMilliseconds(history.BackoffMs);
+
+                Debug.WriteLine($"[SetSignalPhase] {signalName}: diff={diffMs}ms, backoff={history.BackoffMs}ms, nextAllowed={nextAllowed:HH:mm:ss:fff}, lastAttempt={history.LastAttemptTime:HH:mm:ss:fff}, relation={relation}");
+
+                _signalPhaseQueue.Enqueue(new SignalPhaseCommand
+                {
+                    SignalName = signalName,
+                    Phase = phase,
+                    EnqueuedAt = now,
+                    EarliestSendTime = nextAllowed
+                });
+
+                //Debug.WriteLine($"[SetSignalPhase] Enqueued: {signalName}, earliest={nextAllowed:HH:mm:ss:fff}, backoff={history.BackoffMs}ms");
+                //Debug.WriteLine($"[SetSignalPhase] Queue size after enqueue: {_signalPhaseQueue.Count}");
+
+                // バッチ処理をトリガー（多重起動を防ぐ）
+                if (!_isProcessingSignalQueue)
+                {
+                    Debug.WriteLine("[SetSignalPhase] Starting ProcessSignalPhaseQueueAsync");
+                    _isProcessingSignalQueue = true;
+                    Task.Run(ProcessSignalPhaseQueueAsync);
                 }
             }
         }
 
+        /// <summary>
+        /// SetSignalPhase キューをレート制限付きで処理する 
+        /// </summary>
+        private async Task ProcessSignalPhaseQueueAsync()
+        {
+            try
+            {
+                while (true)
+                {
+                    List<SignalPhaseCommand> batch;
+                    int delayMs;
+
+                    lock (_signalPhaseQueueLock)
+                    {
+                        //Debug.WriteLine($"[ProcessQueue] Loop start, queue size={_signalPhaseQueue.Count}, lastBatch={_lastSignalBatchTime:HH:mm:ss:fff}");
+                        if (_signalPhaseQueue.Count == 0)
+                        {
+                            // キューが空なら処理終了
+                            //Debug.WriteLine("[ProcessQueue] Queue empty, stopping processor");
+                            _isProcessingSignalQueue = false;
+                            return;
+                        }
+
+                        var now = DateTime.UtcNow;
+
+                        // 前回バッチからの経過時間に基づいて待機時間を計算
+                        var elapsedSinceLastBatch = (now - _lastSignalBatchTime).TotalMilliseconds;
+                        delayMs = elapsedSinceLastBatch >= SignalCommandBaseIntervalMs
+                            ? 0
+                            : SignalCommandBaseIntervalMs - (int)elapsedSinceLastBatch;
+
+                        //Debug.WriteLine($"[ProcessQueue] elapsedSinceLastBatch={elapsedSinceLastBatch}ms, delayMs={delayMs}ms");
+
+                        // 送信可能なものを最大数まで取り出す
+                        batch = new List<SignalPhaseCommand>(MaxConcurrentSignalCommands);
+                        var remaining = new Queue<SignalPhaseCommand>();
+                        while (_signalPhaseQueue.Count > 0)
+                        {
+                            var cmd = _signalPhaseQueue.Dequeue();
+
+                            // まだ送信許可時刻に達していないもの、またはバッチ上限超過分は次回以降に回す
+                            if (cmd.EarliestSendTime > now || batch.Count >= MaxConcurrentSignalCommands)
+                            {
+                                if (cmd.EarliestSendTime > now)
+                                {
+                                    //Debug.WriteLine($"[ProcessQueue] Defer (not yet allowed): {cmd.SignalName}, earliest={cmd.EarliestSendTime:HH:mm:ss:fff}");
+                                }
+                                else
+                                {
+                                    //Debug.WriteLine($"[ProcessQueue] Defer (over limit): {cmd.SignalName}");
+                                }
+                                remaining.Enqueue(cmd);
+                                continue;
+                            }
+
+                            batch.Add(cmd);
+                        }
+
+                        // 残りのキュー要素を保持
+                        while (remaining.Count > 0)
+                        {
+                            _signalPhaseQueue.Enqueue(remaining.Dequeue());
+                        }
+
+                        //Debug.WriteLine($"[ProcessQueue] Built batch size={batch.Count}, remaining queue size={_signalPhaseQueue.Count}");
+
+                        if (batch.Count == 0)
+                        {
+                            // 送信可能なものがない場合は少し待って再試行
+                            delayMs = SignalCommandBaseIntervalMs;
+                        }
+                        else
+                        {
+                            _lastSignalBatchTime = now;
+                        }
+                    }
+
+                    if (delayMs > 0)
+                    {
+                        //Debug.WriteLine($"[ProcessQueue] Waiting {delayMs}ms before sending batch");
+                        await Task.Delay(delayMs);
+                    }
+
+                    if (batch == null || batch.Count == 0)
+                    {
+                        continue;
+                    }
+
+                    // バッチ送信（並列にしないことで急激な集中を避ける）
+                    //Debug.WriteLine($"[ProcessQueue] Sending batch, size={batch.Count}");
+                    foreach (var cmd in batch)
+                    {
+                        try
+                        {
+                            Debug.WriteLine($"☆信号名：{cmd.SignalName}／現示：{cmd.Phase.ToString()}");
+                            // 実送信
+                            await SendSingleCommand("SetSignalPhase", new[] { cmd.SignalName, cmd.Phase.ToString() });
+
+                            // 成功したので履歴を更新
+                            lock (_signalPhaseQueueLock)
+                            {
+                                if (_signalPhaseHistory.TryGetValue(cmd.SignalName, out var history))
+                                {
+                                    history.LastAttemptTime = DateTime.UtcNow;
+                                    history.LastPhase = cmd.Phase;
+                                }
+                            }
+                        }
+                        catch
+                        {
+                            // 送信エラーは SendSingleCommand 内で処理されるため、ここでは再スローしない
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // ここでの例外は握りつぶして処理ルーチンを継続可能にする
+                Debug.WriteLine("[ProcessQueue] Exception occurred in processor loop");
+            }
+            finally
+            {
+                lock (_signalPhaseQueueLock)
+                {
+                    Debug.WriteLine("[ProcessQueue] Finally: clearing processing flag");
+                    _isProcessingSignalQueue = false;
+                }
+            }
+        }
+
+        // SetSignalPhase 用のキューエントリ
+        private sealed class SignalPhaseCommand
+        {
+            public string SignalName { get; init; } = string.Empty;
+            public Phase Phase { get; init; }
+            public DateTime EnqueuedAt { get; init; }
+            public DateTime EarliestSendTime { get; init; }
+        }
+
+        // 同一信号のバックオフ管理用
+        private sealed class SignalPhaseHistory 
+        {
+            public int BackoffMs { get; set; }
+            public DateTime LastAttemptTime { get; set; }
+            public Phase? LastPhase { get; set; }
+            public DateTime CreatedAt { get; set; }
+            // 直前評価時に diffMs < BackoffMs だったかどうか
+            public bool LastWasInWindow { get; set; }
+        }
+
     }
-}
+}       
