@@ -471,6 +471,20 @@ namespace TatehamaATS_v1.OnboardDevice
             var newSignalDict = (signalDatas ?? []).ToDictionary(s => s.Name, s => s);
             var nowSignalDict = TcData.signalDataList.ToDictionary(s => s.Name, s => s);
 
+            // --- 無設定（履歴なし）信号の初期キュー投入 ---
+            foreach (var kv in nowSignalDict)
+            {
+                var signalName = kv.Key;
+                var currentData = kv.Value;
+
+                // まだ Relay 側で一度も扱っていない信号だけを対象にする
+                if (!_signalPhaseHistory.ContainsKey(signalName))
+                {
+                    // ここでは「現時点の TcData 上の現示」をそのまま初期値として送る
+                    SetSignalPhase(signalName, currentData.phase);
+                }
+            }
+
             // 追加・変更された信号
             var addedSignals = newSignalDict.Values
                 .Where(newSignal => !nowSignalDict.TryGetValue(newSignal.Name, out var existingSignal) || existingSignal.phase != newSignal.phase)
