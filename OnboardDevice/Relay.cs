@@ -131,7 +131,7 @@ namespace TatehamaATS_v1.OnboardDevice
 
         // SetSignalPhase レート制限用
         private const int MaxConcurrentSignalCommands = 3;           // 1バッチあたりの最大送信数
-        private const int SignalCommandBaseIntervalMs = 250;          // バッチの基準間隔    
+        private const int SignalCommandBaseIntervalMs = 250;          // バッチの基準間隔
         private const int SignalCommandMaxBackoffMs = 200_000;         // 同一信号向けの最大バックオフ
         private const double SignalCommandBackoffGrowFactor = 2.0;     // バックオフ増加係数（指数バックオフ）
         private const double SignalCommandBackoffDecayFactor = 1.5 / SignalCommandBackoffGrowFactor;    // バックオフ減少係数（対数的減少）
@@ -142,6 +142,7 @@ namespace TatehamaATS_v1.OnboardDevice
         private readonly Dictionary<string, SignalPhaseHistory> _signalPhaseHistory = new Dictionary<string, SignalPhaseHistory>();
         private DateTime _lastSignalBatchTime = DateTime.MinValue;
         private bool _isProcessingSignalQueue = false;               // キュー処理中フラグ
+        private Task? _queueProcessingTask; // 処理中タスク
         // 現示優先度（値が小さいほど「下位現示」＝より厳しい）
         private static readonly Dictionary<Phase, int> SignalPhasePriority = new()
         {
@@ -485,6 +486,7 @@ namespace TatehamaATS_v1.OnboardDevice
             foreach (var signalData in addedSignals)
             {
                 // 個別信号の現示設定
+                Debug.WriteLine("Set {0} to {1}", signalData.Name, signalData.phase.ToString());
                 SetSignalPhase(signalData.Name, signalData.phase);
             }
 
@@ -492,6 +494,7 @@ namespace TatehamaATS_v1.OnboardDevice
             foreach (var signalData in removedSignals)
             {
                 // 削除信号は停止現示に戻す
+                Debug.WriteLine("Set {0} to {1}", signalData.Name, Phase.R.ToString());
                 SetSignalPhase(signalData.Name, Phase.R);
             }
         }
@@ -1176,14 +1179,14 @@ namespace TatehamaATS_v1.OnboardDevice
                 // 履歴取得または作成
                 if (!_signalPhaseHistory.TryGetValue(signalName, out var history))
                 {
-                    history = new SignalPhaseHistory        
-                    {   
+                    history = new SignalPhaseHistory
+                    {
                         BackoffMs = SignalCommandBaseIntervalMs,
                         LastAttemptTime = DateTime.MinValue,
                         CreatedAt = now
                     };
                     _signalPhaseHistory[signalName] = history;
-                    //Debug.WriteLine($"[SetSignalPhase] New history created for {signalName}, backoff={history.BackoffMs}ms");   
+                    //Debug.WriteLine($"[SetSignalPhase] New history created for {signalName}, backoff={history.BackoffMs}ms");
                 }
 
                 // TC側から送られてくる現在の現示と比較して、下位／上位を判定する
@@ -1207,7 +1210,7 @@ namespace TatehamaATS_v1.OnboardDevice
                 else
                 {
                     //Debug.WriteLine($"[SetSignalPhase] PriorityCheck {signalName}: no current phase, new={phase}({newPriority})");
-                }   
+                }
 
                 // 次回許可時刻を計算（Upper/Same はバックオフ期間中は破棄、Lower は常に受付）
                 var nowMs = now;
@@ -1230,7 +1233,7 @@ namespace TatehamaATS_v1.OnboardDevice
                     }
 
                     // バックオフ期間を経過した Upper/Same 要求は受け付けるが、
-                    // 前回は期間内・今回は期間外（しきい値を初めて越えた）場合は一度増加させる。    
+                    // 前回は期間内・今回は期間外（しきい値を初めて越えた）場合は一度増加させる。
                     // 前回も今回も期間外の場合のみ、対数的（係数指定）に減少させていく。
                     if (history.BackoffMs > SignalCommandBaseIntervalMs && history.LastAttemptTime != DateTime.MinValue)
                     {
@@ -1279,7 +1282,7 @@ namespace TatehamaATS_v1.OnboardDevice
         }
 
         /// <summary>
-        /// SetSignalPhase キューをレート制限付きで処理する 
+        /// SetSignalPhase キューをレート制限付きで処理する
         /// </summary>
         private async Task ProcessSignalPhaseQueueAsync()
         {
@@ -1419,7 +1422,7 @@ namespace TatehamaATS_v1.OnboardDevice
         }
 
         // 同一信号のバックオフ管理用
-        private sealed class SignalPhaseHistory 
+        private sealed class SignalPhaseHistory
         {
             public int BackoffMs { get; set; }
             public DateTime LastAttemptTime { get; set; }
@@ -1430,4 +1433,4 @@ namespace TatehamaATS_v1.OnboardDevice
         }
 
     }
-}       
+}
