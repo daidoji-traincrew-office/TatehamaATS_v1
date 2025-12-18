@@ -1190,8 +1190,13 @@ namespace TatehamaATS_v1.OnboardDevice
                 string relation = "First";
                 int newPriority = 0;
                 int prevPriority = 0;
-                // 現在の現示を TcData.signalDataList から取得 
-                var currentSignal = TcData.signalDataList.FirstOrDefault(s => s.Name == signalName);
+                // 現在の現示を TcData.signalDataList から取得
+
+                SignalData? currentSignal;
+                lock (TcData)
+                {
+                   currentSignal = TcData.signalDataList.FirstOrDefault(s => s.Name == signalName);
+                }
                 if (currentSignal != null && SignalPhasePriority.TryGetValue(phase, out newPriority) && SignalPhasePriority.TryGetValue(currentSignal.phase, out prevPriority))
                 {
                     relation = newPriority < prevPriority ? "Lower" :
