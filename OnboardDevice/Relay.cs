@@ -490,7 +490,6 @@ namespace TatehamaATS_v1.OnboardDevice
             foreach (var signalData in addedSignals)
             {
                 // 個別信号の現示設定
-                Debug.WriteLine("Set {0} to {1}", signalData.Name, signalData.phase.ToString());
                 SetSignalPhase(signalData.Name, signalData.phase);
             }
 
@@ -498,7 +497,6 @@ namespace TatehamaATS_v1.OnboardDevice
             foreach (var signalData in removedSignals)
             {
                 // 削除信号は停止現示に戻す
-                Debug.WriteLine("Set {0} to {1}", signalData.Name, Phase.R.ToString());
                 SetSignalPhase(signalData.Name, Phase.R);
             }
         }
