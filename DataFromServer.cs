@@ -22,6 +22,7 @@ namespace TatehamaATS_v1
         //将来用
         public int PNotch { get; set; } = 0;
         public int BNotch { get; set; } = 8;
+        public List<string> VisibleSignalNames { get; set; } = [];
 
         public override string ToString()
         {
@@ -100,6 +101,11 @@ namespace TatehamaATS_v1
         /// ステータスフラグ(ビットフラグ)
         /// </summary>
         public ServerStatusFlags StatusFlags { get; set; } = ServerStatusFlags.None;
+
+        /// <summary>
+        /// 次の信号機名リスト
+        /// </summary>
+        public List<string> NextSignalNames { get; set; } = [];
 
         public override string ToString()
         {
