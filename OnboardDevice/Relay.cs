@@ -73,6 +73,7 @@ namespace TatehamaATS_v1.OnboardDevice
         private List<Route> TrainCrewRoutes = new List<Route>();
         private int RouteCounta = 0;
         internal static int shiftTime = 0;
+        private HashSet<string> NextSignalNameSet = [];
 
         // SignalSet/UpdateRoute用の同時実行防止ロック
         private readonly SemaphoreSlim _routeSignalLock = new(1, 1);
@@ -510,6 +511,11 @@ namespace TatehamaATS_v1.OnboardDevice
             {
                 SendSingleCommand("SetEmergencyLight", new string[] { emergencyLightData.Name, emergencyLightData.State ? "true" : "false" });
             }
+        }
+
+        internal void SetNextSignalNames(List<string>? nextSignalNames)
+        {
+            NextSignalNameSet = nextSignalNames?.ToHashSet() ?? [];
         }
 
         internal void SetOther(bool isHide)
