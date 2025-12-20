@@ -130,9 +130,9 @@ namespace TatehamaATS_v1.OnboardDevice
         private int hasInvalidCharsTimes = 0;
 
         // SetSignalPhase レート制限用
-        private const int MaxConcurrentSignalCommands = 3;           // 1バッチあたりの最大送信数
-        private const int SignalCommandBaseIntervalMs = 250;          // バッチの基準間隔
-        private const int SignalCommandMaxBackoffMs = 200_000;         // 同一信号向けの最大バックオフ
+        private const int MaxConcurrentSignalCommands = 10;           // 1バッチあたりの最大送信数
+        private const int SignalCommandBaseIntervalMs = 125;          // バッチの基準間隔
+        private const int SignalCommandMaxBackoffMs = 100_000;         // 同一信号向けの最大バックオフ
         private const double SignalCommandBackoffGrowFactor = 2.0;     // バックオフ増加係数（指数バックオフ）
         private const double SignalCommandBackoffDecayFactor = 1.5 / SignalCommandBackoffGrowFactor;    // バックオフ減少係数（対数的減少）
         private const int SignalHistoryTtlMs = 300_000;                 // 信号履歴の有効期間
@@ -468,52 +468,46 @@ namespace TatehamaATS_v1.OnboardDevice
 
         private void SignalSetCore(List<SignalData>? signalDatas)
         {
-            // 新しい信号データをDictionary化
-            var newSignalDict = (signalDatas ?? []).ToDictionary(s => s.Name, s => s);
-            Dictionary<string, SignalData> nowSignalDict;
+            var newSignalPhaseDict = (signalDatas ?? Enumerable.Empty<SignalData>())
+                .ToDictionary(s => s.Name, s => NormalizeSignalPhase(s.phase));
+
+            Dictionary<string, Phase> nowSignalPhaseDict;
             lock (TcData)
             {
-                nowSignalDict = TcData.signalDataList.ToDictionary(s => s.Name, s => s);
+                var currentSignals = TcData.signalDataList ?? new List<SignalData>();
+                nowSignalPhaseDict = currentSignals.ToDictionary(s => s.Name, s => NormalizeSignalPhase(s.phase));
             }
 
-            // --- 無設定（履歴なし）信号の初期キュー投入 ---
-            foreach (var kv in nowSignalDict)
+            foreach (var kv in nowSignalPhaseDict)
             {
-                var signalName = kv.Key;
-                var currentData = kv.Value;
-
-                // まだ Relay 側で一度も扱っていない信号だけを対象にする
-                if (!_signalPhaseHistory.ContainsKey(signalName))
+                if (!_signalPhaseHistory.ContainsKey(kv.Key))
                 {
-                    // ここでは「現時点の TcData 上の現示」をそのまま初期値として送る
-                    SetSignalPhase(signalName, currentData.phase);
+                    SetSignalPhase(kv.Key, kv.Value);
                 }
             }
 
-            // 追加・変更された信号
-            var addedSignals = newSignalDict.Values
-                .Where(newSignal => !nowSignalDict.TryGetValue(newSignal.Name, out var existingSignal) || existingSignal.phase != newSignal.phase)
+            var addedSignals = newSignalPhaseDict
+                .Where(kv => !nowSignalPhaseDict.TryGetValue(kv.Key, out var existingPhase) || existingPhase != kv.Value)
                 .ToList();
 
-            // 削除された信号
-            var removedSignals = nowSignalDict.Values
-                .Where(existingSignal => !newSignalDict.ContainsKey(existingSignal.Name))
+            var removedSignals = nowSignalPhaseDict
+                .Where(kv => !newSignalPhaseDict.ContainsKey(kv.Key))
+                .Select(kv => kv.Key)
                 .ToList();
 
-            // 追加された信号の現示を送信
-            foreach (var signalData in addedSignals)
+            foreach (var signal in addedSignals)
             {
-                // 個別信号の現示設定
-                SetSignalPhase(signalData.Name, signalData.phase);
+                SetSignalPhase(signal.Key, signal.Value);
             }
 
-            // 削除された信号の現示をRに設定して送信
-            foreach (var signalData in removedSignals)
+            foreach (var signalName in removedSignals)
             {
-                // 削除信号は停止現示に戻す
-                SetSignalPhase(signalData.Name, Phase.R);
+                SetSignalPhase(signalName, Phase.R);
             }
         }
+
+        private static Phase NormalizeSignalPhase(Phase phase) =>
+            phase == Phase.R ? Phase.R : Phase.None;
 
         internal void EMSet(List<EmergencyLightData> emergencyLightDatas)
         {
@@ -911,6 +905,7 @@ namespace TatehamaATS_v1.OnboardDevice
         /// <returns></returns>
         private async Task ReceiveMessages()
         {
+            TrainCrewInput.GetTrainState();
             var buffer = new byte[2048];
             var messageBuilder = new StringBuilder();
 
@@ -1150,6 +1145,17 @@ namespace TatehamaATS_v1.OnboardDevice
             {
                 return;
             }
+
+            if (TcData.gameScreen is not (TrainCrewAPI.GameScreen.MainGame or TrainCrewAPI.GameScreen.MainGame_Pause))
+            {
+                return;
+            }
+
+            if (status != ConnectionState.Connected)
+            {
+                return;
+            }
+
             // 送信要求をキューに積んでレート制限付きで処理する
             lock (_signalPhaseQueueLock)
             {
@@ -1205,6 +1211,12 @@ namespace TatehamaATS_v1.OnboardDevice
                     //Debug.WriteLine($"[SetSignalPhase] New history created for {signalName}, backoff={history.BackoffMs}ms");
                 }
 
+                var isTrainCrewSignal = TrainCrewInput.signals?.Any(s => s.name == signalName) ?? false;
+                if (isTrainCrewSignal)
+                {
+                    history.BackoffMs = SignalCommandBaseIntervalMs;
+                }
+
                 // TC側から送られてくる現在の現示と比較して、下位／上位を判定する
                 string relation = "First";
                 int newPriority = 0;
@@ -1214,9 +1226,10 @@ namespace TatehamaATS_v1.OnboardDevice
                 SignalData? currentSignal;
                 lock (TcData)
                 {
-                   currentSignal = TcData.signalDataList.FirstOrDefault(s => s.Name == signalName);
+                    currentSignal = TcData.signalDataList.FirstOrDefault(s => s.Name == signalName);
                 }
-                if (currentSignal != null && SignalPhasePriority.TryGetValue(phase, out newPriority) && SignalPhasePriority.TryGetValue(currentSignal.phase, out prevPriority))
+
+                if (currentSignal != null && SignalPhasePriority.TryGetValue(NormalizeSignalPhase(phase), out newPriority) && SignalPhasePriority.TryGetValue(NormalizeSignalPhase(currentSignal.phase), out prevPriority))
                 {
                     relation = newPriority < prevPriority ? "Lower" :
                                 newPriority > prevPriority ? "Upper" :
@@ -1274,7 +1287,7 @@ namespace TatehamaATS_v1.OnboardDevice
 
                 var nextAllowed = nowMs.AddMilliseconds(history.BackoffMs);
 
-                Debug.WriteLine($"[SetSignalPhase] {signalName}: diff={diffMs}ms, backoff={history.BackoffMs}ms, nextAllowed={nextAllowed:HH:mm:ss:fff}, lastAttempt={history.LastAttemptTime:HH:mm:ss:fff}, relation={relation}");
+                //Debug.WriteLine($"[SetSignalPhase] {signalName}: diff={diffMs}ms, backoff={history.BackoffMs}ms, nextAllowed={nextAllowed:HH:mm:ss:fff}, lastAttempt={history.LastAttemptTime:HH:mm:ss:fff}, relation={relation}");
 
                 _signalPhaseQueue.Enqueue(new SignalPhaseCommand
                 {
@@ -1416,7 +1429,7 @@ namespace TatehamaATS_v1.OnboardDevice
             {
                 // ここでの例外は握りつぶして処理ルーチンを継続可能にする
                 Debug.WriteLine("[ProcessQueue] Exception occurred in processor loop");
-                Debug.WriteLine("[ProcessQueue] {0}\n{1}",ex.Message, ex.StackTrace);
+                Debug.WriteLine("[ProcessQueue] {0}\n{1}", ex.Message, ex.StackTrace);
             }
             finally
             {
