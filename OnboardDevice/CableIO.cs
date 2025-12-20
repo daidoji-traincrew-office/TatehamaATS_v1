@@ -376,18 +376,21 @@ namespace TatehamaATS_v1.OnboardDevice
 
         internal void ReceiveData(DataFromServerBySchedule data, bool ForceStop)
         {
-            Relay.SetTime(data.TimeOffset);
-            if (!ForceStop)
+            Task.Run(async () =>
             {
-                Relay.UpdateRoute(data.RouteData);
-            }
+                await Relay.SetTime(data.TimeOffset);
+                if (!ForceStop)
+                {
+                    await Relay.UpdateRoute(data.RouteData);
+                }
+            });
         }
 
         internal void ReceiveSignalData(List<SignalData> data, bool ForceStop)
         {
             if (!ForceStop)
             {
-                Relay.SignalSet(data);
+                Task.Run(async () => await Relay.SignalSet(data));
             }
         }
 

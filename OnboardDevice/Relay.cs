@@ -75,7 +75,7 @@ namespace TatehamaATS_v1.OnboardDevice
         internal static int shiftTime = 0;
 
         // SignalSet/UpdateRoute用の同時実行防止ロック
-        private readonly object _routeSignalLock = new object();
+        private readonly SemaphoreSlim _routeSignalLock = new(1, 1);
 
         private Dictionary<string, string> StaNameById = new Dictionary<string, string>()
         {
@@ -448,7 +448,7 @@ namespace TatehamaATS_v1.OnboardDevice
             }
         }
 
-        internal void SignalSet(List<SignalData> signalDatas)
+        internal async Task SignalSet(List<SignalData> signalDatas)
         {
             if (TcData.gameScreen is not (TrainCrewAPI.GameScreen.MainGame or TrainCrewAPI.GameScreen.MainGame_Pause))
             {
@@ -460,9 +460,14 @@ namespace TatehamaATS_v1.OnboardDevice
                 return;
             }
 
-            lock (_routeSignalLock)
+            await _routeSignalLock.WaitAsync();
+            try
             {
                 SignalSetCore(signalDatas);
+            }
+            finally
+            {
+                _routeSignalLock.Release();
             }
         }
 
@@ -532,7 +537,7 @@ namespace TatehamaATS_v1.OnboardDevice
             SendSingleCommand("mode_req", new string[] { "realtimemode_on" });
         }
 
-        internal void UpdateRoute(List<Route> routes)
+        internal async Task UpdateRoute(List<Route> routes)
         {
             if (!(TcData.gameScreen == TrainCrewAPI.GameScreen.MainGame || TcData.gameScreen == TrainCrewAPI.GameScreen.MainGame_Pause))
             {
@@ -551,13 +556,18 @@ namespace TatehamaATS_v1.OnboardDevice
                 TrainCrewRoutes = new List<Route>();
             }
 
-            lock (_routeSignalLock)
+            await _routeSignalLock.WaitAsync();
+            try
             {
-                UpdateRouteCore(routes);
+                await UpdateRouteCore(routes);
+            }
+            finally
+            {
+                _routeSignalLock.Release();
             }
         }
 
-        private void UpdateRouteCore(List<Route> routes)
+        private async Task UpdateRouteCore(List<Route> routes)
         {
 
             // デバッグ出力
@@ -593,16 +603,16 @@ namespace TatehamaATS_v1.OnboardDevice
 
             foreach (var route in addedRoutes.ToList())
             {
-                SetRoute(route);
+                await SetRoute(route);
             }
 
             foreach (var route in removedRoutes.ToList())
             {
-                DeleteRoute(route);
+                await DeleteRoute(route);
             }
         }
 
-        private void SetRoute(Route route)
+        private async Task SetRoute(Route route)
         {
             try
             {
@@ -643,7 +653,7 @@ namespace TatehamaATS_v1.OnboardDevice
                 }
 
                 //Debug.WriteLine($"☆API送信: SetRoute/{route.TcName}/{StaStopById[r[0]]}");
-                SendSingleCommand("SetRoute", [staName, routeName, indicator, TcData.myTrainData.diaName, StaStopById[r[0]]]);
+                await SendSingleCommand("SetRoute", [staName, routeName, indicator, TcData.myTrainData.diaName, StaStopById[r[0]]]);
             }
             catch (Exception ex)
             {
@@ -651,7 +661,7 @@ namespace TatehamaATS_v1.OnboardDevice
             }
         }
 
-        private void DeleteRoute(Route route)
+        private async Task DeleteRoute(Route route)
         {
             try
             {
@@ -673,7 +683,7 @@ namespace TatehamaATS_v1.OnboardDevice
                 var routeName = System.Text.RegularExpressions.Regex.Replace(r[1], @"[ST]([A-Z])$", "$1");
 
                 //Debug.WriteLine($"☆API送信: DeleteRoute2/{route.TcName}");
-                SendSingleCommand("DeleteRoute2", [staName, routeName]);
+                await SendSingleCommand("DeleteRoute2", [staName, routeName]);
             }
             catch (Exception ex)
             {
@@ -681,7 +691,7 @@ namespace TatehamaATS_v1.OnboardDevice
             }
         }
 
-        internal void SetTime(int shiftTime)
+        internal async Task SetTime(int shiftTime)
         {
             try
             {
@@ -691,7 +701,7 @@ namespace TatehamaATS_v1.OnboardDevice
                 }
                 Relay.shiftTime = shiftTime;
                 //Debug.WriteLine($"☆API送信: realtimeoffset/{shiftTime}");
-                SendSingleCommand("realtimeoffset", [$"{shiftTime}"]);
+                await SendSingleCommand("realtimeoffset", [$"{shiftTime}"]);
             }
             catch (Exception ex)
             {
