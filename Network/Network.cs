@@ -1,5 +1,6 @@
 using OpenIddict.Abstractions;
 using OpenIddict.Client;
+using TrainCrew;
 
 namespace TatehamaATS_v1.Network
 {
@@ -589,6 +590,10 @@ namespace TatehamaATS_v1.Network
                     SendData.BNotch = TcData.myTrainData.Bnotch;
                     SendData.CarStates = TcData.myTrainData.CarStates;
                 }
+
+                SendData.VisibleSignalNames = TrainCrewInput.signals != null
+                    ? TrainCrewInput.signals.Select(s => s.name).ToList()
+                    : [];
 
                 //単純に代入の皆様
                 SendData.DiaName = OverrideDiaName;
