@@ -458,7 +458,7 @@ namespace TatehamaATS_v1.OnboardDevice
 
         internal void SetTime(TimeSpan shiftTime)
         {
-            Relay.SetTime(shiftTime.Hours);
+            Task.Run(async() => await Relay.SetTime(shiftTime.Hours));
         }
     }
 }
