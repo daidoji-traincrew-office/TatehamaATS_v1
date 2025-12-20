@@ -450,38 +450,16 @@ namespace TatehamaATS_v1.OnboardDevice
 
         private async Task SignalSetCore(List<SignalData>? signalDatas)
         {
-            var newSignalPhaseDict = (signalDatas ?? Enumerable.Empty<SignalData>())
+            if (signalDatas is not {Count: > 0})
+            {
+                return;
+            }
+            var targetSignals = signalDatas
+                .Where(s => NextSignalNameSet.Contains(s.Name))
                 .ToDictionary(s => s.Name, s => NormalizeSignalPhase(s.phase));
-
-            Dictionary<string, Phase> nowSignalPhaseDict;
-            lock (TcData)
-            {
-                var currentSignals = TcData.signalDataList ?? new List<SignalData>();
-                nowSignalPhaseDict = currentSignals.ToDictionary(s => s.Name, s => NormalizeSignalPhase(s.phase));
-            }
-
-            foreach (var kv in nowSignalPhaseDict)
-            {
-                await SetSignalPhase(kv.Key, kv.Value);
-            }
-
-            var addedSignals = newSignalPhaseDict
-                .Where(kv => !nowSignalPhaseDict.TryGetValue(kv.Key, out var existingPhase) || existingPhase != kv.Value)
-                .ToList();
-
-            var removedSignals = nowSignalPhaseDict
-                .Where(kv => !newSignalPhaseDict.ContainsKey(kv.Key))
-                .Select(kv => kv.Key)
-                .ToList();
-
-            foreach (var signal in addedSignals)
+            foreach (var signal in targetSignals)
             {
                 await SetSignalPhase(signal.Key, signal.Value);
-            }
-
-            foreach (var signalName in removedSignals)
-            {
-                await SetSignalPhase(signalName, Phase.R);
             }
         }
 
