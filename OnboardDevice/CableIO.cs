@@ -360,6 +360,7 @@ namespace TatehamaATS_v1.OnboardDevice
         {
             InspectionRecord.NetworkUpdate();
             Relay.EMSet(dataFromServer.EmergencyLightDatas);
+            Relay.SetNextSignalNames(dataFromServer.NextSignalNames);
             OtherBougoState = dataFromServer.BougoState;
             Speaker.ChengeBougoState(MyBougoState, OtherBougoState);
             KokuchiWindow.SetData(dataFromServer.OperationNotificationData);
