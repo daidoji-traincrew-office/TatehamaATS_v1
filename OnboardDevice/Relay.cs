@@ -515,7 +515,11 @@ namespace TatehamaATS_v1.OnboardDevice
 
         internal void SetNextSignalNames(List<string>? nextSignalNames)
         {
-            NextSignalNameSet = nextSignalNames?.ToHashSet() ?? [];
+            if (nextSignalNames is not {Count: > 0})
+            {
+                return;
+            }
+            NextSignalNameSet = nextSignalNames.ToHashSet();
         }
 
         internal void SetOther(bool isHide)
