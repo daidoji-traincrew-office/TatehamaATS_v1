@@ -76,6 +76,7 @@ namespace TatehamaATS_v1.OnboardDevice
 
         // SignalSet/UpdateRoute用の同時実行防止ロック
         private readonly object _routeSignalLock = new object();
+        private readonly HashSet<string> _removedSignalCache = new();
 
         private Dictionary<string, string> StaNameById = new Dictionary<string, string>()
         {
@@ -464,17 +465,34 @@ namespace TatehamaATS_v1.OnboardDevice
 
             foreach (var signal in addedSignals)
             {
+                Phase? currentPhase = nowSignalPhaseDict.TryGetValue(signal.Key, out var existingPhase) ? existingPhase : null;
+                LogSignalDifference(signal.Key, currentPhase, signal.Value);
+                _removedSignalCache.Remove(signal.Key);
                 SetSignalPhase(signal.Key, signal.Value);
             }
 
             foreach (var signalName in removedSignals)
             {
+                if (!_removedSignalCache.Add(signalName))
+                {
+                    continue;
+                }
+
+                Phase? currentPhase = nowSignalPhaseDict.TryGetValue(signalName, out var existingPhase) ? existingPhase : null;
+                LogSignalDifference(signalName, currentPhase, null);
                 SetSignalPhase(signalName, Phase.R);
             }
         }
 
         private static Phase NormalizeSignalPhase(Phase phase) =>
             phase == Phase.R ? Phase.R : Phase.None;
+
+        private static void LogSignalDifference(string signalName, Phase? currentPhase, Phase? tcPhase)
+        {
+            var currentText = currentPhase?.ToString() ?? "N/A";
+            var tcText = tcPhase?.ToString() ?? "N/A";
+            Debug.WriteLine($"信号差分検知: {signalName} 現在={currentText}, TC={tcText}");
+        }
 
         internal void EMSet(List<EmergencyLightData> emergencyLightDatas)
         {
@@ -1124,6 +1142,7 @@ namespace TatehamaATS_v1.OnboardDevice
             }
 
             var normalizedPhase = NormalizeSignalPhase(phase);
+            Debug.WriteLine($"信号設定：{signalName}→{normalizedPhase}");
             _ = SendSingleCommand("SetSignalPhase", new[] { signalName, normalizedPhase.ToString() });
         }
     }
