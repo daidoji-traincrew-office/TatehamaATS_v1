@@ -1429,7 +1429,15 @@ namespace TatehamaATS_v1.OnboardDevice
                         {
                             Debug.WriteLine($"☆信号名：{cmd.SignalName}／現示：{cmd.Phase.ToString()}");
                             // 実送信
-                            await SendSingleCommand("SetSignalPhase", new[] { cmd.SignalName, cmd.Phase.ToString() });
+                            await _routeSignalLock.WaitAsync();
+                            try
+                            {
+                                await SendSingleCommand("SetSignalPhase", new[] { cmd.SignalName, cmd.Phase.ToString() });
+                            }
+                            finally
+                            {
+                                _routeSignalLock.Release();
+                            }
 
                             // 成功したので履歴を更新
                             lock (_signalPhaseQueueLock)
