@@ -22,15 +22,18 @@ namespace TatehamaATS_v1.OnboardDevice
         /// 切断
         /// </summary>
         DisConnect,
+
         /// <summary>
         /// 接続中
         /// </summary>
         Connecting,
+
         /// <summary>
         /// 接続完了
         /// </summary>
         Connected
     }
+
     /// <summary>
     /// <strong>継電部</strong>
     /// TCとのWS通信を担当
@@ -48,8 +51,11 @@ namespace TatehamaATS_v1.OnboardDevice
         private readonly string _connectUri = "ws://127.0.0.1:50300/"; //TRAIN CREWのポート番号は50300
 
         // キャッシュ用の静的辞書
-        private static readonly ConcurrentDictionary<Type, PropertyInfo[]> PropertyCache = new ConcurrentDictionary<Type, PropertyInfo[]>();
-        private static readonly ConcurrentDictionary<Type, FieldInfo[]> FieldCache = new ConcurrentDictionary<Type, FieldInfo[]>();
+        private static readonly ConcurrentDictionary<Type, PropertyInfo[]> PropertyCache =
+            new ConcurrentDictionary<Type, PropertyInfo[]>();
+
+        private static readonly ConcurrentDictionary<Type, FieldInfo[]> FieldCache =
+            new ConcurrentDictionary<Type, FieldInfo[]>();
 
         // JSONシリアライザ設定
         private static readonly JsonSerializerSettings JsonSerializerSettings = new JsonSerializerSettings()
@@ -80,36 +86,36 @@ namespace TatehamaATS_v1.OnboardDevice
 
         private Dictionary<string, string> StaNameById = new Dictionary<string, string>()
         {
-            {"TH76","館浜"},
-            {"TH75","駒野"},
-            {"TH71","津崎"},
-            {"TH70","浜園"},
-            {"TH67","新野崎"},
-            {"TH66S","江ノ原信号場"},
-            {"TH65","大道寺"},
-            {"TH64","藤江"},
-            {"TH63","水越"},
-            {"TH62","高見沢"},
-            {"TH61","日野森"},
-            {"TH59","西赤山"},
-            {"TH58","赤山町"}
+            { "TH76", "館浜" },
+            { "TH75", "駒野" },
+            { "TH71", "津崎" },
+            { "TH70", "浜園" },
+            { "TH67", "新野崎" },
+            { "TH66S", "江ノ原信号場" },
+            { "TH65", "大道寺" },
+            { "TH64", "藤江" },
+            { "TH63", "水越" },
+            { "TH62", "高見沢" },
+            { "TH61", "日野森" },
+            { "TH59", "西赤山" },
+            { "TH58", "赤山町" }
         };
 
         private Dictionary<string, string> StaStopById = new Dictionary<string, string>()
         {
-            {"TH76","停車"},
-            {"TH75","停車"},
-            {"TH71","停車"},
-            {"TH70","停車"},
-            {"TH67","停車"},
-            {"TH66S","停車"},
-            {"TH65","停車"},
-            {"TH64","停車"},
-            {"TH63","停車"},
-            {"TH62","停車"},
-            {"TH61","停車"},
-            {"TH59","停車"},
-            {"TH58","停車"}
+            { "TH76", "停車" },
+            { "TH75", "停車" },
+            { "TH71", "停車" },
+            { "TH70", "停車" },
+            { "TH67", "停車" },
+            { "TH66S", "停車" },
+            { "TH65", "停車" },
+            { "TH64", "停車" },
+            { "TH63", "停車" },
+            { "TH62", "停車" },
+            { "TH61", "停車" },
+            { "TH59", "停車" },
+            { "TH58", "停車" }
         };
 
         /// <summary>
@@ -131,19 +137,24 @@ namespace TatehamaATS_v1.OnboardDevice
         private int hasInvalidCharsTimes = 0;
 
         // SetSignalPhase レート制限用
-        private const int MaxConcurrentSignalCommands = 10;           // 1バッチあたりの最大送信数
-        private const int SignalCommandBaseIntervalMs = 125;          // バッチの基準間隔
-        private const int SignalCommandMaxBackoffMs = 100_000;         // 同一信号向けの最大バックオフ
-        private const double SignalCommandBackoffGrowFactor = 2.0;     // バックオフ増加係数（指数バックオフ）
-        private const double SignalCommandBackoffDecayFactor = 1.5 / SignalCommandBackoffGrowFactor;    // バックオフ減少係数（対数的減少）
-        private const int SignalHistoryTtlMs = 300_000;                 // 信号履歴の有効期間
-        private const int SignalQueueTtlMs = 150_000;                    // キューに残す指示の最大寿命
+        private const int MaxConcurrentSignalCommands = 10; // 1バッチあたりの最大送信数
+        private const int SignalCommandBaseIntervalMs = 125; // バッチの基準間隔
+        private const int SignalCommandMaxBackoffMs = 100_000; // 同一信号向けの最大バックオフ
+        private const double SignalCommandBackoffGrowFactor = 2.0; // バックオフ増加係数（指数バックオフ）
+        private const double SignalCommandBackoffDecayFactor = 1.5 / SignalCommandBackoffGrowFactor; // バックオフ減少係数（対数的減少）
+        private const int SignalHistoryTtlMs = 300_000; // 信号履歴の有効期間
+        private const int SignalQueueTtlMs = 150_000; // キューに残す指示の最大寿命
         private readonly object _signalPhaseQueueLock = new object(); // キュー用ロック
         private readonly Queue<SignalPhaseCommand> _signalPhaseQueue = new Queue<SignalPhaseCommand>();
-        private readonly Dictionary<string, SignalPhaseHistory> _signalPhaseHistory = new Dictionary<string, SignalPhaseHistory>();
+
+        private readonly Dictionary<string, SignalPhaseHistory> _signalPhaseHistory =
+            new Dictionary<string, SignalPhaseHistory>();
+
         private DateTime _lastSignalBatchTime = DateTime.MinValue;
-        private bool _isProcessingSignalQueue = false;               // キュー処理中フラグ
+        private bool _isProcessingSignalQueue = false; // キュー処理中フラグ
+
         private Task? _queueProcessingTask; // 処理中タスク
+
         // 現示優先度（値が小さいほど「下位現示」＝より厳しい）
         private static readonly Dictionary<Phase, int> SignalPhasePriority = new()
         {
@@ -215,7 +226,11 @@ namespace TatehamaATS_v1.OnboardDevice
         /// <param name="requestValues"></param>
         /// <returns></returns>
         private static bool IsValidCommand(string requestValues) =>
-            new[] { "DataRequest", "SetEmergencyLight", "SetSignalPhase", "mode_req", "SetRoute", "DeleteRoute", "DeleteRoute2", "realtimeoffset" }.Contains(requestValues);
+            new[]
+            {
+                "DataRequest", "SetEmergencyLight", "SetSignalPhase", "mode_req", "SetRoute", "DeleteRoute",
+                "DeleteRoute2", "realtimeoffset"
+            }.Contains(requestValues);
 
         /// <summary>
         /// リクエストの検証
@@ -229,13 +244,21 @@ namespace TatehamaATS_v1.OnboardDevice
             {
                 case "DataRequest":
                     return requestValues.Length == 1 && requestValues[0] == "all" ||
-                           requestValues.All(str => str == "tc" || str == "tconlyontrain" || str == "tcall" || str == "signal" || str == "train");
+                           requestValues.All(str =>
+                               str == "tc" || str == "tconlyontrain" || str == "tcall" || str == "signal" ||
+                               str == "train");
                 case "SetEmergencyLight":
                     return requestValues.Length == 2 && (requestValues[1] == "true" || requestValues[1] == "false");
                 case "SetSignalPhase":
-                    return requestValues.Length == 2 && (requestValues[1] == "None" || requestValues[1] == "R" || requestValues[1] == "YY" || requestValues[1] == "Y" || requestValues[1] == "YG" || requestValues[1] == "G");
+                    return requestValues.Length == 2 && (requestValues[1] == "None" || requestValues[1] == "R" ||
+                                                         requestValues[1] == "YY" || requestValues[1] == "Y" ||
+                                                         requestValues[1] == "YG" || requestValues[1] == "G");
                 case "mode_req":
-                    return requestValues.Length == 1 && (requestValues[0] == "hide_other" || requestValues[0] == "show_other" || requestValues[0] == "route_manual" || requestValues[0] == "route_auto" || requestValues[0] == "realtimemode_on");
+                    return requestValues.Length == 1 && (requestValues[0] == "hide_other" ||
+                                                         requestValues[0] == "show_other" ||
+                                                         requestValues[0] == "route_manual" ||
+                                                         requestValues[0] == "route_auto" ||
+                                                         requestValues[0] == "realtimemode_on");
                 case "SetRoute":
                     return requestValues.Length == 5;
                 case "DeleteRoute":
@@ -271,6 +294,7 @@ namespace TatehamaATS_v1.OnboardDevice
                 SetOther(true);
                 SetTimeMode();
             }
+
             // TrainCrewRoutesにTcData.interlockDataListから展開した進路情報を格納する
             TrainCrewRoutes = ConvertToRoutes(TcData.interlockDataList);
         }
@@ -290,10 +314,10 @@ namespace TatehamaATS_v1.OnboardDevice
                 {
                     // StaNameByIdを逆向きに使用して、interlockData.Nameを駅IDにする
                     // interlockData.Nameには"連動装置"が末尾に含まれているため、削除してから検索する
-                    var stationId = StaNameById.FirstOrDefault(x => x.Value == interlockData.Name.Replace("連動装置", "")).Key;
+                    var stationId = StaNameById.FirstOrDefault(x => x.Value == interlockData.Name.Replace("連動装置", ""))
+                        .Key;
                     var route = new Route
                     {
-
                         TcName = $"{stationId}_{interlockRoute.Name}",
                         RouteType = RouteType.SwitchRoute,
                         Indicator = "",
@@ -479,13 +503,32 @@ namespace TatehamaATS_v1.OnboardDevice
 
             var nextSignals = (signalDatas ?? Enumerable.Empty<SignalData>())
                 .Where(s => NextSignalNameSet.Contains(s.Name))
-                .ToDictionary(s => s.Name, s =>s.phase);
+                .ToDictionary(s => s.Name, s => s.phase);
+
+            // キューから、近い信号を取り除いて、残ったものを再度キューに入れ直す
+            // (これにより、キュー処理上で再送されることを防ぐ)
+            lock (_signalPhaseQueueLock)
+            {
+                var temp = new Queue<SignalPhaseCommand>();
+                while (_signalPhaseQueue.Count > 0)
+                {
+                    var cmd = _signalPhaseQueue.Dequeue();
+                    if (!nextSignals.ContainsKey(cmd.SignalName))
+                    {
+                        temp.Enqueue(cmd);
+                    }
+                }
+
+                while (temp.Count > 0)
+                {
+                    _signalPhaseQueue.Enqueue(temp.Dequeue());
+                }
+            }
 
             // 近い信号は即時送信とする
             foreach (var kv in nextSignals)
             {
                 await SendSingleCommand("SetSignalPhase", [kv.Key, kv.Value.ToString()]);
-                // Todo: キューから、近い信号はクリアする(キュー処理上で再送されることを防ぐ)
             }
 
             Dictionary<string, Phase> nowSignalPhaseDict;
@@ -522,16 +565,18 @@ namespace TatehamaATS_v1.OnboardDevice
         {
             foreach (var emergencyLightData in emergencyLightDatas.ToList())
             {
-                SendSingleCommand("SetEmergencyLight", new string[] { emergencyLightData.Name, emergencyLightData.State ? "true" : "false" });
+                SendSingleCommand("SetEmergencyLight",
+                    new string[] { emergencyLightData.Name, emergencyLightData.State ? "true" : "false" });
             }
         }
 
         internal void SetNextSignalNames(List<string>? nextSignalNames)
         {
-            if (nextSignalNames is not {Count: > 0})
+            if (nextSignalNames is not { Count: > 0 })
             {
                 return;
             }
+
             NextSignalNameSet = nextSignalNames.ToHashSet();
         }
 
@@ -552,7 +597,8 @@ namespace TatehamaATS_v1.OnboardDevice
 
         internal async Task UpdateRoute(List<Route> routes)
         {
-            if (!(TcData.gameScreen == TrainCrewAPI.GameScreen.MainGame || TcData.gameScreen == TrainCrewAPI.GameScreen.MainGame_Pause))
+            if (!(TcData.gameScreen == TrainCrewAPI.GameScreen.MainGame ||
+                  TcData.gameScreen == TrainCrewAPI.GameScreen.MainGame_Pause))
             {
                 return;
             }
@@ -582,7 +628,6 @@ namespace TatehamaATS_v1.OnboardDevice
 
         private async Task UpdateRouteCore(List<Route> routes)
         {
-
             // デバッグ出力
             //Debug.WriteLine("TrainCrewRoutes:");
             //foreach (var route in TrainCrewRoutes.ToList())
@@ -629,7 +674,8 @@ namespace TatehamaATS_v1.OnboardDevice
         {
             try
             {
-                if (!(TcData.gameScreen.HasFlag(TrainCrewAPI.GameScreen.MainGame) || TcData.gameScreen.HasFlag(TrainCrewAPI.GameScreen.MainGame_Pause)))
+                if (!(TcData.gameScreen.HasFlag(TrainCrewAPI.GameScreen.MainGame) ||
+                      TcData.gameScreen.HasFlag(TrainCrewAPI.GameScreen.MainGame_Pause)))
                 {
                     return;
                 }
@@ -666,7 +712,8 @@ namespace TatehamaATS_v1.OnboardDevice
                 }
 
                 //Debug.WriteLine($"☆API送信: SetRoute/{route.TcName}/{StaStopById[r[0]]}");
-                await SendSingleCommand("SetRoute", [staName, routeName, indicator, TcData.myTrainData.diaName, StaStopById[r[0]]]);
+                await SendSingleCommand("SetRoute",
+                    [staName, routeName, indicator, TcData.myTrainData.diaName, StaStopById[r[0]]]);
             }
             catch (Exception ex)
             {
@@ -678,7 +725,8 @@ namespace TatehamaATS_v1.OnboardDevice
         {
             try
             {
-                if (!(TcData.gameScreen.HasFlag(TrainCrewAPI.GameScreen.MainGame) || TcData.gameScreen.HasFlag(TrainCrewAPI.GameScreen.MainGame_Pause)))
+                if (!(TcData.gameScreen.HasFlag(TrainCrewAPI.GameScreen.MainGame) ||
+                      TcData.gameScreen.HasFlag(TrainCrewAPI.GameScreen.MainGame_Pause)))
                 {
                     return;
                 }
@@ -712,6 +760,7 @@ namespace TatehamaATS_v1.OnboardDevice
                 {
                     return;
                 }
+
                 Relay.shiftTime = shiftTime;
                 //Debug.WriteLine($"☆API送信: realtimeoffset/{shiftTime}");
                 await SendSingleCommand("realtimeoffset", [$"{shiftTime}"]);
@@ -785,111 +834,111 @@ namespace TatehamaATS_v1.OnboardDevice
             {
                 case "普通":
                     StaStopById = new Dictionary<string, string>()
-                        {
-                            {"TH76","停車"},
-                            {"TH75","停車"},
-                            {"TH71","停車"},
-                            {"TH70","停車"},
-                            {"TH67","停車"},
-                            {"TH66S","停車"},
-                            {"TH65","停車"},
-                            {"TH64","停車"},
-                            {"TH63","停車"},
-                            {"TH62","停車"},
-                            {"TH61","停車"},
-                            {"TH59","停車"},
-                            {"TH58","停車"}
-                        };
+                    {
+                        { "TH76", "停車" },
+                        { "TH75", "停車" },
+                        { "TH71", "停車" },
+                        { "TH70", "停車" },
+                        { "TH67", "停車" },
+                        { "TH66S", "停車" },
+                        { "TH65", "停車" },
+                        { "TH64", "停車" },
+                        { "TH63", "停車" },
+                        { "TH62", "停車" },
+                        { "TH61", "停車" },
+                        { "TH59", "停車" },
+                        { "TH58", "停車" }
+                    };
                     break;
                 case "準急":
                     StaStopById = new Dictionary<string, string>()
-                        {
-                            {"TH76","停車"},
-                            {"TH75","停車"},
-                            {"TH71","通過"},
-                            {"TH70","停車"},
-                            {"TH67","停車"},
-                            {"TH66S","停車"},
-                            {"TH65","停車"},
-                            {"TH64","停車"},
-                            {"TH63","停車"},
-                            {"TH62","停車"},
-                            {"TH61","停車"},
-                            {"TH59","停車"},
-                            {"TH58","停車"}
-                        };
+                    {
+                        { "TH76", "停車" },
+                        { "TH75", "停車" },
+                        { "TH71", "通過" },
+                        { "TH70", "停車" },
+                        { "TH67", "停車" },
+                        { "TH66S", "停車" },
+                        { "TH65", "停車" },
+                        { "TH64", "停車" },
+                        { "TH63", "停車" },
+                        { "TH62", "停車" },
+                        { "TH61", "停車" },
+                        { "TH59", "停車" },
+                        { "TH58", "停車" }
+                    };
                     break;
                 case "急行":
                     StaStopById = new Dictionary<string, string>()
-                        {
-                            {"TH76","停車"},
-                            {"TH75","通過"},
-                            {"TH71","通過"},
-                            {"TH70","通過"},
-                            {"TH67","停車"},
-                            {"TH66S","停車"},
-                            {"TH65","停車"},
-                            {"TH64","停車"},
-                            {"TH63","停車"},
-                            {"TH62","停車"},
-                            {"TH61","停車"},
-                            {"TH59","停車"},
-                            {"TH58","停車"}
-                        };
+                    {
+                        { "TH76", "停車" },
+                        { "TH75", "通過" },
+                        { "TH71", "通過" },
+                        { "TH70", "通過" },
+                        { "TH67", "停車" },
+                        { "TH66S", "停車" },
+                        { "TH65", "停車" },
+                        { "TH64", "停車" },
+                        { "TH63", "停車" },
+                        { "TH62", "停車" },
+                        { "TH61", "停車" },
+                        { "TH59", "停車" },
+                        { "TH58", "停車" }
+                    };
                     break;
                 case "快速急行":
                     StaStopById = new Dictionary<string, string>()
-                        {
-                            {"TH76","停車"},
-                            {"TH75","通過"},
-                            {"TH71","通過"},
-                            {"TH70","通過"},
-                            {"TH67","停車"},
-                            {"TH66S","停車"},
-                            {"TH65","停車"},
-                            {"TH64","停車"},
-                            {"TH63","停車"},
-                            {"TH62","通過"},
-                            {"TH61","停車"},
-                            {"TH59","通過"},
-                            {"TH58","停車"}
-                        };
+                    {
+                        { "TH76", "停車" },
+                        { "TH75", "通過" },
+                        { "TH71", "通過" },
+                        { "TH70", "通過" },
+                        { "TH67", "停車" },
+                        { "TH66S", "停車" },
+                        { "TH65", "停車" },
+                        { "TH64", "停車" },
+                        { "TH63", "停車" },
+                        { "TH62", "通過" },
+                        { "TH61", "停車" },
+                        { "TH59", "通過" },
+                        { "TH58", "停車" }
+                    };
                     break;
                 case "A特":
                     StaStopById = new Dictionary<string, string>()
-                        {
-                            {"TH76","停車"},
-                            {"TH75","通過"},
-                            {"TH71","通過"},
-                            {"TH70","通過"},
-                            {"TH67","通過"},
-                            {"TH66S","通過"},
-                            {"TH65","通過"},
-                            {"TH64","通過"},
-                            {"TH63","通過"},
-                            {"TH62","通過"},
-                            {"TH61","通過"},
-                            {"TH59","通過"},
-                            {"TH58","通過"}
-                        };
+                    {
+                        { "TH76", "停車" },
+                        { "TH75", "通過" },
+                        { "TH71", "通過" },
+                        { "TH70", "通過" },
+                        { "TH67", "通過" },
+                        { "TH66S", "通過" },
+                        { "TH65", "通過" },
+                        { "TH64", "通過" },
+                        { "TH63", "通過" },
+                        { "TH62", "通過" },
+                        { "TH61", "通過" },
+                        { "TH59", "通過" },
+                        { "TH58", "通過" }
+                    };
                     break;
                 case "回送":
                     StaStopById = new Dictionary<string, string>()
-                        {
-                            {"TH76","停車"},
-                            {"TH75","通過"},
-                            {"TH71","通過"},
-                            {"TH70","通過"},
-                            {"TH67","通過"},
-                            {"TH66S","停車"},
-                            {"TH65","通過"},
-                            {"TH64","通過"},
-                            {"TH63","通過"},
-                            {"TH62","通過"},
-                            {"TH61","通過"},
-                            {"TH59","通過"},
-                            {"TH58","通過"}
-                        };
+                    {
+                        { "TH76", "停車" },
+                        { "TH75", "通過" },
+                        { "TH71", "通過" },
+                        { "TH70", "通過" },
+                        { "TH67", "通過" },
+                        { "TH66S", "停車" },
+                        { "TH65", "通過" },
+                        { "TH64", "通過" },
+                        { "TH63", "通過" },
+                        { "TH62", "通過" },
+                        { "TH61", "通過" },
+                        { "TH59", "通過" },
+                        { "TH58", "通過" }
+                    };
                     break;
             }
         }
@@ -989,7 +1038,8 @@ namespace TatehamaATS_v1.OnboardDevice
                     {
                         // Debug.WriteLine(baseData.data);
                         // Data_Base.DataをTrainCrewStateData型にデシリアライズ
-                        var _trainCrewStateData = JsonConvert.DeserializeObject<TrainCrewStateData>(baseData.data.ToString());
+                        var _trainCrewStateData =
+                            JsonConvert.DeserializeObject<TrainCrewStateData>(baseData.data.ToString());
 
                         if (_trainCrewStateData != null)
                         {
@@ -1013,7 +1063,8 @@ namespace TatehamaATS_v1.OnboardDevice
                     else if (baseData.type == "RecvBeaconStateData")
                     {
                         // Data_Base.DataをRecvBeaconStateData型にデシリアライズ
-                        var _recvBeaconStateData = JsonConvert.DeserializeObject<RecvBeaconStateData>(baseData.data.ToString());
+                        var _recvBeaconStateData =
+                            JsonConvert.DeserializeObject<RecvBeaconStateData>(baseData.data.ToString());
 
                         if (_recvBeaconStateData != null)
                         {
@@ -1060,7 +1111,8 @@ namespace TatehamaATS_v1.OnboardDevice
             if (_webSocket != null && _webSocket.State == WebSocketState.Open)
             {
                 // 正常に接続を閉じる
-                await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Client closing", CancellationToken.None);
+                await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Client closing",
+                    CancellationToken.None);
                 status = ConnectionState.DisConnect;
                 ConnectionStatusChanged?.Invoke(status);
             }
@@ -1101,7 +1153,8 @@ namespace TatehamaATS_v1.OnboardDevice
             }
 
             // プロパティのキャッシュを取得または設定
-            var properties = PropertyCache.GetOrAdd(target.GetType(), t => t.GetProperties(BindingFlags.Public | BindingFlags.Instance));
+            var properties = PropertyCache.GetOrAdd(target.GetType(),
+                t => t.GetProperties(BindingFlags.Public | BindingFlags.Instance));
             foreach (var property in properties)
             {
                 if (property.CanWrite)
@@ -1112,7 +1165,8 @@ namespace TatehamaATS_v1.OnboardDevice
             }
 
             // フィールドのキャッシュを取得または設定
-            var fields = FieldCache.GetOrAdd(target.GetType(), t => t.GetFields(BindingFlags.Public | BindingFlags.Instance));
+            var fields = FieldCache.GetOrAdd(target.GetType(),
+                t => t.GetFields(BindingFlags.Public | BindingFlags.Instance));
             foreach (var field in fields)
             {
                 var newValue = field.GetValue(source);
@@ -1209,6 +1263,7 @@ namespace TatehamaATS_v1.OnboardDevice
                             temp.Enqueue(cmd);
                         }
                     }
+
                     while (temp.Count > 0)
                     {
                         _signalPhaseQueue.Enqueue(temp.Dequeue());
@@ -1252,11 +1307,13 @@ namespace TatehamaATS_v1.OnboardDevice
                     currentSignal = TcData.signalDataList.FirstOrDefault(s => s.Name == signalName);
                 }
 
-                if (currentSignal != null && SignalPhasePriority.TryGetValue(NormalizeSignalPhase(phase), out newPriority) && SignalPhasePriority.TryGetValue(NormalizeSignalPhase(currentSignal.phase), out prevPriority))
+                if (currentSignal != null &&
+                    SignalPhasePriority.TryGetValue(NormalizeSignalPhase(phase), out newPriority) &&
+                    SignalPhasePriority.TryGetValue(NormalizeSignalPhase(currentSignal.phase), out prevPriority))
                 {
                     relation = newPriority < prevPriority ? "Lower" :
-                                newPriority > prevPriority ? "Upper" :
-                                "Same";
+                        newPriority > prevPriority ? "Upper" :
+                        "Same";
                     //Debug.WriteLine($"[SetSignalPhase] PriorityCheck {signalName}: current={currentSignal.phase}({prevPriority}), new={phase}({newPriority}) => {relation}");
                 }
                 else
@@ -1278,7 +1335,8 @@ namespace TatehamaATS_v1.OnboardDevice
                     if (diffMs < history.BackoffMs)
                     {
                         // バックオフ期間中の Upper/Same 要求は、常にバックオフを増加させてドロップ（指数バックオフ）
-                        var nextBackoff = (int)Math.Min(history.BackoffMs * SignalCommandBackoffGrowFactor, SignalCommandMaxBackoffMs);
+                        var nextBackoff = (int)Math.Min(history.BackoffMs * SignalCommandBackoffGrowFactor,
+                            SignalCommandMaxBackoffMs);
                         //Debug.WriteLine($"[SetSignalPhase] Drop {signalName} ({phase}) by backoff. relation={relation}, diff={diffMs}ms, backoff {history.BackoffMs}ms -> {nextBackoff}ms");
                         history.BackoffMs = nextBackoff;
                         return;
@@ -1291,14 +1349,16 @@ namespace TatehamaATS_v1.OnboardDevice
                     {
                         if (history.LastWasInWindow)
                         {
-                            var grown = (int)Math.Min(history.BackoffMs * SignalCommandBackoffGrowFactor, SignalCommandMaxBackoffMs);
+                            var grown = (int)Math.Min(history.BackoffMs * SignalCommandBackoffGrowFactor,
+                                SignalCommandMaxBackoffMs);
                             //Debug.WriteLine($"[SetSignalPhase] Grow backoff for {signalName} after first cooldown crossing: {history.BackoffMs}ms -> {grown}ms, relation={relation}, diff={diffMs}ms");
                             history.BackoffMs = grown;
                         }
                         else
                         {
                             // 緩やかにベース間隔へ近づける（下限は SignalCommandBaseIntervalMs）
-                            var decayed = (int)Math.Max(SignalCommandBaseIntervalMs, history.BackoffMs * SignalCommandBackoffDecayFactor);
+                            var decayed = (int)Math.Max(SignalCommandBaseIntervalMs,
+                                history.BackoffMs * SignalCommandBackoffDecayFactor);
                             //Debug.WriteLine($"[SetSignalPhase] Decay backoff for {signalName} from {history.BackoffMs}ms to {decayed}ms after cooldown. relation={relation}, diff={diffMs}ms");
                             history.BackoffMs = decayed;
                         }
@@ -1384,6 +1444,7 @@ namespace TatehamaATS_v1.OnboardDevice
                                 {
                                     //Debug.WriteLine($"[ProcessQueue] Defer (over limit): {cmd.SignalName}");
                                 }
+
                                 remaining.Enqueue(cmd);
                                 continue;
                             }
@@ -1432,7 +1493,8 @@ namespace TatehamaATS_v1.OnboardDevice
                             await _routeSignalLock.WaitAsync();
                             try
                             {
-                                await SendSingleCommand("SetSignalPhase", new[] { cmd.SignalName, cmd.Phase.ToString() });
+                                await SendSingleCommand("SetSignalPhase",
+                                    new[] { cmd.SignalName, cmd.Phase.ToString() });
                             }
                             finally
                             {
@@ -1487,10 +1549,11 @@ namespace TatehamaATS_v1.OnboardDevice
             public int BackoffMs { get; set; }
             public DateTime LastAttemptTime { get; set; }
             public Phase? LastPhase { get; set; }
+
             public DateTime CreatedAt { get; set; }
+
             // 直前評価時に diffMs < BackoffMs だったかどうか
             public bool LastWasInWindow { get; set; }
         }
-
     }
 }
