@@ -456,7 +456,7 @@ namespace TatehamaATS_v1.OnboardDevice
             }
             var targetSignals = signalDatas
                 .Where(s => NextSignalNameSet.Contains(s.Name))
-                .ToDictionary(s => s.Name, s => NormalizeSignalPhase(s.phase));
+                .ToDictionary(s => s.Name, s => s.phase);
             foreach (var signal in targetSignals)
             {
                 await SetSignalPhase(signal.Key, signal.Value);
