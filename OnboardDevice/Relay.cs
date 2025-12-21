@@ -490,19 +490,9 @@ namespace TatehamaATS_v1.OnboardDevice
                 .Where(kv => !nowSignalPhaseDict.TryGetValue(kv.Key, out var existingPhase) || existingPhase != kv.Value)
                 .ToList();
 
-            var removedSignals = nowSignalPhaseDict
-                .Where(kv => !newSignalPhaseDict.ContainsKey(kv.Key))
-                .Select(kv => kv.Key)
-                .ToList();
-
             foreach (var signal in addedSignals)
             {
                 SetSignalPhase(signal.Key, signal.Value);
-            }
-
-            foreach (var signalName in removedSignals)
-            {
-                SetSignalPhase(signalName, Phase.R);
             }
         }
 
