@@ -464,7 +464,7 @@ namespace TatehamaATS_v1.OnboardDevice
             await _routeSignalLock.WaitAsync();
             try
             {
-                SignalSetCore(signalDatas);
+                await SignalSetCore(signalDatas);
             }
             finally
             {
@@ -472,28 +472,41 @@ namespace TatehamaATS_v1.OnboardDevice
             }
         }
 
-        private void SignalSetCore(List<SignalData>? signalDatas)
+        private async Task SignalSetCore(List<SignalData>? signalDatas)
         {
             var newSignalPhaseDict = (signalDatas ?? Enumerable.Empty<SignalData>())
                 .ToDictionary(s => s.Name, s => NormalizeSignalPhase(s.phase));
 
+            var nextSignals = (signalDatas ?? Enumerable.Empty<SignalData>())
+                .Where(s => NextSignalNameSet.Contains(s.Name))
+                .ToDictionary(s => s.Name, s =>s.phase);
+
+            // 近い信号は即時送信とする
+            foreach (var kv in nextSignals)
+            {
+                await SendSingleCommand("SetSignalPhase", [kv.Key, kv.Value.ToString()]);
+                // Todo: キューから、近い信号はクリアする(キュー処理上で再送されることを防ぐ)
+            }
+
             Dictionary<string, Phase> nowSignalPhaseDict;
             lock (TcData)
             {
-                var currentSignals = TcData.signalDataList ?? new List<SignalData>();
+                var currentSignals = TcData.signalDataList ?? [];
                 nowSignalPhaseDict = currentSignals.ToDictionary(s => s.Name, s => NormalizeSignalPhase(s.phase));
             }
 
             foreach (var kv in nowSignalPhaseDict)
             {
-                if (!_signalPhaseHistory.ContainsKey(kv.Key))
+                if (!_signalPhaseHistory.ContainsKey(kv.Key) && !nextSignals.ContainsKey(kv.Key))
                 {
                     SetSignalPhase(kv.Key, kv.Value);
                 }
             }
 
             var addedSignals = newSignalPhaseDict
-                .Where(kv => !nowSignalPhaseDict.TryGetValue(kv.Key, out var existingPhase) || existingPhase != kv.Value)
+                .Where(kv =>
+                    !nextSignals.ContainsKey(kv.Key) &&
+                    (!nowSignalPhaseDict.TryGetValue(kv.Key, out var existingPhase) || existingPhase != kv.Value))
                 .ToList();
 
             foreach (var signal in addedSignals)
