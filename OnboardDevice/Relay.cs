@@ -528,6 +528,7 @@ namespace TatehamaATS_v1.OnboardDevice
             // 近い信号は即時送信とする
             foreach (var kv in nextSignals)
             {
+                Debug.WriteLine($"☆信号名：{kv.Key}／現示：{kv.Value.ToString()}");
                 await SendSingleCommand("SetSignalPhase", [kv.Key, kv.Value.ToString()]);
             }
 

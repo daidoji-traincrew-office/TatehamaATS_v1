@@ -591,6 +591,7 @@ namespace TatehamaATS_v1.Network
                     SendData.CarStates = TcData.myTrainData.CarStates;
                 }
 
+                TrainCrewInput.GetTrainState();
                 SendData.VisibleSignalNames = TrainCrewInput.signals != null
                     ? TrainCrewInput.signals.Select(s => s.name).ToList()
                     : [];
