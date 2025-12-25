@@ -127,10 +127,7 @@
   <data name="Null" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Null.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ATS_LED2" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\ATSDisplay\ATS_LED2.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="ATS_LED" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>ATS_LED.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>..\Resources\ATS_LED.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

@@ -76,6 +76,7 @@ namespace TatehamaATS_v1
                         // 通常テスト
                         ATSLEDTest = 1;
                     }
+                    ATSLEDTest = 3;
                 }
             }
         }
@@ -177,6 +178,25 @@ namespace TatehamaATS_v1
                     {
                         ledWindow.DisplayImage(1, 379);
                     }
+                    return;
+                }
+                else
+                {
+                    TestStart = DateTime.MinValue;
+                    ATSLEDTest = 0;
+                }
+            }
+            if (ATSLEDTest == 3)
+            {
+                var deltaT = DateTime.Now - TestStart;
+
+                var LED = deltaT.Seconds % 3 + 27;
+                var Place = deltaT.Seconds / 3 % 3 + 1;
+                if (deltaT < TimeSpan.FromSeconds(6))
+                {
+                    ledWindow.DisplayImage(1, 329);
+                    ledWindow.DisplayImage(2, 330);
+                    ledWindow.DisplayImage(3, 331);
                     return;
                 }
                 else

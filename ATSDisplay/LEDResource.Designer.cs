@@ -83,16 +83,6 @@ namespace TatehamaATS_v1.ATSDisplay {
         /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
-        internal static System.Drawing.Bitmap ATS_LED2 {
-            get {
-                object obj = ResourceManager.GetObject("ATS_LED2", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
-        /// </summary>
         internal static System.Drawing.Bitmap LED_Waku {
             get {
                 object obj = ResourceManager.GetObject("LED_Waku", resourceCulture);
