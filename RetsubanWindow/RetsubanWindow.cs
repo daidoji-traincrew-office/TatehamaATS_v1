@@ -48,6 +48,7 @@ namespace TatehamaATS_v1.RetsubanWindow
         /// 設定情報変更
         /// </summary>
         internal event Action<string> SetDiaNameAction;
+        internal event Action<TimeSpan> SetShiftTime;
 
         internal RetsubanWindow(StopPassManager stopPassManager)
         {
@@ -56,15 +57,22 @@ namespace TatehamaATS_v1.RetsubanWindow
             TopMost = true;
 
             retsubanLogic = new RetsubanLogic(Retsuban_Head, new PictureBox[] { Retsuban_4, Retsuban_3, Retsuban_2, Retsuban_1 }, Retsuban_Tail, Car_2, Car_1);
-            retsubanLogic.SetDiaNameAction += OnSetDiaName;
             timeLogic = new TimeLogic(Time_h2, Time_h1, Time_m2, Time_m1, Time_s2, Time_s1);
             LCDLogic = new LCDLogic(LCD) { StopPassManager = stopPassManager };
             retsubanLogic.SetCarAction += LCDLogic.SetCar;
+
+            timeLogic.SetShiftTime += OnSetShiftTime;
         }
+
         private void OnSetDiaName(string retsuban)
         {
             SetDiaNameAction?.Invoke(retsuban); // 外部への伝播
             LCDLogic?.SetRetsuban(retsuban);     // LCDLogicへの伝播
+        }
+
+        private void OnSetShiftTime(TimeSpan shiftTime)
+        {
+            SetShiftTime?.Invoke(shiftTime);
         }
 
         private void Loaded(object sender, EventArgs e)

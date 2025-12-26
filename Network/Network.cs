@@ -163,7 +163,7 @@ namespace TatehamaATS_v1.Network
                 {
                     if (!connected)
                     {
-                        AddExceptionAction.Invoke(new NetworkConnectException(7, "未接続"));
+                        AddExceptionAction.Invoke(new NetworkNonConnectException(7, "未接続"));
                         continue;
                     }
 

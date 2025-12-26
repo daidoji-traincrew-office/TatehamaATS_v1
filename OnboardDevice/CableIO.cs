@@ -48,11 +48,6 @@ namespace TatehamaATS_v1.OnboardDevice
         private RetsubanWindow.RetsubanWindow RetsubanWindow;
 
         /// <summary>
-        /// ゲーム内時間
-        /// </summary>
-        static TimeSpan TC_Time;
-
-        /// <summary>
         /// ATS電源状態
         /// </summary>
         bool ATSPowerState;
@@ -480,6 +475,11 @@ namespace TatehamaATS_v1.OnboardDevice
         internal void IsMaybeWarpIgnore()
         {
             Network.IsMaybeWarpIgnoreSet();
+        }
+
+        internal void SetTime(TimeSpan shiftTime)
+        {
+            Relay.SetTime(shiftTime.Hours);
         }
     }
 }

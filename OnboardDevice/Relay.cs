@@ -147,7 +147,7 @@ namespace TatehamaATS_v1.OnboardDevice
         /// <param name="requestValues"></param>
         /// <returns></returns>
         private static bool IsValidCommand(string requestValues) =>
-            new[] { "DataRequest", "SetEmergencyLight", "SetSignalPhase", "mode_req", "SetRoute", "DeleteRoute", "DeleteRoute2" }.Contains(requestValues);
+            new[] { "DataRequest", "SetEmergencyLight", "SetSignalPhase", "mode_req", "SetRoute", "DeleteRoute", "DeleteRoute2", "realtimeoffset" }.Contains(requestValues);
 
         /// <summary>
         /// リクエストの検証
@@ -167,12 +167,14 @@ namespace TatehamaATS_v1.OnboardDevice
                 case "SetSignalPhase":
                     return requestValues.Length == 2 && (requestValues[1] == "None" || requestValues[1] == "R" || requestValues[1] == "YY" || requestValues[1] == "Y" || requestValues[1] == "YG" || requestValues[1] == "G");
                 case "mode_req":
-                    return requestValues.Length == 1 && (requestValues[0] == "hide_other" || requestValues[0] == "show_other" || requestValues[0] == "route_manual" || requestValues[0] == "route_auto");
+                    return requestValues.Length == 1 && (requestValues[0] == "hide_other" || requestValues[0] == "show_other" || requestValues[0] == "route_manual" || requestValues[0] == "route_auto" || requestValues[0] == "realtimemode_on");
                 case "SetRoute":
                     return requestValues.Length == 5;
                 case "DeleteRoute":
                 case "DeleteRoute2":
                     return requestValues.Length == 2;
+                case "realtimeoffset":
+                    return requestValues.Length == 1;
                 default:
                     return false;
             }
@@ -199,6 +201,7 @@ namespace TatehamaATS_v1.OnboardDevice
             {
                 SetRouteMode(true);
                 SetOther(true);
+                SetTimeMode();
             }
             // TrainCrewRoutesにTcData.interlockDataListから展開した進路情報を格納する
             TrainCrewRoutes = ConvertToRoutes(TcData.interlockDataList);
@@ -253,7 +256,7 @@ namespace TatehamaATS_v1.OnboardDevice
                     status = ConnectionState.Connecting;
                     ConnectionStatusChanged?.Invoke(status);
                     // 接続処理
-                    await ConnectWebSocket();
+                    await SendAndReceiveDataRequest();
                     break;
                 }
                 catch (ATSCommonException ex)
@@ -272,10 +275,46 @@ namespace TatehamaATS_v1.OnboardDevice
         }
 
         /// <summary>
-        /// WebSocket接続処理
+        /// Websocketの接続処理
         /// </summary>
         /// <returns></returns>
-        private async Task ConnectWebSocket()
+        private async Task ConnectWebSocketAsync()
+        {
+            const int maxRetry = 5;
+            if (_webSocket.State == WebSocketState.Open)
+            {
+                return;
+            }
+
+            for (var i = 1; i <= maxRetry; i++)
+            {
+                try
+                {
+                    await _webSocket.ConnectAsync(new(_connectUri), CancellationToken.None);
+                }
+                catch (InvalidOperationException)
+                {
+                    if (i == maxRetry)
+                    {
+                        throw;
+                    }
+
+                    _webSocket.Dispose();
+                    _webSocket = new();
+                    continue;
+                }
+
+                status = ConnectionState.Connected;
+                ConnectionStatusChanged?.Invoke(status);
+                break;
+            }
+        }
+
+        /// <summary>
+        /// TraincrewにDataRequestの送信を行い、データの受信をする。 
+        /// </summary>
+        /// <returns></returns>
+        private async Task SendAndReceiveDataRequest()
         {
             // 送信処理
             await SendMessages();
@@ -290,13 +329,7 @@ namespace TatehamaATS_v1.OnboardDevice
         {
             try
             {
-                if (_webSocket.State != WebSocketState.Open)
-                {
-                    await _webSocket.ConnectAsync(new Uri(_connectUri), CancellationToken.None);
-                    status = ConnectionState.Connected;
-                    ConnectionStatusChanged?.Invoke(status);
-                }
-
+                await ConnectWebSocketAsync();
                 CommandToTrainCrew requestCommand = new CommandToTrainCrew()
                 {
                     command = _command,
@@ -308,7 +341,8 @@ namespace TatehamaATS_v1.OnboardDevice
                 byte[] bytes = _encoding.GetBytes(json);
 
                 // WebSocket送信
-                await _webSocket.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Text, true, CancellationToken.None);
+                await _webSocket.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Text, true,
+                    CancellationToken.None);
             }
             catch (Exception ex)
             {
@@ -322,25 +356,22 @@ namespace TatehamaATS_v1.OnboardDevice
         {
             try
             {
-                if (_webSocket.State != WebSocketState.Open)
-                {
-                    await _webSocket.ConnectAsync(new Uri(_connectUri), CancellationToken.None);
-                    status = ConnectionState.Connected;
-                    ConnectionStatusChanged?.Invoke(status);
-                }
-
+                await ConnectWebSocketAsync();
                 CommandToTrainCrew requestCommand = new CommandToTrainCrew()
                 {
                     command = command,
                     args = request
                 };
 
+                Debug.WriteLine(requestCommand);
+
                 // JSON形式にシリアライズ
                 string json = JsonConvert.SerializeObject(requestCommand, JsonSerializerSettings);
                 byte[] bytes = _encoding.GetBytes(json);
 
                 // WebSocket送信
-                await _webSocket.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Text, true, CancellationToken.None);
+                await _webSocket.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Text, true,
+                    CancellationToken.None);
             }
             catch (Exception ex)
             {
@@ -356,6 +387,7 @@ namespace TatehamaATS_v1.OnboardDevice
             {
                 _ = SendSingleCommand("SetSignalPhase", new string[] { signalData.Name, signalData.phase.ToString() });
             }
+
             //情報の送られてこなくなった信号機の現示をNoneにする
             var outSignals = SignalDatas
                 .Where(s2 => !signalDatas.Any(s1 => s1.Name == s2.Name))
@@ -364,6 +396,7 @@ namespace TatehamaATS_v1.OnboardDevice
             {
                 _ = SendSingleCommand("SetSignalPhase", new string[] { signalData.Name, Phase.None.ToString() });
             }
+
             SignalDatas = signalDatas;
         }
 
@@ -383,6 +416,11 @@ namespace TatehamaATS_v1.OnboardDevice
         internal void SetRouteMode(bool isManual)
         {
             SendSingleCommand("mode_req", new string[] { isManual ? "route_manual" : "route_auto" });
+        }
+
+        internal void SetTimeMode()
+        {
+            SendSingleCommand("mode_req", new string[] { "realtimemode_on" });
         }
 
         internal void UpdateRoute(List<Route> routes)
@@ -417,6 +455,7 @@ namespace TatehamaATS_v1.OnboardDevice
             {
                 SetRoute(route);
             }
+
             foreach (var route in removedRoutes.ToList())
             {
                 DeleteRoute(route);
@@ -473,6 +512,19 @@ namespace TatehamaATS_v1.OnboardDevice
 
                 Debug.WriteLine($"☆API送信: DeleteRoute2/{route.TcName}");
                 SendSingleCommand("DeleteRoute2", [staName, routeName]);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"{ex.Message}{ex.InnerException}");
+            }
+        }
+
+        internal void SetTime(int shiftTime)
+        {
+            try
+            {
+                Debug.WriteLine($"☆API送信: realtimeoffset/{shiftTime}");
+                SendSingleCommand("realtimeoffset", [$"{shiftTime}"]);
             }
             catch (Exception ex)
             {
@@ -541,7 +593,6 @@ namespace TatehamaATS_v1.OnboardDevice
                     {
                         messageBytes.AddRange(buffer.Take(result.Count));
                     }
-
                 } while (!result.EndOfMessage);
 
                 // データが揃ったら文字列へエンコード
@@ -559,6 +610,7 @@ namespace TatehamaATS_v1.OnboardDevice
                         var e = new RelayOtherInfoAbnormal(5, $"文字化け検知${hasInvalidCharsTimes}回目");
                         AddExceptionAction.Invoke(e);
                     }
+
                     continue;
                 }
                 else
@@ -587,6 +639,7 @@ namespace TatehamaATS_v1.OnboardDevice
                                 // Form関連処理                           
                                 TC_TimeUpdated?.Invoke(TcData.nowTime.ToTimeSpan());
                             }
+
                             // その他処理
                             ProcessingReceiveData();
                         }
@@ -629,6 +682,7 @@ namespace TatehamaATS_v1.OnboardDevice
                         AddExceptionAction.Invoke(e);
                     }
                 }
+
                 _stopwatch.Stop();
                 string s = (_stopwatch.Elapsed.TotalSeconds * 1000).ToString("F2");
             }
@@ -649,6 +703,7 @@ namespace TatehamaATS_v1.OnboardDevice
                 status = ConnectionState.DisConnect;
                 ConnectionStatusChanged?.Invoke(status);
             }
+
             _webSocket.Dispose();
         }
 
@@ -665,6 +720,7 @@ namespace TatehamaATS_v1.OnboardDevice
                     return true;
                 }
             }
+
             return false;
         }
 
