@@ -596,8 +596,6 @@ namespace TatehamaATS_v1.Network
                     ? TrainCrewInput.signals.Select(s => s.name).ToList()
                     : [];
 
-                Debug.WriteLine(String.Join(",", SendData.VisibleSignalNames));
-
                 //単純に代入の皆様
                 SendData.DiaName = OverrideDiaName;
                 SendData.BougoState = IsBougo;

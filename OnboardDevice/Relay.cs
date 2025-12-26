@@ -606,13 +606,13 @@ namespace TatehamaATS_v1.OnboardDevice
 
             if (routes == null)
             {
-                Debug.WriteLine("routes is null. Skipping UpdateRoute.");
+                //Debug.WriteLine("routes is null. Skipping UpdateRoute.");
                 return;
             }
 
             if (TrainCrewRoutes == null)
             {
-                Debug.WriteLine("TrainCrewRoutes is null. Initializing empty list.");
+                //Debug.WriteLine("TrainCrewRoutes is null. Initializing empty list.");
                 TrainCrewRoutes = new List<Route>();
             }
 
@@ -718,7 +718,7 @@ namespace TatehamaATS_v1.OnboardDevice
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"{ex.Message}{ex.InnerException}");
+                //Debug.WriteLine($"{ex.Message}{ex.InnerException}");
             }
         }
 
@@ -749,7 +749,7 @@ namespace TatehamaATS_v1.OnboardDevice
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"{ex.Message}{ex.InnerException}");
+                //Debug.WriteLine($"{ex.Message}{ex.InnerException}");
             }
         }
 
@@ -768,7 +768,7 @@ namespace TatehamaATS_v1.OnboardDevice
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"{ex.Message}{ex.InnerException}");
+                //Debug.WriteLine($"{ex.Message}{ex.InnerException}");
             }
         }
 
@@ -1387,7 +1387,7 @@ namespace TatehamaATS_v1.OnboardDevice
                 // バッチ処理をトリガー（多重起動を防ぐ）
                 if (!_isProcessingSignalQueue)
                 {
-                    Debug.WriteLine("[SetSignalPhase] Starting ProcessSignalPhaseQueueAsync");
+                    //Debug.WriteLine("[SetSignalPhase] Starting ProcessSignalPhaseQueueAsync");
                     _isProcessingSignalQueue = true;
                     _queueProcessingTask = Task.Run(ProcessSignalPhaseQueueAsync);
                 }
@@ -1489,7 +1489,7 @@ namespace TatehamaATS_v1.OnboardDevice
                     {
                         try
                         {
-                            Debug.WriteLine($"☆信号名：{cmd.SignalName}／現示：{cmd.Phase.ToString()}");
+                            //Debug.WriteLine($"☆信号名：{cmd.SignalName}／現示：{cmd.Phase.ToString()}");
                             // 実送信
                             await _routeSignalLock.WaitAsync();
                             try
@@ -1529,7 +1529,7 @@ namespace TatehamaATS_v1.OnboardDevice
             {
                 lock (_signalPhaseQueueLock)
                 {
-                    Debug.WriteLine("[ProcessQueue] Finally: clearing processing flag");
+                    //Debug.WriteLine("[ProcessQueue] Finally: clearing processing flag");
                     _isProcessingSignalQueue = false;
                 }
             }
