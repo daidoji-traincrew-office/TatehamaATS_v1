@@ -278,7 +278,6 @@ namespace TatehamaATS_v1.OnboardDevice
         {
             OverrideDiaName = "9999";
             TrainCrewInput.Init();
-            TrainCrewInput.RequestData(DataRequest.Signal);
             _webSocket = new ClientWebSocket();
         }
 
@@ -290,6 +289,7 @@ namespace TatehamaATS_v1.OnboardDevice
             TrainCrewDataUpdated.Invoke(TcData);
             if (TcData.gameScreen == TrainCrewAPI.GameScreen.Menu)
             {
+                TrainCrewInput.RequestData(DataRequest.Signal);
                 SetRouteMode(true);
                 SetOther(true);
                 SetTimeMode();
