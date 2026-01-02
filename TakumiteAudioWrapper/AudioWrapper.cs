@@ -48,7 +48,7 @@ namespace TakumiteAudioWrapper
                 {
                     Volume = _relativeVolume * Math.Clamp(volume, 0.0f, 1.0f)
                 };
-                _wavePlayer = new WasapiOut();
+                _wavePlayer = new WaveOutEvent();
                 _wavePlayer.Init(_audioFile);
                 _wavePlayer.Play();
 
@@ -77,7 +77,7 @@ namespace TakumiteAudioWrapper
                         Volume = _relativeVolume * Math.Clamp(volume, 0.0f, 1.0f)
                     };
 
-                    _wavePlayer = new WasapiOut();
+                    _wavePlayer = new WaveOutEvent();
                     _wavePlayer.Init(_loopStream);
                     _wavePlayer.Play();
 
