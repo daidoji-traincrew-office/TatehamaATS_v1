@@ -48,8 +48,20 @@ namespace TakumiteAudioWrapper
                 {
                     Volume = _relativeVolume * Math.Clamp(volume, 0.0f, 1.0f)
                 };
-                _wavePlayer = new WaveOutEvent();
-                _wavePlayer.Init(_audioFile);
+                try
+                {
+                    _wavePlayer = new WaveOutEvent();
+                    _wavePlayer.Init(_audioFile);
+                }
+                catch (NAudio.MmException ex)
+                {
+                    Debug.WriteLine("WaveoutEvent Error, Fallback to WasapiEvent");
+                    Debug.WriteLine(ex.Message);
+                    Debug.WriteLine(ex.StackTrace);
+                    _wavePlayer = new WasapiOut();
+                    _wavePlayer.Init(_audioFile);
+                }
+
                 _wavePlayer.Play();
 
                 _isLooping = false;
@@ -76,9 +88,20 @@ namespace TakumiteAudioWrapper
                     {
                         Volume = _relativeVolume * Math.Clamp(volume, 0.0f, 1.0f)
                     };
+                    try
+                    {
+                        _wavePlayer = new WaveOutEvent();
+                        _wavePlayer.Init(_loopStream);
+                    }
+                    catch (NAudio.MmException ex)
+                    {
+                        Debug.WriteLine("WaveoutEvent Error, Fallback to WasapiEvent");
+                        Debug.WriteLine(ex.Message);
+                        Debug.WriteLine(ex.StackTrace);
+                        _wavePlayer = new WasapiOut();
+                        _wavePlayer.Init(_loopStream);
+                    }
 
-                    _wavePlayer = new WaveOutEvent();
-                    _wavePlayer.Init(_loopStream);
                     _wavePlayer.Play();
 
                     _isLooping = true;
