@@ -85,10 +85,28 @@ namespace TakumiteAudioWrapper
                 }
                 catch (Exception ex)
                 {
+                    DiagnoseAudioDevices();
                     Debug.WriteLine($"PlayLoop error: {ex.Message}");
                     Dispose();
                     throw;
                 }
+            }
+        }
+
+        public static void DiagnoseAudioDevices()
+        {
+            Debug.WriteLine($"=== オーディオ診断 ===");
+            Debug.WriteLine($"WaveOut デバイス数: {WaveOut.DeviceCount}");
+
+            for (var i = 0; i < WaveOut.DeviceCount; i++)
+            {
+                var cap = WaveOut.GetCapabilities(i);
+                Debug.WriteLine($"  [{i}] {cap.ProductName}");
+            }
+
+            if (WaveOut.DeviceCount == 0)
+            {
+                Debug.WriteLine("⚠ 有効なオーディオ出力デバイスがありません");
             }
         }
 
@@ -101,14 +119,42 @@ namespace TakumiteAudioWrapper
 
             lock (_lockObj)
             {
-                try { _wavePlayer?.Stop(); } catch { }
-                try { _wavePlayer?.Dispose(); } catch { }
+                try
+                {
+                    _wavePlayer?.Stop();
+                }
+                catch
+                {
+                }
+
+                try
+                {
+                    _wavePlayer?.Dispose();
+                }
+                catch
+                {
+                }
+
                 _wavePlayer = null;
 
-                try { _loopStream?.Dispose(); } catch { }
+                try
+                {
+                    _loopStream?.Dispose();
+                }
+                catch
+                {
+                }
+
                 _loopStream = null;
 
-                try { _audioFile?.Dispose(); } catch { }
+                try
+                {
+                    _audioFile?.Dispose();
+                }
+                catch
+                {
+                }
+
                 _audioFile = null;
 
                 _isLooping = false;
