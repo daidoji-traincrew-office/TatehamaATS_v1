@@ -40,7 +40,6 @@ namespace TakumiteAudioWrapper
         /// <param name="waveProvider">音声ストリーム</param>
         private void InitializeWavePlayer(IWaveProvider waveProvider)
         {
-            /*
             try
             {
                 _wavePlayer = new WaveOutEvent
@@ -50,13 +49,10 @@ namespace TakumiteAudioWrapper
                 _wavePlayer.Init(waveProvider);
             }
             catch (NAudio.MmException ex)
-            */
             {
-                /*
                 Debug.WriteLine("WaveoutEvent Error, Fallback to WasapiEvent");
                 Debug.WriteLine(ex.Message);
                 Debug.WriteLine(ex.StackTrace);
-                */
 
                 // WasapiOutでデバイスを指定する場合
                 if (_deviceNumber >= 0 && _deviceNumber < WaveOut.DeviceCount)
