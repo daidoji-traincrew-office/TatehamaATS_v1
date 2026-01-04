@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using NAudio.CoreAudioApi;
 using NAudio.Wave;
 
 namespace TakumiteAudioWrapper
@@ -17,6 +18,7 @@ namespace TakumiteAudioWrapper
         private LoopStream _loopStream;
         private bool _isLooping;
         private bool _disposed;
+        private int _deviceNumber = -1; // -1はデフォルトデバイス
 
         /// <summary>
         /// 音声ラッパーを初期化
@@ -30,6 +32,61 @@ namespace TakumiteAudioWrapper
             _lockObj = new object();
             _isLooping = false;
             _disposed = false;
+        }
+
+        /// <summary>
+        /// WavePlayerを初期化(WaveOutEventで失敗した場合はWasapiOutにフォールバック)
+        /// </summary>
+        /// <param name="waveProvider">音声ストリーム</param>
+        private void InitializeWavePlayer(IWaveProvider waveProvider)
+        {
+            try
+            {
+                _wavePlayer = new WaveOutEvent
+                {
+                    DeviceNumber = _deviceNumber
+                };
+                _wavePlayer.Init(waveProvider);
+            }
+            catch (NAudio.MmException ex)
+            {
+                Debug.WriteLine("WaveoutEvent Error, Fallback to WasapiEvent");
+                Debug.WriteLine(ex.Message);
+                Debug.WriteLine(ex.StackTrace);
+
+                // WasapiOutでデバイスを指定する場合
+                if (_deviceNumber >= 0 && _deviceNumber < WaveOut.DeviceCount)
+                {
+                    var deviceInfo = WaveOut.GetCapabilities(_deviceNumber);
+                    // WasapiOutでデバイス名からデバイスを取得
+                    using var enumerator = new MMDeviceEnumerator();
+                    var wasapiDevices = enumerator.EnumerateAudioEndPoints(
+                        DataFlow.Render,
+                        DeviceState.Active);
+
+                    MMDevice? targetDevice = null;
+                    foreach (var device in wasapiDevices)
+                    {
+                        if (!device.FriendlyName.Contains(deviceInfo.ProductName))
+                        {
+                            continue;
+                        }
+
+                        targetDevice = device;
+                        break;
+                    }
+
+                    _wavePlayer = targetDevice != null
+                        ? new WasapiOut(targetDevice, AudioClientShareMode.Shared, false, 100)
+                        : new(AudioClientShareMode.Shared, false, 100);
+                }
+                else
+                {
+                    _wavePlayer = new WasapiOut(AudioClientShareMode.Shared, false, 100);
+                }
+
+                _wavePlayer.Init(waveProvider);
+            }
         }
 
         /// <summary>
@@ -48,8 +105,8 @@ namespace TakumiteAudioWrapper
                 {
                     Volume = _relativeVolume * Math.Clamp(volume, 0.0f, 1.0f)
                 };
-                _wavePlayer = new WaveOutEvent();
-                _wavePlayer.Init(_audioFile);
+
+                InitializeWavePlayer(_audioFile);
                 _wavePlayer.Play();
 
                 _isLooping = false;
@@ -77,8 +134,7 @@ namespace TakumiteAudioWrapper
                         Volume = _relativeVolume * Math.Clamp(volume, 0.0f, 1.0f)
                     };
 
-                    _wavePlayer = new WaveOutEvent();
-                    _wavePlayer.Init(_loopStream);
+                    InitializeWavePlayer(_loopStream);
                     _wavePlayer.Play();
 
                     _isLooping = true;
@@ -171,24 +227,22 @@ namespace TakumiteAudioWrapper
 
             lock (_lockObj)
             {
+                _deviceNumber = deviceNumber;
+
                 // デバイスを変更するために再生を停止して再度初期化
                 if (_wavePlayer != null && _wavePlayer.PlaybackState == PlaybackState.Playing)
                 {
                     var volume = _isLooping ? _loopStream?.Volume ?? 0.0f : _audioFile?.Volume ?? 0.0f;
                     Stop();
 
-                    _wavePlayer = new WaveOutEvent
-                    {
-                        DeviceNumber = deviceNumber
-                    };
-
                     if (_isLooping)
                     {
-                        _loopStream = new LoopStream(new AudioFileReader(_filePath))
+                        _audioFile = new AudioFileReader(_filePath);
+                        _loopStream = new LoopStream(_audioFile)
                         {
                             Volume = volume
                         };
-                        _wavePlayer.Init(_loopStream);
+                        InitializeWavePlayer(_loopStream);
                     }
                     else
                     {
@@ -196,7 +250,7 @@ namespace TakumiteAudioWrapper
                         {
                             Volume = volume
                         };
-                        _wavePlayer.Init(_audioFile);
+                        InitializeWavePlayer(_audioFile);
                     }
 
                     _wavePlayer.Play();
