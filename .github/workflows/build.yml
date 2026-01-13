@@ -164,6 +164,7 @@ jobs:
           make_latest: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
           files: ${{ steps.get_files.outputs.FILES }}
           prerelease: ${{ github.event_name != 'push' || github.ref != 'refs/heads/master' }}
+          target_commitish: ${{ github.sha }}
   notify_discord:
     runs-on: ubuntu-latest
     name: "Notify Discord"
