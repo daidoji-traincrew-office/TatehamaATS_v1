@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Xml.Linq;
 using TatehamaATS_v1.Exceptions;
+using TatehamaATS_v1.Utils;
 using TrainCrewAPI;
 
 namespace TatehamaATS_v1.OnboardDevice
@@ -86,13 +87,13 @@ namespace TatehamaATS_v1.OnboardDevice
                 {
                     //通信途絶確認
                     var NowGame = TcData.gameScreen == GameScreen.MainGame || TcData.gameScreen == GameScreen.MainGame_Pause;
-                    if (DateTime.Now.TimeOfDay - RelayUpdatedTime > TimeSpan.FromSeconds(2) && NowGame)
+                    if (DateTimeUtils.GetNowJst().TimeOfDay - RelayUpdatedTime > TimeSpan.FromSeconds(2) && NowGame)
                     {
                         var e = new RelayIOConnectionException(3, "継電部通信途絶2秒異常");
                         RelayState = false;
                         AddExceptionAction.Invoke(e);
                     }
-                    if (DateTime.Now.TimeOfDay - NetworkUpdatedTime > TimeSpan.FromSeconds(5))
+                    if (DateTimeUtils.GetNowJst().TimeOfDay - NetworkUpdatedTime > TimeSpan.FromSeconds(5))
                     {
                         var e = new NetworkIOConnectionException(3, "地上装置通信途絶2秒異常");
                         NetworkState = false;
@@ -139,7 +140,7 @@ namespace TatehamaATS_v1.OnboardDevice
             Debug.WriteLine($"故障追加");
             Debug.WriteLine($"{exception.Message} {exception.InnerException}");
             exceptions[exception.ToCode()] = exception;
-            exceptionsTime[exception.ToCode()] = DateTime.Now;
+            exceptionsTime[exception.ToCode()] = DateTimeUtils.GetNowJst();
 
             // ログ出力
             WriteLog(exception);
@@ -152,7 +153,7 @@ namespace TatehamaATS_v1.OnboardDevice
         internal void AddException(Exception exception)
         {
             exceptions.Add("39F", new CsharpException(3, exception.ToString()));
-            exceptionsTime.Add("39F", DateTime.Now);
+            exceptionsTime.Add("39F", DateTimeUtils.GetNowJst());
 
             // ログ出力
             WriteLog(new CsharpException(3, exception.ToString()));
@@ -170,7 +171,7 @@ namespace TatehamaATS_v1.OnboardDevice
                 if (File.Exists(LogFilePath))
                 {
                     var lastWrite = File.GetLastWriteTime(LogFilePath);
-                    if ((DateTime.Now - lastWrite).TotalHours >= 12)
+                    if ((DateTimeUtils.GetNowJst() - lastWrite).TotalHours >= 12)
                     {
                         File.WriteAllText(LogFilePath, string.Empty, Encoding.UTF8);
                     }
@@ -183,7 +184,7 @@ namespace TatehamaATS_v1.OnboardDevice
                     case "7EC":
                         return;
                     default:
-                        var log = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] " +
+                        var log = $"[{DateTimeUtils.GetNowJst():yyyy-MM-dd HH:mm:ss.fff}] " +
                                   $"Code:{exception.ToCode()} " +
                                   $"Message:{exception.Message} \n" +
                                   $"Inner:{exception.InnerException}";
@@ -211,7 +212,7 @@ namespace TatehamaATS_v1.OnboardDevice
             foreach (var ex in exceptions.ToList())
             {
                 string key = ex.Key;
-                TimeSpan time = DateTime.Now - exceptionsTime[key];
+                TimeSpan time = DateTimeUtils.GetNowJst() - exceptionsTime[key];
 
                 switch (ex.Value.ResetCondition())
                 {
@@ -265,13 +266,13 @@ namespace TatehamaATS_v1.OnboardDevice
         internal void RelayUpdate(TrainCrewStateData tcData)
         {
             TcData = tcData;
-            RelayUpdatedTime = DateTime.Now.TimeOfDay;
+            RelayUpdatedTime = DateTimeUtils.GetNowJst().TimeOfDay;
         }
 
         internal void NetworkUpdate()
         {
             NetworkState = true;
-            NetworkUpdatedTime = DateTime.Now.TimeOfDay;
+            NetworkUpdatedTime = DateTimeUtils.GetNowJst().TimeOfDay;
         }
     }
 }

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using TakumiteAudioWrapper;
 using TatehamaATS_v1.Exceptions;
 using TatehamaATS_v1.OnboardDevice;
+using TatehamaATS_v1.Utils;
 using TrainCrewAPI;
 
 namespace TatehamaATS_v1.RetsubanWindow
@@ -48,7 +49,7 @@ namespace TatehamaATS_v1.RetsubanWindow
             Time_s1 = time_s1;
 
             // 初期化
-            var tst_time = DateTime.Now + ShiftTime;
+            var tst_time = DateTimeUtils.GetNowJst() + ShiftTime;
             BeforeTimeData = new TimeData()
             {
                 hour = tst_time.Hour,
@@ -80,7 +81,7 @@ namespace TatehamaATS_v1.RetsubanWindow
         public void ClockTimer_Tick()
         {
             ShiftTime = TimeSpan.FromHours(Relay.shiftTime);
-            var tst_time = DateTime.Now + ShiftTime;
+            var tst_time = DateTimeUtils.GetNowJst() + ShiftTime;
             TimeData timeData = new TimeData()
             {
                 hour = tst_time.Hour < 4 ? tst_time.Hour + 24 : tst_time.Hour,
@@ -89,7 +90,7 @@ namespace TatehamaATS_v1.RetsubanWindow
             };
             if (nowSetting)
             {
-                TimeDrawing(timeData, DateTime.Now.Millisecond < 500);
+                TimeDrawing(timeData, DateTimeUtils.GetNowJst().Millisecond < 500);
                 BeforeTimeData = timeData;
             }
             else
@@ -164,7 +165,7 @@ namespace TatehamaATS_v1.RetsubanWindow
                     {
                         var newHour = Int32.Parse(NewHour);
                         newHour = newHour + 24;
-                        ShiftTime = TimeSpan.FromHours(newHour - DateTime.Now.Hour);
+                        ShiftTime = TimeSpan.FromHours(newHour - DateTimeUtils.GetNowJst().Hour);
                         SetShiftTime.Invoke(ShiftTime);
                         nowSetting = false;
                         beep2.PlayOnce(1.0f);
@@ -192,7 +193,7 @@ namespace TatehamaATS_v1.RetsubanWindow
                     nowSetting = true;
                     NewHour = "";
                     beep1.PlayOnce(1.0f);
-                    TimeDrawing(BeforeTimeData, DateTime.Now.Millisecond < 500);
+                    TimeDrawing(BeforeTimeData, DateTimeUtils.GetNowJst().Millisecond < 500);
                     return;
                 case "RetsuSet":
                 case "CarSet":

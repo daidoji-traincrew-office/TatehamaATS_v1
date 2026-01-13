@@ -5,6 +5,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using OpenIddict.Client;
 using TatehamaATS_v1.Network;
+using TatehamaATS_v1.Utils;
 
 namespace TatehamaATS_v1
 {
@@ -97,12 +98,12 @@ namespace TatehamaATS_v1
             var crashLogPath = Path.Combine(Directory.GetCurrentDirectory(), "crashlogs");
             Directory.CreateDirectory(crashLogPath);
 
-            var fileName = $"crash_{DateTime.Now:yyyyMMdd_HHmmss}.log";
+            var fileName = $"crash_{DateTimeUtils.GetNowJst():yyyyMMdd_HHmmss}.log";
             var fullPath = Path.Combine(crashLogPath, fileName);
 
             var logContent = $"""
                                ==================== Crash Log ====================
-                               Time: {DateTime.Now:yyyy-MM-dd HH:mm:ss}
+                               Time: {DateTimeUtils.GetNowJst():yyyy-MM-dd HH:mm:ss}
                                Exception Type: {ex.GetType().FullName}
 
                                Message:

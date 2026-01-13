@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using TatehamaATS_v1.ATSDisplay;
 using TatehamaATS_v1.Exceptions;
+using TatehamaATS_v1.Utils;
 
 namespace TatehamaATS_v1
 {
@@ -71,7 +72,7 @@ namespace TatehamaATS_v1
             // どのテストを行うかは時間末尾で制御し疑似乱数とする。
             if (TestStart == DateTime.MinValue)
             {
-                TestStart = DateTime.Now;
+                TestStart = DateTimeUtils.GetNowJst();
                 if (ATSLEDTest == 0)
                 {
                     var millisecond = TestStart.Millisecond;
@@ -151,7 +152,7 @@ namespace TatehamaATS_v1
             //Debug.WriteLine(TrainState.ATSDisplay);
             if (ATSLEDTest == 1)
             {
-                var deltaT = DateTime.Now - TestStart;
+                var deltaT = DateTimeUtils.GetNowJst() - TestStart;
 
                 var LED = deltaT.Seconds % 3 + 360;
                 var Place = deltaT.Seconds / 3 % 3 + 1;
@@ -171,7 +172,7 @@ namespace TatehamaATS_v1
             }
             if (ATSLEDTest == 2)
             {
-                var deltaT = DateTime.Now - TestStart;
+                var deltaT = DateTimeUtils.GetNowJst() - TestStart;
 
                 var LED = deltaT.Seconds % 3 + 27;
                 var Place = deltaT.Seconds / 3 % 3 + 1;
@@ -232,14 +233,14 @@ namespace TatehamaATS_v1
                     }
                     if (L3List.Count == 0)
                     {
-                        L3Start = DateTime.Now.TimeOfDay;
+                        L3Start = DateTimeUtils.GetNowJst().TimeOfDay;
                         ledWindow.DisplayImage(1, ConvertToLEDNumber(overrideText != null ? overrideText : display.L1));
                         ledWindow.DisplayImage(2, ConvertToLEDNumber(display.L2));
                         ledWindow.DisplayImage(3, 0);
                     }
                     else
                     {
-                        var NowTime = DateTime.Now.TimeOfDay;
+                        var NowTime = DateTimeUtils.GetNowJst().TimeOfDay;
 
                         if (L3List.Count == 1)
                         {
@@ -286,7 +287,7 @@ namespace TatehamaATS_v1
                 {
                     List<string> L3List;
                     L3List = ExceptionCodes;
-                    var NowTime = DateTime.Now.TimeOfDay;
+                    var NowTime = DateTimeUtils.GetNowJst().TimeOfDay;
                     if (L3List.Count == 1)
                     {
                         L3Start = NowTime;
@@ -300,7 +301,7 @@ namespace TatehamaATS_v1
                 }
                 else
                 {
-                    L3Start = DateTime.Now.TimeOfDay;
+                    L3Start = DateTimeUtils.GetNowJst().TimeOfDay;
                     ledWindow.DisplayImage(3, 0);
                 }
             }
