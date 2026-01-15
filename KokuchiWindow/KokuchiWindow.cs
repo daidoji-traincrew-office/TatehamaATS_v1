@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using TatehamaATS_v1.ATSDisplay;
 using TatehamaATS_v1.Exceptions;
+using TatehamaATS_v1.Utils;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
 
 namespace TatehamaATS_v1.KokuchiWindow
@@ -405,7 +406,7 @@ namespace TatehamaATS_v1.KokuchiWindow
                     DisplayImageByPos(1, 222);
                     return;
                 }
-                var DeltaTime = (DateTime.Now - KokuchiData.OperatedAt).TotalMilliseconds;
+                var DeltaTime = (DateTimeUtils.GetNowJst() - KokuchiData.OperatedAt).TotalMilliseconds;
 
                 switch (KokuchiData.Type)
                 {
