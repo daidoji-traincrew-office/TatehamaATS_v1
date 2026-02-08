@@ -20,7 +20,7 @@ namespace TatehamaATS_v1.MainWindow
         private bool isLongPressed = false;
 
         private int atsState = 0; // 0: 蓋アリ正常, 1: 蓋アリ開放, 2: 蓋ナシ正常, 3: 蓋ナシ開放
-        private Timer lidTimer; // 0.5秒無操作で蓋が戻る                               
+        private Timer lidTimer; // 0.5秒無操作で蓋が戻る
         private Timer cutLongPressTimer; // 0.3秒長押し判定用
         private bool isLongPressHandled = false; // 長押し処理を1回だけ実行するためのフラグ
 
@@ -269,13 +269,13 @@ namespace TatehamaATS_v1.MainWindow
         {
             longPressTimer.Stop(); // 長押し時間を超えたらタイマーを止める
             isLongPressed = true; // 長押し成功を設定
-            Image_Reset.BackgroundImage = MainResource.ATS_Reset1; // 差し替え画像に変更
+            Image_Reset.Image = MainResource.ATS_Reset1; // 差し替え画像に変更
         }
 
         private void ResetImageTimer_Tick(object sender, EventArgs e)
         {
             resetImageTimer.Stop();
-            Image_Reset.BackgroundImage = MainResource.ATS_Reset0; // 画像を元に戻す
+            Image_Reset.Image = MainResource.ATS_Reset0; // 画像を元に戻す
         }
 
         private void Image_Reset_Click(object sender, EventArgs e)
