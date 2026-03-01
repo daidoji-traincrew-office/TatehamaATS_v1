@@ -82,7 +82,7 @@ jobs:
           namespace ${{ env.NAMESPACE }};
           public static class ServerAddress {
               public const string SignalAddress = "${SERVER_ADDRESS}"; 
-              public const string Version = "${{ env.ZIP_FILE_BASE }}";
+              public const string Version = "${{ needs.calc_version.outputs.VERSION }}";
           }
           EOF
       - name: Setup dotnet 8.0.x
