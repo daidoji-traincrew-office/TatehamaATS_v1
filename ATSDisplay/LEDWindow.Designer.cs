@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LEDWindow));
             L1 = new PictureBox();
             panel1 = new Panel();
             L3 = new PictureBox();
@@ -122,6 +123,7 @@
             Controls.Add(LEDTest);
             Controls.Add(panel1);
             FormBorderStyle = FormBorderStyle.None;
+            Icon = (Icon)resources.GetObject("$this.Icon");
             MaximizeBox = false;
             MinimizeBox = false;
             Name = "LEDWindow";

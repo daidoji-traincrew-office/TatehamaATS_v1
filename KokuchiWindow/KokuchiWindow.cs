@@ -18,7 +18,7 @@ namespace TatehamaATS_v1.KokuchiWindow
     {
         OperationNotificationData KokuchiData;
         private Bitmap sourceImage;
-        public bool ShowLED;
+        public bool ShowLED { get; set; }
 
 
         /// <summary>
