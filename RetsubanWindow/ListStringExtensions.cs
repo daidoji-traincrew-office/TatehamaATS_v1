@@ -22,7 +22,7 @@ namespace TatehamaATS_v1.RetsubanWindow
             // 開始位置を求める
             if (x < 0 || y < 0 || x > 16 || y > 3)
             {
-                throw new ArgumentOutOfRangeException("x or y is out of range.");
+                return list;
             }
             var startPosition = y * 16 + x;
             if (isY) // 縦書きの場合

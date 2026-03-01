@@ -13,6 +13,7 @@ using System.Windows.Documents;
 using System.Windows.Forms;
 using TakumiteAudioWrapper;
 using TatehamaATS_v1.Exceptions;
+using TatehamaATS_v1.OnboardDevice;
 using TrainCrewAPI;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -49,7 +50,7 @@ namespace TatehamaATS_v1.RetsubanWindow
         internal event Action<string> SetDiaNameAction;
         internal event Action<TimeSpan> SetShiftTime;
 
-        public RetsubanWindow()
+        internal RetsubanWindow(StopPassManager stopPassManager)
         {
             InitializeComponent();
             this.Load += Loaded;
@@ -57,11 +58,10 @@ namespace TatehamaATS_v1.RetsubanWindow
 
             retsubanLogic = new RetsubanLogic(Retsuban_Head, new PictureBox[] { Retsuban_4, Retsuban_3, Retsuban_2, Retsuban_1 }, Retsuban_Tail, Car_2, Car_1);
             timeLogic = new TimeLogic(Time_h2, Time_h1, Time_m2, Time_m1, Time_s2, Time_s1);
-            LCDLogic = new LCDLogic(LCD);
-
-            retsubanLogic.SetDiaNameAction += OnSetDiaName;
+            LCDLogic = new LCDLogic(LCD) { StopPassManager = stopPassManager };
             retsubanLogic.SetCarAction += LCDLogic.SetCar;
 
+            retsubanLogic.SetDiaNameAction += OnSetDiaName;
             timeLogic.SetShiftTime += OnSetShiftTime;
         }
 
@@ -122,7 +122,7 @@ namespace TatehamaATS_v1.RetsubanWindow
 
         private void Buttons_Click(string Name, ButtonType buttonType)
         {
-            Debug.WriteLine($"押下：{Name}");
+            Debug.WriteLine($"押下：{Name}/{buttonType}");
             switch (buttonType)
             {
                 case ButtonType.Function:
@@ -133,20 +133,25 @@ namespace TatehamaATS_v1.RetsubanWindow
                 case ButtonType.Digit:
                     retsubanLogic.Buttons_Digit(Name);
                     timeLogic.Buttons_Digit(Name);
+                    LCDLogic.Buttons_Digit(Name);
                     break;
                 case ButtonType.StopPass:
+                    LCDLogic.Buttons_StopPass(Name);
                     break;
                 case ButtonType.RetsuHead:
                     retsubanLogic.Buttons_RetsuHead(Name);
+                    LCDLogic.Buttons_RetsuHead(Name);
                     break;
                 case ButtonType.RetsuTailType:
                     retsubanLogic.Buttons_RetsuTailType(Name);
+                    LCDLogic.Buttons_RetsuTailType(Name);
                     break;
                 case ButtonType.RetsuTailCompany:
                     retsubanLogic.Buttons_RetsuTailCompany(Name);
                     break;
                 case ButtonType.RetsuTailOther:
                     retsubanLogic.Buttons_RetsuTailOther(Name);
+                    LCDLogic.Buttons_RetsuTailOther(Name);
                     break;
                 case ButtonType.OtherInput:
                     break;
@@ -311,12 +316,12 @@ namespace TatehamaATS_v1.RetsubanWindow
 
         private void Button_Tei_Click(object sender, EventArgs e)
         {
-            Buttons_Click("停", ButtonType.Digit);
+            Buttons_Click("停", ButtonType.StopPass);
         }
 
         private void Button_Tsu_Click(object sender, EventArgs e)
         {
-            Buttons_Click("通", ButtonType.Digit);
+            Buttons_Click("通", ButtonType.StopPass);
         }
 
         private void Button_Set_Click(object sender, EventArgs e)

@@ -84,44 +84,12 @@ namespace TatehamaATS_v1.OnboardDevice
         // SignalSet/UpdateRoute用の同時実行防止ロック
         private readonly SemaphoreSlim _routeSignalLock = new(1, 1);
 
-        private Dictionary<string, string> StaNameById = new Dictionary<string, string>()
-        {
-            { "TH76", "館浜" },
-            { "TH75", "駒野" },
-            { "TH71", "津崎" },
-            { "TH70", "浜園" },
-            { "TH67", "新野崎" },
-            { "TH66S", "江ノ原信号場" },
-            { "TH65", "大道寺" },
-            { "TH64", "藤江" },
-            { "TH63", "水越" },
-            { "TH62", "高見沢" },
-            { "TH61", "日野森" },
-            { "TH59", "西赤山" },
-            { "TH58", "赤山町" }
-        };
-
-        private Dictionary<string, string> StaStopById = new Dictionary<string, string>()
-        {
-            { "TH76", "停車" },
-            { "TH75", "停車" },
-            { "TH71", "停車" },
-            { "TH70", "停車" },
-            { "TH67", "停車" },
-            { "TH66S", "停車" },
-            { "TH65", "停車" },
-            { "TH64", "停車" },
-            { "TH63", "停車" },
-            { "TH62", "停車" },
-            { "TH61", "停車" },
-            { "TH59", "停車" },
-            { "TH58", "停車" }
-        };
+        internal StopPassManager StopPassManager;
 
         /// <summary>
         /// 運転会列番
         /// </summary>
-        internal string OverrideDiaName;
+        internal string OverrideDiaName { get; set; }
 
         // イベント
         internal event Action<TimeSpan> TC_TimeUpdated;
@@ -314,8 +282,7 @@ namespace TatehamaATS_v1.OnboardDevice
                 {
                     // StaNameByIdを逆向きに使用して、interlockData.Nameを駅IDにする
                     // interlockData.Nameには"連動装置"が末尾に含まれているため、削除してから検索する
-                    var stationId = StaNameById.FirstOrDefault(x => x.Value == interlockData.Name.Replace("連動装置", ""))
-                        .Key;
+                    var stationId = StopPassManager.GetStationIdByName(interlockData.Name.Replace("連動装置", ""));
                     var route = new Route
                     {
                         TcName = $"{stationId}_{interlockRoute.Name}",
@@ -687,8 +654,8 @@ namespace TatehamaATS_v1.OnboardDevice
                 }
 
                 var r = route.TcName.Split('_').ToList();
-                // staID仮対応
-                var staName = StaNameById[r[0]] + "連動装置";
+                // staID仮対応          
+                var staName = StopPassManager.GetStationNameById(r[0]) + "連動装置";
 
                 // 末尾が "S[A-Z]" または "T[A-Z]" の場合に "[A-Z]" の部分だけを残す
                 var routeName = System.Text.RegularExpressions.Regex.Replace(r[1], @"[ST]([A-Z])$", "$1");
@@ -704,17 +671,14 @@ namespace TatehamaATS_v1.OnboardDevice
                         indicator = route.Indicator;
                         break;
                     case RouteType.Departure:
-                        indicator = TypeString(OverrideDiaName);
-                        SetStaStop(indicator);
+                        indicator = StopPassManager.TypeNameTC;
                         break;
                     default:
                         indicator = "";
                         break;
                 }
-
-                //Debug.WriteLine($"☆API送信: SetRoute/{route.TcName}/{StaStopById[r[0]]}");
-                await SendSingleCommand("SetRoute",
-                    [staName, routeName, indicator, TcData.myTrainData.diaName, StaStopById[r[0]]]);
+                Debug.WriteLine($"☆API送信: SetRoute/{route.TcName}/{StopPassManager.GetStopDataById(r[0])}/{indicator}");
+                SendSingleCommand("SetRoute", [staName, routeName, indicator, TcData.myTrainData.diaName, StopPassManager.GetStopDataById(r[0])]);
             }
             catch (Exception ex)
             {
@@ -738,8 +702,8 @@ namespace TatehamaATS_v1.OnboardDevice
                 }
 
                 var r = route.TcName.Split('_').ToList();
-                // staID仮対応
-                var staName = StaNameById[r[0]] + "連動装置";
+                // staID仮対応          
+                var staName = StopPassManager.GetStationNameById(r[0]) + "連動装置";
 
                 // 末尾が "S[A-Z]" または "T[A-Z]" の場合に "[A-Z]" の部分だけを残す
                 var routeName = System.Text.RegularExpressions.Regex.Replace(r[1], @"[ST]([A-Z])$", "$1");
@@ -755,194 +719,10 @@ namespace TatehamaATS_v1.OnboardDevice
 
         internal async Task SetTime(int shiftTime)
         {
-            try
-            {
-                if (Relay.shiftTime == shiftTime)
-                {
-                    return;
-                }
-
-                Relay.shiftTime = shiftTime;
-                //Debug.WriteLine($"☆API送信: realtimeoffset/{shiftTime}");
-                await SendSingleCommand("realtimeoffset", [$"{shiftTime}"]);
-            }
-            catch (Exception ex)
-            {
-                //Debug.WriteLine($"{ex.Message}{ex.InnerException}");
-            }
+            Relay.shiftTime = shiftTime;
         }
 
 
-        internal string TypeString(string Retsuban)
-        {
-            Retsuban = Retsuban.Replace("X", "").Replace("Y", "").Replace("Z", "");
-            if (Retsuban == "9999")
-            {
-                return "";
-            }
-
-            if (Retsuban.Contains("溝月"))
-            {
-                return "回送";
-            }
-
-            if (Retsuban.StartsWith("回"))
-            {
-                return "回送";
-            }
-
-            if (Retsuban.StartsWith("試"))
-            {
-                return "回送";
-            }
-
-            if (Retsuban.Contains("A"))
-            {
-                return "A特";
-            }
-
-            if (Retsuban.Contains("K"))
-            {
-                return "快速急行";
-            }
-
-            if (Retsuban.Contains("B"))
-            {
-                return "急行";
-            }
-
-            if (Retsuban.Contains("C"))
-            {
-                return "準急";
-            }
-
-            if (Retsuban.StartsWith("臨"))
-            {
-                return "回送";
-            }
-
-            if (int.TryParse(Retsuban, null, out _))
-            {
-                return "普通";
-            }
-
-            return "回送";
-        }
-
-        private void SetStaStop(string name)
-        {
-            switch (name)
-            {
-                case "普通":
-                    StaStopById = new Dictionary<string, string>()
-                    {
-                        { "TH76", "停車" },
-                        { "TH75", "停車" },
-                        { "TH71", "停車" },
-                        { "TH70", "停車" },
-                        { "TH67", "停車" },
-                        { "TH66S", "停車" },
-                        { "TH65", "停車" },
-                        { "TH64", "停車" },
-                        { "TH63", "停車" },
-                        { "TH62", "停車" },
-                        { "TH61", "停車" },
-                        { "TH59", "停車" },
-                        { "TH58", "停車" }
-                    };
-                    break;
-                case "準急":
-                    StaStopById = new Dictionary<string, string>()
-                    {
-                        { "TH76", "停車" },
-                        { "TH75", "停車" },
-                        { "TH71", "通過" },
-                        { "TH70", "停車" },
-                        { "TH67", "停車" },
-                        { "TH66S", "停車" },
-                        { "TH65", "停車" },
-                        { "TH64", "停車" },
-                        { "TH63", "停車" },
-                        { "TH62", "停車" },
-                        { "TH61", "停車" },
-                        { "TH59", "停車" },
-                        { "TH58", "停車" }
-                    };
-                    break;
-                case "急行":
-                    StaStopById = new Dictionary<string, string>()
-                    {
-                        { "TH76", "停車" },
-                        { "TH75", "通過" },
-                        { "TH71", "通過" },
-                        { "TH70", "通過" },
-                        { "TH67", "停車" },
-                        { "TH66S", "停車" },
-                        { "TH65", "停車" },
-                        { "TH64", "停車" },
-                        { "TH63", "停車" },
-                        { "TH62", "停車" },
-                        { "TH61", "停車" },
-                        { "TH59", "停車" },
-                        { "TH58", "停車" }
-                    };
-                    break;
-                case "快速急行":
-                    StaStopById = new Dictionary<string, string>()
-                    {
-                        { "TH76", "停車" },
-                        { "TH75", "通過" },
-                        { "TH71", "通過" },
-                        { "TH70", "通過" },
-                        { "TH67", "停車" },
-                        { "TH66S", "停車" },
-                        { "TH65", "停車" },
-                        { "TH64", "停車" },
-                        { "TH63", "停車" },
-                        { "TH62", "通過" },
-                        { "TH61", "停車" },
-                        { "TH59", "通過" },
-                        { "TH58", "停車" }
-                    };
-                    break;
-                case "A特":
-                    StaStopById = new Dictionary<string, string>()
-                    {
-                        { "TH76", "停車" },
-                        { "TH75", "通過" },
-                        { "TH71", "通過" },
-                        { "TH70", "通過" },
-                        { "TH67", "通過" },
-                        { "TH66S", "通過" },
-                        { "TH65", "通過" },
-                        { "TH64", "通過" },
-                        { "TH63", "通過" },
-                        { "TH62", "通過" },
-                        { "TH61", "通過" },
-                        { "TH59", "通過" },
-                        { "TH58", "通過" }
-                    };
-                    break;
-                case "回送":
-                    StaStopById = new Dictionary<string, string>()
-                    {
-                        { "TH76", "停車" },
-                        { "TH75", "通過" },
-                        { "TH71", "通過" },
-                        { "TH70", "通過" },
-                        { "TH67", "通過" },
-                        { "TH66S", "停車" },
-                        { "TH65", "通過" },
-                        { "TH64", "通過" },
-                        { "TH63", "通過" },
-                        { "TH62", "通過" },
-                        { "TH61", "通過" },
-                        { "TH59", "通過" },
-                        { "TH58", "通過" }
-                    };
-                    break;
-            }
-        }
 
         internal async Task SendSingleCommand(string command, string[] request)
         {
@@ -1093,6 +873,19 @@ namespace TatehamaATS_v1.OnboardDevice
                     {
                         var e = new RelayOtherInfoAbnormal(5, "不明タイプ");
                         AddExceptionAction.Invoke(e);
+                    }
+                }
+
+                if (TcData.nowTime.hour != shiftTime)
+                {
+                    try
+                    {
+                        Debug.WriteLine($"☆API送信: realtimeoffset/{shiftTime}");
+                        SendSingleCommand("realtimeoffset", [$"{shiftTime}"]);
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"{ex.Message}{ex.InnerException}");
                     }
                 }
 
