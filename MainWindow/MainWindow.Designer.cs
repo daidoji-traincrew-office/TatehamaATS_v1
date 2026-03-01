@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWindow));
             Image_ATSCut = new PictureBox();
             Image_Reset = new PictureBox();
             Image_Kokuchi = new PictureBox();
@@ -217,6 +218,7 @@
             Controls.Add(Image_ATSReady);
             Controls.Add(Image_ATSCut);
             FormBorderStyle = FormBorderStyle.FixedSingle;
+            Icon = (Icon)resources.GetObject("$this.Icon");
             MaximumSize = new Size(316, 339);
             MinimumSize = new Size(316, 339);
             Name = "MainWindow";

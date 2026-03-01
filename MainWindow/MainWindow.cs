@@ -1,7 +1,7 @@
-﻿using System;
-using System.Drawing;
-using Dapplo.Microsoft.Extensions.Hosting.WinForms;
+﻿using Dapplo.Microsoft.Extensions.Hosting.WinForms;
 using OpenIddict.Client;
+using System;
+using System.Drawing;
 using TatehamaATS_v1.OnboardDevice;
 
 
@@ -10,6 +10,8 @@ namespace TatehamaATS_v1.MainWindow
     using System.Diagnostics;
     using System.Runtime.InteropServices;
     using System.Windows.Forms;
+    using TatehamaATS_v1.RetsubanWindow;
+
     public partial class MainWindow : Form, IWinFormsShell
     {
         private const int HOTKEY_ID_F4 = 2; // F4キー用ホットキーID
@@ -25,7 +27,6 @@ namespace TatehamaATS_v1.MainWindow
         private bool isLongPressHandled = false; // 長押し処理を1回だけ実行するためのフラグ
 
         private CableIO CableIO;
-        private RetsubanWindow.RetsubanWindow retsubanWindow = new RetsubanWindow.RetsubanWindow();
 
         //TopMost切替用
         private const int HOTKEY_ID = 1; // ホットキーID
@@ -103,10 +104,6 @@ namespace TatehamaATS_v1.MainWindow
             CableIO.isTransferChenge += TransferLamp;
             CableIO.isNetworkChenge += NetworkLamp;
             Application.ApplicationExit += new EventHandler(Application_ApplicationExit);
-
-            retsubanWindow.AddExceptionAction += CableIO.AddException;
-            retsubanWindow.SetDiaNameAction += CableIO.RetsubanSet;
-            retsubanWindow.SetShiftTime += CableIO.SetTime;
         }
 
         /// <summary>
@@ -215,14 +212,7 @@ namespace TatehamaATS_v1.MainWindow
 
         private void Image_Retsuban_Click(object sender, EventArgs e)
         {
-            if (retsubanWindow.Visible)
-            {
-                retsubanWindow.Hide();
-            }
-            else
-            {
-                retsubanWindow.Show();
-            }
+            CableIO.RetsubanWinChenge();
         }
 
         private void Image_Kokuchi_Click(object sender, EventArgs e)

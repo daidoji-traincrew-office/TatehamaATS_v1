@@ -19,7 +19,6 @@ namespace TatehamaATS_v1.KokuchiWindow
     {
         OperationNotificationData KokuchiData;
         private Bitmap sourceImage;
-        public bool ShowLED;
 
 
         /// <summary>
@@ -35,7 +34,6 @@ namespace TatehamaATS_v1.KokuchiWindow
             TopMost = true;
             BackColor = Color.Blue;
             TransparencyKey = BackColor;
-            ShowLED = false;
         }
 
         private void KokuchiWindow_FormClosing(object sender, FormClosingEventArgs e)
@@ -385,43 +383,45 @@ namespace TatehamaATS_v1.KokuchiWindow
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            if (ShowLED)
+            if (this.BackgroundImage == null)
             {
-                if (this.BackgroundImage != null)
-                {
-                    this.BackgroundImage = null;
-                    KokuchiLED.BackgroundImage = null;
-                    KokuchiLED.Image = null;
-                }
+                this.BackgroundImage = KokuchiResource.Kokuchi_Background;
+                KokuchiLED.Image = KokuchiResource.KokuchiLED_Waku;
             }
-            else
+            if (KokuchiData == null)
             {
-                if (this.BackgroundImage == null)
-                {
-                    this.BackgroundImage = KokuchiResource.Kokuchi_Background;
-                    KokuchiLED.Image = KokuchiResource.KokuchiLED_Waku;
-                }
-                if (KokuchiData == null)
-                {
-                    DisplayImageByPos(1, 222);
-                    return;
-                }
-                var DeltaTime = (DateTimeUtils.GetNowJst() - KokuchiData.OperatedAt).TotalMilliseconds;
+                DisplayImageByPos(1, 222);
+                return;
+            }
+            var DeltaTime = (DateTimeUtils.GetNowJst() - KokuchiData.OperatedAt).TotalMilliseconds;
 
-                switch (KokuchiData.Type)
-                {
-                    case OperationNotificationType.None:
-                    case OperationNotificationType.Kaijo:
-                    case OperationNotificationType.Shuppatsu:
-                    case OperationNotificationType.ShuppatsuJikoku:
-                    case OperationNotificationType.Torikeshi:
-                        //点滅しないやつ
-                        SetLED(KokuchiData);
-                        break;
-                    case OperationNotificationType.Yokushi:
-                    case OperationNotificationType.Tsuuchi:
-                        //1000+500点滅
-                        if (DeltaTime % 1500 < 1000)
+            switch (KokuchiData.Type)
+            {
+                case OperationNotificationType.None:
+                case OperationNotificationType.Kaijo:
+                case OperationNotificationType.Shuppatsu:
+                case OperationNotificationType.ShuppatsuJikoku:
+                case OperationNotificationType.Torikeshi:
+                    //点滅しないやつ
+                    SetLED(KokuchiData);
+                    break;
+                case OperationNotificationType.Yokushi:
+                case OperationNotificationType.Tsuuchi:
+                    //1000+500点滅
+                    if (DeltaTime % 1500 < 1000)
+                    {
+                        SetLED(KokuchiData, 0);
+                    }
+                    else
+                    {
+                        SetLED(KokuchiData, 1);
+                    }
+                    break;
+                case OperationNotificationType.TsuuchiKaijo:
+                    if (DeltaTime < 5 * 1000)
+                    {
+                        //500+250点滅    
+                        if (DeltaTime % 750 < 500)
                         {
                             SetLED(KokuchiData, 0);
                         }
@@ -429,40 +429,11 @@ namespace TatehamaATS_v1.KokuchiWindow
                         {
                             SetLED(KokuchiData, 1);
                         }
-                        break;
-                    case OperationNotificationType.TsuuchiKaijo:
-                        if (DeltaTime < 5 * 1000)
-                        {
-                            //500+250点滅    
-                            if (DeltaTime % 750 < 500)
-                            {
-                                SetLED(KokuchiData, 0);
-                            }
-                            else
-                            {
-                                SetLED(KokuchiData, 1);
-                            }
-                        }
-                        else if (DeltaTime < 20 * 1000)
-                        {
-                            //250+250点滅      
-                            if (DeltaTime % 500 < 250)
-                            {
-                                SetLED(KokuchiData, 0);
-                            }
-                            else
-                            {
-                                SetLED(KokuchiData, 1);
-                            }
-                        }
-                        else
-                        {
-                            SetLED(KokuchiData, 1);
-                        }
-                        break;
-                    case OperationNotificationType.Tenmatsusho:
-                        //1500+500点滅      
-                        if (DeltaTime % 2000 < 1500)
+                    }
+                    else if (DeltaTime < 20 * 1000)
+                    {
+                        //250+250点滅      
+                        if (DeltaTime % 500 < 250)
                         {
                             SetLED(KokuchiData, 0);
                         }
@@ -470,41 +441,56 @@ namespace TatehamaATS_v1.KokuchiWindow
                         {
                             SetLED(KokuchiData, 1);
                         }
-                        break;
-                    case OperationNotificationType.Other:
-                        //1000+1000+1000+1000点滅               
-                        if (DeltaTime % 2000 < 1000)
-                        {
-                            SetLED(KokuchiData, 0);
-                        }
-                        else
-                        {
-                            SetLED(KokuchiData, 1);
-                        }
-                        break;
-                    case OperationNotificationType.Class:
-                        //1000+1000+1000+1000点滅               
-                        if (DeltaTime % 4000 < 1000)
-                        {
-                            SetLED(KokuchiData, 0);
-                        }
-                        else if (DeltaTime % 4000 < 2000)
-                        {
-                            SetLED(KokuchiData, 1);
-                        }
-                        else if (DeltaTime % 4000 < 3000)
-                        {
-                            SetLED(KokuchiData, 2);
-                        }
-                        else
-                        {
-                            SetLED(KokuchiData, 3);
-                        }
-                        break;
-                    default:
-                        DisplayImageByPos(1, 222);
-                        break;
-                }
+                    }
+                    else
+                    {
+                        SetLED(KokuchiData, 1);
+                    }
+                    break;
+                case OperationNotificationType.Tenmatsusho:
+                    //1500+500点滅      
+                    if (DeltaTime % 2000 < 1500)
+                    {
+                        SetLED(KokuchiData, 0);
+                    }
+                    else
+                    {
+                        SetLED(KokuchiData, 1);
+                    }
+                    break;
+                case OperationNotificationType.Other:
+                    //1000+1000+1000+1000点滅               
+                    if (DeltaTime % 2000 < 1000)
+                    {
+                        SetLED(KokuchiData, 0);
+                    }
+                    else
+                    {
+                        SetLED(KokuchiData, 1);
+                    }
+                    break;
+                case OperationNotificationType.Class:
+                    //1000+1000+1000+1000点滅               
+                    if (DeltaTime % 4000 < 1000)
+                    {
+                        SetLED(KokuchiData, 0);
+                    }
+                    else if (DeltaTime % 4000 < 2000)
+                    {
+                        SetLED(KokuchiData, 1);
+                    }
+                    else if (DeltaTime % 4000 < 3000)
+                    {
+                        SetLED(KokuchiData, 2);
+                    }
+                    else
+                    {
+                        SetLED(KokuchiData, 3);
+                    }
+                    break;
+                default:
+                    DisplayImageByPos(1, 222);
+                    break;
             }
         }
 

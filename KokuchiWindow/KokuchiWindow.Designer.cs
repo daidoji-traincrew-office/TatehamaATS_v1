@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(KokuchiWindow));
             KokuchiLED = new PictureBox();
             timer1 = new System.Windows.Forms.Timer(components);
             Transparency = new PictureBox();
@@ -73,6 +74,7 @@
             Controls.Add(Transparency);
             Controls.Add(KokuchiLED);
             FormBorderStyle = FormBorderStyle.FixedSingle;
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "KokuchiWindow";
             Text = "運転告知器 | 館浜ATS - ダイヤ運転会";
             FormClosing += KokuchiWindow_FormClosing;

@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TestWindow));
             label1 = new Label();
             label2 = new Label();
             stabwTime = new Label();
@@ -132,6 +133,7 @@
             Controls.Add(label1);
             Font = new Font("ＭＳ ゴシック", 9F, FontStyle.Regular, GraphicsUnit.Point, 128);
             FormBorderStyle = FormBorderStyle.FixedSingle;
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Margin = new Padding(3, 2, 3, 2);
             Name = "TestWindow";
             Text = "試験用 | 館浜ATS - ダイヤ運転会";

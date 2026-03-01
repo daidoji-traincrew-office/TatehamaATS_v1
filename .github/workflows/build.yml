@@ -47,7 +47,7 @@ jobs:
             else
               n=1
             fi
-            VERSION="v1.0.${today}.${n}-beta"
+            VERSION="v1.0.${today}.${n}"
           else
             VERSION=$(date +%Y%m%d%H%M%S)
           fi

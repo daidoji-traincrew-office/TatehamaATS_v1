@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using TakumiteAudioWrapper;
+using TatehamaATS_v1.OnboardDevice;
+using TrainCrew;
 using TrainCrewAPI;
 
 namespace TatehamaATS_v1.RetsubanWindow
@@ -14,9 +18,15 @@ namespace TatehamaATS_v1.RetsubanWindow
 
         private List<string> LCDFontList = new List<string>();
 
-        private bool nowUnkoSetting = false;
+        private int nowUnkoSetting = -1;
+        private int nowStopSetting = -1;
+        private int nowStopCount = 2;
+
+        private string nowInput;
 
         private bool nowVerDisplay = false;
+
+        internal StopPassManager StopPassManager;
 
         private PictureBox LCD { get; set; }
         private string Retsuban;
@@ -26,6 +36,12 @@ namespace TatehamaATS_v1.RetsubanWindow
         private AudioWrapper beep1;
         private AudioWrapper beep2;
         private AudioWrapper beep3;
+
+        /// <summary>
+        /// 設定情報変更
+        /// </summary>                                 
+        internal event Action<string, string> SetType;
+        internal event Action<string, string> SetStaStop;
 
         internal LCDLogic(PictureBox lcd)
         {
@@ -61,6 +77,11 @@ namespace TatehamaATS_v1.RetsubanWindow
         public void SetRetsuban(string retsuban)
         {
             Retsuban = retsuban.Replace("X", "x").Replace("Y", "y").Replace("Z", "z");
+            StopPassManager.TypeString(Retsuban);
+            StopPassManager.TypeNameTC = StopPassManager.TypeStringTC(StopPassManager.TypeName);
+            StopPassManager.TypeNameKana = StopPassManager.TypeStringKana(StopPassManager.TypeName);
+            StopPassManager.TypeToStop();
+            Debug.WriteLine(StopPassManager);
         }
 
         public void SetCar(string car)
@@ -103,10 +124,24 @@ namespace TatehamaATS_v1.RetsubanWindow
 
         private List<string> GetDisplayList()
         {
+            var displayList = new List<string>();
+            //表示文字列がないタイプ
+            if (nowStopSetting >= 0)
+            {
+                // Ver表示
+                displayList = GetStopString();
+                return displayList;
+            }
 
             //表示文字列があるタイプ
             string displayString;
-            if (nowVerDisplay)
+            //運行設定
+            if (nowUnkoSetting >= 0)
+            {
+                // Ver表示
+                displayString = GetUnkoString();
+            }
+            else if (nowVerDisplay)
             {
                 // Ver表示
                 displayString = GetVerString();
@@ -123,7 +158,6 @@ namespace TatehamaATS_v1.RetsubanWindow
                 displayStringList.Add(line);
             }
 
-            var displayList = new List<string>();
             for (int i = 0; i < displayStringList.Count; i++)
             {
                 displayList.SetDisplayData(displayStringList[i], 0, i, false); // 横書きで配置
@@ -132,9 +166,136 @@ namespace TatehamaATS_v1.RetsubanWindow
             return displayList;
         }
 
+        private string GetUnkoString()
+        {
+            if (nowUnkoSetting == 0)
+            {
+                if (DateTime.Now.Second % 2 == 0)
+                {
+                    var OriginText = StopPassManager.GetStationKanaById("TH" + StopPassManager.Origin) + "　　　　　　　";
+                    OriginText = GetAvailableChar(OriginText)[..(7)];
+                    var DestinationText = StopPassManager.GetStationKanaById("TH" + StopPassManager.Destination) + "　　　　　　　";
+                    DestinationText = GetAvailableChar(DestinationText)[..(7)];
+                    return GetAvailableChar($"ウンコウセッテイ　センタク\n{StopPassManager.TypeNameKana}\n{OriginText}→{DestinationText}");
+                }
+                else
+                {
+                    return GetAvailableChar($"ウンコウセッテイ　センタク\nシュベツ：1\nシハツ：2  →イキサキ：3");
+                }
+            }
+            if (nowUnkoSetting == 1)
+            {
+                var input = StopPassManager.TypeStringKana(nowInput);
+                input = input == "リンジ" ? "リンジ？" : input;
+                if (DateTime.Now.Millisecond < 500)
+                {
+                    if (input.Contains("？"))
+                    {
+                        return GetAvailableChar($"ウンコウセッテイ シュベツ\nレツバン：{Retsuban}\n→{input.Replace("？", "■")}");
+                    }
+                    else
+                    {
+                        return GetAvailableChar($"ウンコウセッテイ シュベツ\nレツバン：{Retsuban}\n→{input}■");
+                    }
+                }
+                else
+                {
+                    return GetAvailableChar($"ウンコウセッテイ シュベツ\nレツバン：{Retsuban}\n→{input}");
+                }
+            }
+            if (nowUnkoSetting == 2)
+            {
+                var input = StopPassManager.GetStationKanaById("TH" + nowInput) + "　　　　　　　";
+                input = GetAvailableChar(input)[..(7)];
+                if (DateTime.Now.Millisecond < 500)
+                {
+                    if (input.Contains("？"))
+                    {
+                        return GetAvailableChar($"ウンコウセッテイ シハツ\nシハツ：{StopPassManager.OriginKana}\n→{input}：{nowInput.Replace("？", "■")}");
+                    }
+                    else
+                    {
+                        return GetAvailableChar($"ウンコウセッテイ シハツ\nシハツ：{StopPassManager.OriginKana}\n→{input}：{nowInput}■");
+                    }
+                }
+                else
+                {
+                    return GetAvailableChar($"ウンコウセッテイ シハツ\nシハツ：{StopPassManager.OriginKana}\n→{input}：{nowInput}");
+                }
+            }
+            if (nowUnkoSetting == 3)
+            {
+                var input = StopPassManager.GetStationKanaById("TH" + nowInput) + "　　　　　　　";
+                input = GetAvailableChar(input)[..(7)];
+                if (DateTime.Now.Millisecond < 500)
+                {
+                    if (input.Contains("？"))
+                    {
+                        return GetAvailableChar($"ウンコウセッテイ イキサキ\nイキサキ：{StopPassManager.DestinationKana}\n→{input}：{nowInput.Replace("？", "■")}");
+                    }
+                    else
+                    {
+                        return GetAvailableChar($"ウンコウセッテイ イキサキ\nイキサキ：{StopPassManager.DestinationKana}\n→{input}：{nowInput}■");
+                    }
+                }
+                else
+                {
+                    return GetAvailableChar($"ウンコウセッテイ イキサキ\nイキサキ：{StopPassManager.DestinationKana}\n→{input}：{nowInput}");
+                }
+            }
+            return GetAvailableChar($"ウンコウセッテイ\nミテイギリョウイキ");
+        }
+
+        private List<string> GetStopString()
+        {
+            var displayList = new List<string>();
+            if (nowStopSetting == 0)
+            {
+                displayList.SetDisplayData("停　テコワカニツハハラノエラタ", 0, 0, false);
+                displayList.SetDisplayData("通　ハマサカハサソモイキラシイ5", 0, 1, false);
+                displayList.SetDisplayData("6｜停通通通通停通通停停停通停→", 0, 2, false);
+                displayList.SetDisplayData("テイシャセッテイ　　シュヨウエキ", 0, 0, false);
+                displayList.SetDisplayData("1ミオ｜タハ2リカ｜ナノ3ムイ｜", 0, 1, false);
+                displayList.SetDisplayData("｜オオ4ナタ｜シワ5フエ｜タイ6", 0, 2, false);
+            }
+            else if (nowStopSetting <= 6)
+            {
+                //基礎表示
+                displayList.SetDisplayData($"停通{nowStopSetting}", 0, 0, true);
+                displayList.SetDisplayData($"　{nowStopSetting - 1}→", 15, 0, true);
+                displayList.SetDisplayData($"　{nowStopSetting + 1}←", 1, 0, true);
+                if (nowStopSetting == 1) displayList.SetDisplayData($"　　｜", 15, 0, true);
+                if (nowStopSetting == 6) displayList.SetDisplayData($"　　｜", 1, 0, true);
+                for (int i = 0; i < 13; i++)
+                {
+                    List<string> stationIds = StopPassManager.GetAllStationIds();
+                    string stationId = stationIds[i + 13 * (6 - nowStopSetting)];
+                    string stationKana = StopPassManager.GetStationDenById(stationId);
+                    string stationStop = StopPassManager.GetStopDataById(stationId);
+                    displayList.SetDisplayData(stationKana, i + 2, 0, true);
+                    displayList.SetDisplayData(stationStop, i + 2, 2, true);
+                }
+
+                if (DateTime.Now.Millisecond < 500)
+                {
+                    displayList.SetDisplayData("　　", nowStopCount + 2, 0, true);
+                }
+                else
+                {
+                    displayList.SetDisplayData("■", nowStopCount + 2, 2, true);
+                }
+            }
+            else
+            {
+                displayList.SetDisplayData("テイシャセッテイ", 0, 0, false);
+                displayList.SetDisplayData("ミテイキ゛リョウイキ", 0, 0, false);
+            }
+            return displayList;
+        }
+
         private string GetVerString()
         {
-            return GetAvailableChar("ソフトバージョン\nV." + ServerAddress.Version.Split('-')[0].Replace("v", "") + "\n" + (ServerAddress.Version.Contains("de") ? "DEV" : "PROD") + (ServerAddress.Version.Contains("standalone") ? "　STANDALONE" : ServerAddress.Version.Contains("handbuild") ? "　HAND-BUILD" : ""));
+            return GetAvailableChar($"ソフトバージョン\nV.{ServerAddress.Version.Split('-')[0].Replace("v", "")}\n{(ServerAddress.SignalAddress.Contains("dev") ? "DEV" : "PROD")}　{(ServerAddress.Version.Contains("standalone") ? "STANDALONE" : ServerAddress.Version.Contains("handbuild") ? "HAND-BUILD" : "")}");
         }
 
         private string GetNormalString()
@@ -142,7 +303,9 @@ namespace TatehamaATS_v1.RetsubanWindow
             if (string.IsNullOrEmpty(Retsuban)) return GetAvailableChar($"レツバン ミセッテイ\nセッテイシテクダサイ");
             if (Retsuban == "9999") return GetAvailableChar($"9999 フテイリョウスウ\nダミーレツバン\n");
             if (string.IsNullOrEmpty(Car)) return GetAvailableChar($"リョウスウ ミセッテイ\nセッテイシテクダサイ");
-            return GetAvailableChar($"{Retsuban} {Car}リョウ\nレッシャジョウホウヒョウジ\nタイオウサギョウチュウ");
+            var OriginText = GetAvailableChar(StopPassManager.OriginKana + "　　　　　　　")[..(7)];
+            var DestinationText = GetAvailableChar(StopPassManager.DestinationKana + "　　　　　　　")[..(7)];
+            return GetAvailableChar($"{Retsuban} {Car}リョウ\n{StopPassManager.TypeNameKana}\n{OriginText}→{DestinationText}");
         }
 
         /// <summary>
@@ -280,29 +443,432 @@ namespace TatehamaATS_v1.RetsubanWindow
             }
             return enlargedImage;
         }
+
         internal void Buttons_Func(string Name)
         {
             switch (Name)
             {
                 case "Set":
+                    if (nowUnkoSetting == 1)
+                    {
+                        if (nowInput is not "" or "特急" or "C特")
+                        {
+                            StopPassManager.TypeName = nowInput;
+                            StopPassManager.TypeNameTC = StopPassManager.TypeStringTC(StopPassManager.TypeName);
+                            StopPassManager.TypeNameKana = StopPassManager.TypeStringKana(StopPassManager.TypeName);
+                            StopPassManager.TypeToStop();
+                            Debug.WriteLine(StopPassManager);
+                            beep2.PlayOnce(1.0f);
+                            nowUnkoSetting = 0;
+                            nowInput = "";
+                        }
+                        return;
+                    }
+                    if (nowUnkoSetting == 2)
+                    {
+                        if (string.IsNullOrEmpty(nowInput))
+                        {
+                            beep3.PlayOnce(1.0f);
+                            return;
+                        }
+                        StopPassManager.Origin = nowInput;
+                        StopPassManager.OriginKana = StopPassManager.GetStationKanaById("TH" + nowInput);
+                        nowInput = "";
+                        beep2.PlayOnce(1.0f);
+                    }
+                    if (nowUnkoSetting == 3)
+                    {
+                        if (string.IsNullOrEmpty(nowInput))
+                        {
+                            beep3.PlayOnce(1.0f);
+                            return;
+                        }
+                        StopPassManager.Destination = nowInput;
+                        StopPassManager.DestinationKana = StopPassManager.GetStationKanaById("TH" + nowInput);
+                        nowInput = "";
+                        beep2.PlayOnce(1.0f);
+                    }
+                    if (0 < nowStopSetting)
+                    {
+                        nowStopSetting = -1;
+                        beep2.PlayOnce(1.0f);
+                        return;
+                    }
                     return;
                 case "Del":
+                    if (nowUnkoSetting == 1)
+                    {
+                        var Head = "";
+                        //接頭辞のみ処理
+                        if (nowInput is "臨時" or "だんじり")
+                        {
+                            nowInput = "";
+                            beep1.PlayOnce(1.0f);
+                            return;
+                        }
+
+                        //接頭辞処理
+                        if (nowInput.Contains("臨時"))
+                        {
+                            Head = "臨時";
+                            nowInput = nowInput.Replace("臨時", "");
+                        }
+                        else if (nowInput.Contains("だんじり"))
+                        {
+                            Head = "だんじり";
+                            nowInput = nowInput.Replace("だんじり", "");
+                        }
+                        //種別本体処理
+                        if (nowInput is "C特1" or "C特2" or "C特3" or "C特4")
+                        {
+                            nowInput = "C特";
+                            beep1.PlayOnce(1.0f);
+                        }
+                        else if (nowInput is "A特" or "B特" or "C特" or "D特")
+                        {
+                            nowInput = "特急";
+                            beep1.PlayOnce(1.0f);
+                        }
+                        else if (nowInput is "")
+                        {
+                            beep3.PlayOnce(1.0f);
+                        }
+                        else
+                        {
+                            nowInput = "";
+                            beep1.PlayOnce(1.0f);
+                        }
+                        nowInput = Head + nowInput;
+                    }
+                    if (nowUnkoSetting is 2 or 3)
+                    {
+                        if (string.IsNullOrEmpty(nowInput))
+                        {
+                            beep3.PlayOnce(1.0f);
+                            return;
+                        }
+                        nowInput = nowInput.Remove(nowInput.Length - 1);
+                        beep1.PlayOnce(1.0f);
+                    }
                     return;
                 case "Clear":
-                    return;
-                case "UnkoSet":
-                    return;
-                case "StopSet":
+                    if (nowUnkoSetting >= 1)
+                    {
+                        nowUnkoSetting = 0;
+                        beep2.PlayOnce(1.0f);
+                        return;
+                    }
+                    if (nowUnkoSetting == 0)
+                    {
+                        nowUnkoSetting = -1;
+                        beep3.PlayOnce(1.0f);
+                        return;
+                    }
                     return;
                 case "VerDisplay":
                     nowVerDisplay = !nowVerDisplay;
+                    nowUnkoSetting = -1;
+                    nowStopSetting = -1;
+                    beep1.PlayOnce(1.0f);
+                    return;
+                case "UnkoSet":
+                    nowVerDisplay = false;
+                    nowUnkoSetting = 0;
+                    nowStopSetting = -1;
+                    nowInput = "";
+                    beep1.PlayOnce(1.0f);
+                    return;
+                case "StopSet":
+                    nowVerDisplay = false;
+                    nowUnkoSetting = -1;
+                    nowStopSetting = 0;
+                    nowStopCount = 1;
                     beep1.PlayOnce(1.0f);
                     return;
                 case "RetsuSet":
                 case "CarSet":
                 case "TimeSet":
                     nowVerDisplay = false;
+                    nowUnkoSetting = -1;
+                    nowStopSetting = -1;
                     return;
+            }
+        }
+
+        internal void Buttons_Digit(string Digit)
+        {
+            if (nowUnkoSetting == 0)
+            {
+                switch (Digit)
+                {
+                    case "1":
+                        nowUnkoSetting = 1;
+                        beep1.PlayOnce(1.0f);
+                        return;
+                    case "2":
+                        nowUnkoSetting = 2;
+                        beep1.PlayOnce(1.0f);
+                        return;
+                    case "3":
+                        nowUnkoSetting = 3;
+                        beep1.PlayOnce(1.0f);
+                        return;
+                }
+            }
+            else if (nowUnkoSetting == 1)
+            {
+                if (nowInput.Contains("C特"))
+                {
+                    switch (Digit)
+                    {
+                        case "1":
+                        case "2":
+                        case "3":
+                        case "4":
+                            nowInput += Digit;
+                            beep1.PlayOnce(1.0f);
+                            return;
+                    }
+                }
+            }
+            else if (nowUnkoSetting is 2 or 3)
+            {
+                if (int.TryParse(nowInput + Digit, out int newNum))
+                {
+                    if (newNum <= 76)
+                    {
+                        nowInput += Digit;
+                        beep1.PlayOnce(1.0f);
+                    }
+                    else
+                    {
+                        beep2.PlayOnce(1.0f);
+                    }
+                }
+                return;
+            }
+            else if (0 == nowStopSetting)
+            {
+                switch (Digit)
+                {
+                    case "1":
+                        nowStopSetting = 1;
+                        nowStopCount = 12;
+                        beep1.PlayOnce(1.0f);
+                        return;
+                    case "2":
+                        nowStopSetting = 2;
+                        nowStopCount = 2;
+                        beep1.PlayOnce(1.0f);
+                        return;
+                    case "3":
+                        nowStopSetting = 3;
+                        nowStopCount = 8;
+                        beep1.PlayOnce(1.0f);
+                        return;
+                    case "4":
+                        nowStopSetting = 4;
+                        nowStopCount = 6;
+                        beep1.PlayOnce(1.0f);
+                        return;
+                    case "5":
+                        nowStopSetting = 5;
+                        nowStopCount = 6;
+                        beep1.PlayOnce(1.0f);
+                        return;
+                    case "6":
+                        nowStopSetting = 6;
+                        nowStopCount = 0;
+                        beep1.PlayOnce(1.0f);
+                        return;
+                }
+            }
+            else if (1 <= nowStopSetting)
+            {
+                switch (Digit)
+                {
+                    case "7":
+                        if (nowStopCount == 0 && nowStopSetting == 6)
+                        {
+                            beep3.PlayOnce(1.0f);
+                            return;
+                        }
+                        nowStopCount--;
+                        if (nowStopCount <= -1)
+                        {
+                            nowStopCount = nowStopCount + 13;
+                            nowStopSetting++;
+                        }
+                        beep1.PlayOnce(1.0f);
+                        return;
+                    case "9":
+                        if (nowStopCount == 12 && nowStopSetting == 1)
+                        {
+                            beep3.PlayOnce(1.0f);
+                            return;
+                        }
+                        nowStopCount++;
+                        if (nowStopCount >= 13)
+                        {
+                            nowStopCount = nowStopCount - 13;
+                            nowStopSetting--;
+                        }
+                        beep1.PlayOnce(1.0f);
+                        return;
+                    case "1":
+                        nowStopSetting = 1;
+                        nowStopCount = 12;
+                        beep1.PlayOnce(1.0f);
+                        return;
+                    case "2":
+                        nowStopSetting = 2;
+                        nowStopCount = 2;
+                        beep1.PlayOnce(1.0f);
+                        return;
+                    case "3":
+                        nowStopSetting = 3;
+                        nowStopCount = 8;
+                        beep1.PlayOnce(1.0f);
+                        return;
+                    case "4":
+                        nowStopSetting = 4;
+                        nowStopCount = 6;
+                        beep1.PlayOnce(1.0f);
+                        return;
+                    case "5":
+                        nowStopSetting = 5;
+                        nowStopCount = 6;
+                        beep1.PlayOnce(1.0f);
+                        return;
+                    case "6":
+                        nowStopSetting = 6;
+                        nowStopCount = 0;
+                        beep1.PlayOnce(1.0f);
+                        return;
+                }
+            }
+        }
+        internal void Buttons_StopPass(string Digit)
+        {
+            if (nowUnkoSetting == 1 && Digit == "停")
+            {
+                if (nowInput is "" or "臨時" or "だんじり")
+                {
+                    nowInput += "普通";
+                    beep1.PlayOnce(1.0f);
+                }
+            }
+            else if (1 <= nowStopSetting && Digit == "停")
+            {
+                List<string> stationIds = StopPassManager.GetAllStationIds();
+                string stationId = stationIds[nowStopCount + 13 * (6 - nowStopSetting)];
+                StopPassManager.SetStopDataById(stationId, "停車");
+                beep2.PlayOnce(1.0f);
+            }
+            else if (1 <= nowStopSetting && Digit == "通")
+            {
+                List<string> stationIds = StopPassManager.GetAllStationIds();
+                string stationId = stationIds[nowStopCount + 13 * (6 - nowStopSetting)];
+                StopPassManager.SetStopDataById(stationId, "通過");
+                beep2.PlayOnce(1.0f);
+            }
+        }
+        internal void Buttons_RetsuHead(string Name)
+        {
+            if (nowUnkoSetting == 1)
+            {
+                switch (Name)
+                {
+                    case "回":
+                        nowInput = "回送";
+                        beep1.PlayOnce(1.0f);
+                        break;
+                    case "臨":
+                        nowInput = "臨時";
+                        beep1.PlayOnce(1.0f);
+                        break;
+                    case "試":
+                        nowInput = "試運転";
+                        beep1.PlayOnce(1.0f);
+                        break;
+                }
+            }
+        }
+
+        internal void Buttons_RetsuTailType(string Name)
+        {
+            if (nowUnkoSetting == 1)
+            {
+                if (nowInput is "" or "臨時" or "だんじり")
+                {
+                    switch (Name)
+                    {
+                        case "A":
+                            nowInput += "特急";
+                            break;
+                        case "B":
+                            nowInput += "急行";
+                            break;
+                        case "C":
+                            nowInput += "準急";
+                            break;
+                        case "D":
+                            nowInput += "区間急行";
+                            break;
+                        case "K":
+                            nowInput += "快速急行";
+                            break;
+                    }
+                    beep1.PlayOnce(1.0f);
+                }
+                else if (nowInput.Contains("特急"))
+                {
+                    switch (Name)
+                    {
+                        case "A":
+                            nowInput = nowInput.Replace("特急", "A特");
+                            break;
+                        case "B":
+                            nowInput = nowInput.Replace("特急", "B特");
+                            break;
+                        case "C":
+                            nowInput = nowInput.Replace("特急", "C特");
+                            break;
+                        case "D":
+                            nowInput = nowInput.Replace("特急", "D特");
+                            break;
+                    }
+                    beep1.PlayOnce(1.0f);
+                }
+            }
+        }
+        internal void Buttons_RetsuTailOther(string Name)
+        {
+            if (nowUnkoSetting == 1)
+            {
+                switch (Name)
+                {
+                    case "特":
+                        if (nowInput is "" or "臨時" or "だんじり")
+                        {
+                            nowInput += "特急";
+                            beep1.PlayOnce(1.0f);
+                        }
+                        break;
+                    case "だんじり":
+                        nowInput = "だんじり";
+                        beep1.PlayOnce(1.0f);
+                        break;
+                }
+            }
+            if (nowUnkoSetting == 2)
+            {
+                var station = StopPassManager.GetStationDenById("TH" + nowInput + Name);
+                if (station != "？？")
+                {
+                    nowInput += Name;
+                    beep1.PlayOnce(1.0f);
+                }
             }
         }
     }
