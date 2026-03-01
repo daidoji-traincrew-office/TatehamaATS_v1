@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(RetsubanWindow));
             Retsuban_4 = new PictureBox();
             Retsuban_3 = new PictureBox();
             Retsuban_2 = new PictureBox();
@@ -841,6 +842,7 @@
             Controls.Add(Retsuban_3);
             Controls.Add(Retsuban_4);
             FormBorderStyle = FormBorderStyle.FixedSingle;
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "RetsubanWindow";
             Text = "列番設定器 | 館浜ATS - ダイヤ運転会";
             FormClosing += RetsubanWindow_FormClosing;
