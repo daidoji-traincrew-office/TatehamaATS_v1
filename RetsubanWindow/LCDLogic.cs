@@ -172,11 +172,15 @@ namespace TatehamaATS_v1.RetsubanWindow
             {
                 if (DateTime.Now.Second % 2 == 0)
                 {
-                    return GetAvailableChar($"{Retsuban} ウンコウセッテイ\n{StopPassManager.TypeNameKana}\nシハツ→シュウチャク");
+                    var OriginText = StopPassManager.GetStationKanaById("TH" + StopPassManager.Origin) + "　　　　　　　";
+                    OriginText = GetAvailableChar(OriginText)[..(7)];
+                    var DestinationText = StopPassManager.GetStationKanaById("TH" + StopPassManager.Destination) + "　　　　　　　";
+                    DestinationText = GetAvailableChar(DestinationText)[..(7)];
+                    return GetAvailableChar($"ウンコウセッテイ　センタク\n{StopPassManager.TypeNameKana}\n{OriginText}→{DestinationText}");
                 }
                 else
                 {
-                    return GetAvailableChar($"{Retsuban} ウンコウセッテイ\nシュベツ：1\nシハツ：2 イキサキ：3");
+                    return GetAvailableChar($"ウンコウセッテイ　センタク\nシュベツ：1\nシハツ：2  →イキサキ：3");
                 }
             }
             if (nowUnkoSetting == 1)
@@ -197,6 +201,46 @@ namespace TatehamaATS_v1.RetsubanWindow
                 else
                 {
                     return GetAvailableChar($"ウンコウセッテイ シュベツ\nレツバン：{Retsuban}\n→{input}");
+                }
+            }
+            if (nowUnkoSetting == 2)
+            {
+                var input = StopPassManager.GetStationKanaById("TH" + nowInput) + "　　　　　　　";
+                input = GetAvailableChar(input)[..(7)];
+                if (DateTime.Now.Millisecond < 500)
+                {
+                    if (input.Contains("？"))
+                    {
+                        return GetAvailableChar($"ウンコウセッテイ シハツ\nシハツ：{StopPassManager.OriginKana}\n→{input}：{nowInput.Replace("？", "■")}");
+                    }
+                    else
+                    {
+                        return GetAvailableChar($"ウンコウセッテイ シハツ\nシハツ：{StopPassManager.OriginKana}\n→{input}：{nowInput}■");
+                    }
+                }
+                else
+                {
+                    return GetAvailableChar($"ウンコウセッテイ シハツ\nシハツ：{StopPassManager.OriginKana}\n→{input}：{nowInput}");
+                }
+            }
+            if (nowUnkoSetting == 3)
+            {
+                var input = StopPassManager.GetStationKanaById("TH" + nowInput) + "　　　　　　　";
+                input = GetAvailableChar(input)[..(7)];
+                if (DateTime.Now.Millisecond < 500)
+                {
+                    if (input.Contains("？"))
+                    {
+                        return GetAvailableChar($"ウンコウセッテイ イキサキ\nイキサキ：{StopPassManager.DestinationKana}\n→{input}：{nowInput.Replace("？", "■")}");
+                    }
+                    else
+                    {
+                        return GetAvailableChar($"ウンコウセッテイ イキサキ\nイキサキ：{StopPassManager.DestinationKana}\n→{input}：{nowInput}■");
+                    }
+                }
+                else
+                {
+                    return GetAvailableChar($"ウンコウセッテイ イキサキ\nイキサキ：{StopPassManager.DestinationKana}\n→{input}：{nowInput}");
                 }
             }
             return GetAvailableChar($"ウンコウセッテイ\nミテイギリョウイキ");
@@ -226,7 +270,7 @@ namespace TatehamaATS_v1.RetsubanWindow
                 {
                     List<string> stationIds = StopPassManager.GetAllStationIds();
                     string stationId = stationIds[i + 13 * (6 - nowStopSetting)];
-                    string stationKana = StopPassManager.GetStationKanaById(stationId);
+                    string stationKana = StopPassManager.GetStationDenById(stationId);
                     string stationStop = StopPassManager.GetStopDataById(stationId);
                     displayList.SetDisplayData(stationKana, i + 2, 0, true);
                     displayList.SetDisplayData(stationStop, i + 2, 2, true);
@@ -259,7 +303,9 @@ namespace TatehamaATS_v1.RetsubanWindow
             if (string.IsNullOrEmpty(Retsuban)) return GetAvailableChar($"レツバン ミセッテイ\nセッテイシテクダサイ");
             if (Retsuban == "9999") return GetAvailableChar($"9999 フテイリョウスウ\nダミーレツバン\n");
             if (string.IsNullOrEmpty(Car)) return GetAvailableChar($"リョウスウ ミセッテイ\nセッテイシテクダサイ");
-            return GetAvailableChar($"{Retsuban} {Car}リョウ\n{StopPassManager.TypeNameKana}\nクカンタイオウチュウ");
+            var OriginText = GetAvailableChar(StopPassManager.OriginKana + "　　　　　　　")[..(7)];
+            var DestinationText = GetAvailableChar(StopPassManager.DestinationKana + "　　　　　　　")[..(7)];
+            return GetAvailableChar($"{Retsuban} {Car}リョウ\n{StopPassManager.TypeNameKana}\n{OriginText}→{DestinationText}");
         }
 
         /// <summary>
@@ -414,7 +460,39 @@ namespace TatehamaATS_v1.RetsubanWindow
                             Debug.WriteLine(StopPassManager);
                             beep2.PlayOnce(1.0f);
                             nowUnkoSetting = 0;
+                            nowInput = "";
                         }
+                        return;
+                    }
+                    if (nowUnkoSetting == 2)
+                    {
+                        if (string.IsNullOrEmpty(nowInput))
+                        {
+                            beep3.PlayOnce(1.0f);
+                            return;
+                        }
+                        StopPassManager.Origin = nowInput;
+                        StopPassManager.OriginKana = StopPassManager.GetStationKanaById("TH" + nowInput);
+                        nowInput = "";
+                        beep2.PlayOnce(1.0f);
+                    }
+                    if (nowUnkoSetting == 3)
+                    {
+                        if (string.IsNullOrEmpty(nowInput))
+                        {
+                            beep3.PlayOnce(1.0f);
+                            return;
+                        }
+                        StopPassManager.Destination = nowInput;
+                        StopPassManager.DestinationKana = StopPassManager.GetStationKanaById("TH" + nowInput);
+                        nowInput = "";
+                        beep2.PlayOnce(1.0f);
+                    }
+                    if (0 < nowStopSetting)
+                    {
+                        nowStopSetting = -1;
+                        beep2.PlayOnce(1.0f);
+                        return;
                     }
                     return;
                 case "Del":
@@ -462,11 +540,29 @@ namespace TatehamaATS_v1.RetsubanWindow
                         }
                         nowInput = Head + nowInput;
                     }
+                    if (nowUnkoSetting is 2 or 3)
+                    {
+                        if (string.IsNullOrEmpty(nowInput))
+                        {
+                            beep3.PlayOnce(1.0f);
+                            return;
+                        }
+                        nowInput = nowInput.Remove(nowInput.Length - 1);
+                        beep1.PlayOnce(1.0f);
+                    }
                     return;
                 case "Clear":
                     if (nowUnkoSetting >= 1)
                     {
                         nowUnkoSetting = 0;
+                        beep2.PlayOnce(1.0f);
+                        return;
+                    }
+                    if (nowUnkoSetting == 0)
+                    {
+                        nowUnkoSetting = -1;
+                        beep3.PlayOnce(1.0f);
+                        return;
                     }
                     return;
                 case "VerDisplay":
@@ -534,6 +630,22 @@ namespace TatehamaATS_v1.RetsubanWindow
                             return;
                     }
                 }
+            }
+            else if (nowUnkoSetting is 2 or 3)
+            {
+                if (int.TryParse(nowInput + Digit, out int newNum))
+                {
+                    if (newNum <= 76)
+                    {
+                        nowInput += Digit;
+                        beep1.PlayOnce(1.0f);
+                    }
+                    else
+                    {
+                        beep2.PlayOnce(1.0f);
+                    }
+                }
+                return;
             }
             else if (0 == nowStopSetting)
             {
@@ -747,6 +859,15 @@ namespace TatehamaATS_v1.RetsubanWindow
                         nowInput = "だんじり";
                         beep1.PlayOnce(1.0f);
                         break;
+                }
+            }
+            if (nowUnkoSetting == 2)
+            {
+                var station = StopPassManager.GetStationDenById("TH" + nowInput + Name);
+                if (station != "？？")
+                {
+                    nowInput += Name;
+                    beep1.PlayOnce(1.0f);
                 }
             }
         }

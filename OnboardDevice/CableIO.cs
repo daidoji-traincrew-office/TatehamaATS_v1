@@ -8,6 +8,8 @@ namespace TatehamaATS_v1.OnboardDevice
     using System;
     using System.Diagnostics;
     using TatehamaATS_v1.Network;
+    using TatehamaATS_v1.RetsubanWindow;
+
     public class CableIO
     {
         /// <summary>
@@ -45,7 +47,7 @@ namespace TatehamaATS_v1.OnboardDevice
         /// </summary>
         TestWindow.TestWindow TestWindow;
 
-        private RetsubanWindow.RetsubanWindow RetsubanWindow;
+        private RetsubanWindow RetsubanWindow;
 
         /// <summary>
         /// ATS電源状態
@@ -143,9 +145,10 @@ namespace TatehamaATS_v1.OnboardDevice
             KokuchiWindow = new KokuchiWindow.KokuchiWindow();
             KokuchiWindow.Hide();
 
-            RetsubanWindow = new RetsubanWindow.RetsubanWindow(stopPassManager);
+            RetsubanWindow = new RetsubanWindow(stopPassManager);
             RetsubanWindow.AddExceptionAction += AddException;
             RetsubanWindow.SetDiaNameAction += RetsubanSet;
+            RetsubanWindow.SetShiftTime += SetTime;
 
             TestWindow = new TestWindow.TestWindow();
             TestWindow.Hide();

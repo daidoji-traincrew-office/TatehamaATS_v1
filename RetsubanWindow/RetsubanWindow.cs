@@ -61,6 +61,7 @@ namespace TatehamaATS_v1.RetsubanWindow
             LCDLogic = new LCDLogic(LCD) { StopPassManager = stopPassManager };
             retsubanLogic.SetCarAction += LCDLogic.SetCar;
 
+            retsubanLogic.SetDiaNameAction += OnSetDiaName;
             timeLogic.SetShiftTime += OnSetShiftTime;
         }
 
