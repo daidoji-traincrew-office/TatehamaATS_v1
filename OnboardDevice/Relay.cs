@@ -67,6 +67,8 @@ namespace TatehamaATS_v1.OnboardDevice
         private List<SignalData> SignalDatas = new List<SignalData>();
         private List<Route> TrainCrewRoutes = new List<Route>();
 
+        private int shiftTime = 0;
+
         internal StopPassManager StopPassManager;
 
         /// <summary>
@@ -521,15 +523,7 @@ namespace TatehamaATS_v1.OnboardDevice
 
         internal void SetTime(int shiftTime)
         {
-            try
-            {
-                Debug.WriteLine($"☆API送信: realtimeoffset/{shiftTime}");
-                SendSingleCommand("realtimeoffset", [$"{shiftTime}"]);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"{ex.Message}{ex.InnerException}");
-            }
+            this.shiftTime = shiftTime;
         }
 
 
@@ -680,6 +674,19 @@ namespace TatehamaATS_v1.OnboardDevice
                     {
                         var e = new RelayOtherInfoAbnormal(5, "不明タイプ");
                         AddExceptionAction.Invoke(e);
+                    }
+                }
+
+                if (TcData.nowTime.hour != shiftTime)
+                {
+                    try
+                    {
+                        Debug.WriteLine($"☆API送信: realtimeoffset/{shiftTime}");
+                        SendSingleCommand("realtimeoffset", [$"{shiftTime}"]);
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"{ex.Message}{ex.InnerException}");
                     }
                 }
 
