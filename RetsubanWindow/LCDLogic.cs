@@ -861,7 +861,7 @@ namespace TatehamaATS_v1.RetsubanWindow
                         break;
                 }
             }
-            if (nowUnkoSetting == 2)
+            if (nowUnkoSetting is 2 or 3)
             {
                 var station = StopPassManager.GetStationDenById("TH" + nowInput + Name);
                 if (station != "？？")
