@@ -99,7 +99,7 @@ namespace TatehamaATS_v1.KokuchiWindow
                     case OperationNotificationType.Tenmatsusho:
                         if (index == 1)
                         {
-                            DisplayImageByPosNum(2, 15);
+                            DisplayImageByPosNum(2, 0);
                             break;
                         }
                         switch (kokuchiData.Content)
@@ -113,10 +113,13 @@ namespace TatehamaATS_v1.KokuchiWindow
                             case "C":
                                 DisplayImageByPosNum(2, 3);
                                 break;
-                            case "S":
+                            case "R":
                                 DisplayImageByPosNum(2, 4);
                                 break;
-                            case "A":
+                            case "K":
+                                DisplayImageByPosNum(2, 5);
+                                break;
+                            case "S":
                                 DisplayImageByPosNum(2, 5);
                                 break;
                             default:
@@ -133,7 +136,7 @@ namespace TatehamaATS_v1.KokuchiWindow
                             case "Orikaeshi":
                                 if (index == 1)
                                 {
-                                    DisplayImageByPosNum(2, 15);
+                                    DisplayImageByPosNum(0, 0);
                                     break;
                                 }
                                 DisplayImageByPosNum(0, 9);

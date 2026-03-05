@@ -418,7 +418,7 @@ namespace TatehamaATS_v1.OnboardDevice
                                             //名田
                                             //　各駅に停車
                                             //東井
-            SetStopDataById("TH48", "通過");  //桜坂
+            SetStopDataById("TH47", "通過");  //桜坂
                                             //新大路
                                             //大路
                                             //　急行と同じ
@@ -458,13 +458,13 @@ namespace TatehamaATS_v1.OnboardDevice
                                             //上吉沢
                                             //　快急と同じ
                                             //名田
-            SetStopDataById("TH52", "通過");  //三石
-            SetStopDataById("TH51", "通過");  //二木戸
-            SetStopDataById("TH50", "通過");  //白石町
+            SetStopDataById("TH51", "通過");  //三石
+            SetStopDataById("TH50", "通過");  //二木戸
+            SetStopDataById("TH49", "通過");  //白石町
                                             //東井
                                             //　快急と同じ
                                             //小沼
-            SetStopDataById("TH40", "通過");  //六日市町
+            SetStopDataById("TH39", "通過");  //六日市町
                                             //朝日ヶ丘
                                             //　快急と同じ
                                             //北美
