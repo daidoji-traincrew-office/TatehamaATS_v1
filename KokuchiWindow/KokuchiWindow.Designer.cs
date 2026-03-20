@@ -26,8 +26,7 @@
         /// Required method for Designer support - do not modify
         /// the contents of this method with the code editor.
         /// </summary>
-        private void InitializeComponent()
-        {
+        private void InitializeComponent() {
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(KokuchiWindow));
             KokuchiLED = new PictureBox();
@@ -56,6 +55,7 @@
             // 
             // Transparency
             // 
+            Transparency.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             Transparency.BackgroundImage = ATSDisplay.LEDResource.Null;
             Transparency.Image = KokuchiResource.Kokuchi_Transparency;
             Transparency.Location = new Point(0, 0);
@@ -73,11 +73,12 @@
             ClientSize = new Size(369, 167);
             Controls.Add(Transparency);
             Controls.Add(KokuchiLED);
-            FormBorderStyle = FormBorderStyle.FixedSingle;
             Icon = (Icon)resources.GetObject("$this.Icon");
+            MaximizeBox = false;
             Name = "KokuchiWindow";
             Text = "運転告知器 | 館浜ATS - ダイヤ運転会";
             FormClosing += KokuchiWindow_FormClosing;
+            ResizeEnd += KokuchiWindow_ResizeEnd;
             ((System.ComponentModel.ISupportInitialize)KokuchiLED).EndInit();
             ((System.ComponentModel.ISupportInitialize)Transparency).EndInit();
             ResumeLayout(false);
