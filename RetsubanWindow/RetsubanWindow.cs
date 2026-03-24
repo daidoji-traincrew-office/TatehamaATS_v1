@@ -291,7 +291,6 @@ namespace TatehamaATS_v1.RetsubanWindow
         }
 
         private void RetsubanWindow_KeyDown(object sender, KeyEventArgs e) {
-            Debug.WriteLine($"keycode: {e.KeyValue}");
             switch (e.KeyCode) {
                 case Keys.Enter:
                     Buttons_Click("Set", ButtonType.Function);

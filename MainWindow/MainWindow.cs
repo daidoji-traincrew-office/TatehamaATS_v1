@@ -12,8 +12,7 @@ namespace TatehamaATS_v1.MainWindow
     using System.Windows.Forms;
     using TatehamaATS_v1.RetsubanWindow;
 
-    public partial class MainWindow : Form, IWinFormsShell
-    {
+    public partial class MainWindow : Form, IWinFormsShell {
         private const int HOTKEY_ID_F4 = 2; // F4キー用ホットキーID
         private bool bougoState = false; // トグル用の状態管理変数
 
@@ -60,8 +59,7 @@ namespace TatehamaATS_v1.MainWindow
 
         private IntPtr previousWindowHandle = IntPtr.Zero;
 
-        public MainWindow(OpenIddictClientService service)
-        {
+        public MainWindow(OpenIddictClientService service) {
             InitializeComponent();
             this.Load += MainForm_Load;
             this.Load += (s, e) => SavePreviousWindowHandle();
@@ -111,128 +109,103 @@ namespace TatehamaATS_v1.MainWindow
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private async void MainForm_Load(object sender, EventArgs e)
-        {
+        private async void MainForm_Load(object sender, EventArgs e) {
             CableIO.StartRelay();
             CableIO.NetworkAuthorize();
         }
 
-        private void ATSReadyLamp(bool state)
-        {
+        private void ATSReadyLamp(bool state) {
             // コントロールがまだ作成されていない場合は処理しない
             if (!this.IsHandleCreated) return;
 
-            if (this.InvokeRequired)
-            {
+            if (this.InvokeRequired) {
                 // InvokeでUIスレッドに処理を委譲
                 this.Invoke((Action)(() => ATSReadyLamp(state)));
             }
-            else
-            {
+            else {
                 Image_ATSReady.Visible = state;
             }
         }
 
-        private void ATSBrakeApplyLamp(bool state)
-        {
+        private void ATSBrakeApplyLamp(bool state) {
             // コントロールがまだ作成されていない場合は処理しない
             if (!this.IsHandleCreated) return;
 
-            if (this.InvokeRequired)
-            {
+            if (this.InvokeRequired) {
                 // InvokeでUIスレッドに処理を委譲
                 this.Invoke((Action)(() => ATSBrakeApplyLamp(state)));
             }
-            else
-            {
+            else {
                 Image_ATSBrakeApply.Visible = state;
             }
         }
 
-        private void RelayLamp(bool state)
-        {
+        private void RelayLamp(bool state) {
             // コントロールがまだ作成されていない場合は処理しない
             if (!this.IsHandleCreated) return;
 
-            if (this.InvokeRequired)
-            {
+            if (this.InvokeRequired) {
                 // InvokeでUIスレッドに処理を委譲
                 this.Invoke((Action)(() => RelayLamp(state)));
             }
-            else
-            {
+            else {
                 Image_Relay.Visible = state;
             }
         }
 
-        private void TransferLamp(bool state)
-        {
+        private void TransferLamp(bool state) {
             // コントロールがまだ作成されていない場合は処理しない
             if (!this.IsHandleCreated) return;
 
-            if (this.InvokeRequired)
-            {
+            if (this.InvokeRequired) {
                 // InvokeでUIスレッドに処理を委譲
                 this.Invoke((Action)(() => TransferLamp(state)));
             }
-            else
-            {
+            else {
                 Image_Transfer.Visible = state;
             }
         }
 
-        private void NetworkLamp(bool state)
-        {
+        private void NetworkLamp(bool state) {
             // コントロールがまだ作成されていない場合は処理しない
             if (!this.IsHandleCreated) return;
 
-            if (this.InvokeRequired)
-            {
+            if (this.InvokeRequired) {
                 // InvokeでUIスレッドに処理を委譲
                 this.Invoke((Action)(() => NetworkLamp(state)));
             }
-            else
-            {
+            else {
                 Image_Network.Visible = state;
             }
         }
 
-        private void Kyokan(bool state)
-        {
-            Image_Kyokan?.Invoke((MethodInvoker)(() =>
-            {
+        private void Kyokan(bool state) {
+            Image_Kyokan?.Invoke((MethodInvoker)(() => {
                 Image_Kyokan.Visible = state;
             }));
         }
 
-        private void Image_LED_Click(object sender, EventArgs e)
-        {
+        private void Image_LED_Click(object sender, EventArgs e) {
             CableIO.LEDWinChenge();
         }
 
-        private void Image_Retsuban_Click(object sender, EventArgs e)
-        {
+        private void Image_Retsuban_Click(object sender, EventArgs e) {
             CableIO.RetsubanWinChenge();
         }
 
-        private void Image_Kokuchi_Click(object sender, EventArgs e)
-        {
+        private void Image_Kokuchi_Click(object sender, EventArgs e) {
             CableIO.KokuchiWinChenge();
         }
-        public void Application_ApplicationExit(object sender, EventArgs e)
-        {
+        public void Application_ApplicationExit(object sender, EventArgs e) {
             //切断処理
             CableIO.ATSPower_Off();
             //ApplicationExitイベントハンドラを削除
             Application.ApplicationExit -= new EventHandler(Application_ApplicationExit);
         }
 
-        private void Image_Reset_MouseDown(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Left)
-            {
-                if (isLongPressed)
-                {
+        private void Image_Reset_MouseDown(object sender, MouseEventArgs e) {
+            if (e.Button == MouseButtons.Left) {
+                if (isLongPressed) {
                     //Todo: ATS復帰操作を送る
                     Debug.WriteLine("ATS復帰");
                     CableIO.ATSResetPush();
@@ -244,62 +217,51 @@ namespace TatehamaATS_v1.MainWindow
             }
         }
 
-        private void Image_Reset_MouseUp(object sender, MouseEventArgs e)
-        {
+        private void Image_Reset_MouseUp(object sender, MouseEventArgs e) {
             longPressTimer.Stop();
 
-            if (isLongPressed)
-            {
+            if (isLongPressed) {
                 // 長押し成功後に、差し替え画像状態のまま放された場合の処理を開始
                 resetImageTimer.Start();
             }
         }
 
-        private void LongPressTimer_Tick(object sender, EventArgs e)
-        {
+        private void LongPressTimer_Tick(object sender, EventArgs e) {
             longPressTimer.Stop(); // 長押し時間を超えたらタイマーを止める
             isLongPressed = true; // 長押し成功を設定
             Image_Reset.BackgroundImage = MainResource.ATS_Reset1; // 差し替え画像に変更
         }
 
-        private void ResetImageTimer_Tick(object sender, EventArgs e)
-        {
+        private void ResetImageTimer_Tick(object sender, EventArgs e) {
             resetImageTimer.Stop();
             Image_Reset.BackgroundImage = MainResource.ATS_Reset0; // 画像を元に戻す
         }
 
-        private void Image_Reset_Click(object sender, EventArgs e)
-        {
+        private void Image_Reset_Click(object sender, EventArgs e) {
         }
 
-        private void Image_ATSCut_MouseDown(object sender, MouseEventArgs e)
-        {
+        private void Image_ATSCut_MouseDown(object sender, MouseEventArgs e) {
             isLongPressHandled = false; // フラグリセット
             cutLongPressTimer.Start(); // 長押し判定タイマー開始
             lidTimer.Stop(); // クリック時に蓋戻りタイマーをリセット
         }
 
-        private void Image_ATSCut_MouseUp(object sender, MouseEventArgs e)
-        {
+        private void Image_ATSCut_MouseUp(object sender, MouseEventArgs e) {
             cutLongPressTimer.Stop(); // 長押しタイマーを停止
 
             lidTimer.Start(); // クリック後 0.5 秒後に蓋を戻す
-            if (isLongPressHandled)
-            {
+            if (isLongPressHandled) {
                 return; // すでに長押し処理が実行されていたら、クリック処理を無効化
             }
 
             // クリック（短押し）による正常位置と開放位置の切り替え
-            if (atsState == 2 || atsState == 3)
-            {
+            if (atsState == 2 || atsState == 3) {
                 atsState = (atsState == 2) ? 3 : 2;
-                if (atsState == 2)
-                {
+                if (atsState == 2) {
                     Debug.WriteLine("ATS: 正常位置へ変更");
                     CableIO.ATSPower_On();
                 }
-                else if (atsState == 3)
-                {
+                else if (atsState == 3) {
                     Debug.WriteLine("ATS: 開放位置へ変更");
                     CableIO.ATSPower_Off();
                 }
@@ -308,8 +270,7 @@ namespace TatehamaATS_v1.MainWindow
             UpdateATSCutImage();
         }
 
-        private void CutLongPressTimer_Tick(object sender, EventArgs e)
-        {
+        private void CutLongPressTimer_Tick(object sender, EventArgs e) {
             cutLongPressTimer.Stop(); // 長押し検知完了
             isLongPressHandled = true; // フラグをセット
 
@@ -328,11 +289,9 @@ namespace TatehamaATS_v1.MainWindow
 
 
 
-        private void LidTimer_Tick(object sender, EventArgs e)
-        {
+        private void LidTimer_Tick(object sender, EventArgs e) {
             // 0.5 秒後に蓋を戻す
-            if (atsState == 2 || atsState == 3)
-            {
+            if (atsState == 2 || atsState == 3) {
                 atsState -= 2;
                 Debug.WriteLine("ATS: 蓋が落ちて元の状態に戻る");
                 UpdateATSCutImage();
@@ -340,10 +299,8 @@ namespace TatehamaATS_v1.MainWindow
             lidTimer.Stop();
         }
 
-        private void UpdateATSCutImage()
-        {
-            switch (atsState)
-            {
+        private void UpdateATSCutImage() {
+            switch (atsState) {
                 case 0:
                     Image_ATSCut.Image = MainResource.ATS_Cut0; // 蓋アリ/正常位置
                     break;
@@ -360,70 +317,57 @@ namespace TatehamaATS_v1.MainWindow
         }
 
         // メッセージ処理
-        protected override void WndProc(ref Message m)
-        {
+        protected override void WndProc(ref Message m) {
             const int WM_HOTKEY = 0x0312;
 
-            if (m.Msg == WM_HOTKEY)
-            {
-                if (m.WParam.ToInt32() == HOTKEY_ID_F4)
-                {
+            if (m.Msg == WM_HOTKEY) {
+                if (m.WParam.ToInt32() == HOTKEY_ID_F4) {
                     ToggleBougoState(); // F4キーの処理を呼び出し
                 }
-                else if (m.WParam.ToInt32() == HOTKEY_ID)
-                {
+                else if (m.WParam.ToInt32() == HOTKEY_ID) {
                     OnTopMost(); // Ctrl+0の処理
                 }
             }
             base.WndProc(ref m);
         }
 
-        private void OnTopMost()
-        {
+        private void OnTopMost() {
             this.TopMost = true;
         }
 
         /// <summary>
         /// F4キー押下時にBougoStateをトグルする処理
         /// </summary>
-        private void ToggleBougoState()
-        {
+        private void ToggleBougoState() {
             bougoState = !bougoState; // トグル処理
             CableIO.BougoStateChenge(bougoState); // 状態をCableIOに送信
         }
 
-        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
-        {
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e) {
             // フォームが閉じる際にホットキーを解除          
             UnregisterHotKey(this.Handle, HOTKEY_ID);
             UnregisterHotKey(this.Handle, HOTKEY_ID_F4);
         }
-        private void SavePreviousWindowHandle()
-        {
+        private void SavePreviousWindowHandle() {
             IntPtr currentWindow = GetForegroundWindow();
-            if (currentWindow != this.Handle)
-            {
+            if (currentWindow != this.Handle) {
                 previousWindowHandle = currentWindow;
             }
         }
 
-        private void ReturnFocusToTrainCrew()
-        {
+        private void ReturnFocusToTrainCrew() {
             Process[] processes = Process.GetProcessesByName("TrainCrew");
 
-            if (processes.Length > 0)
-            {
+            if (processes.Length > 0) {
                 // TrainCrew.exeが存在する場合、最初のプロセスのメインウィンドウハンドルを取得
                 IntPtr trainCrewHandle = processes[0].MainWindowHandle;
 
-                if (trainCrewHandle != IntPtr.Zero)
-                {
+                if (trainCrewHandle != IntPtr.Zero) {
                     uint currentThreadId = GetCurrentThreadId();
                     uint trainCrewThreadId = GetWindowThreadProcessId(trainCrewHandle, out _);
 
                     // 必要ならスレッド間で入力を接続
-                    if (currentThreadId != trainCrewThreadId)
-                    {
+                    if (currentThreadId != trainCrewThreadId) {
                         AttachThreadInput(currentThreadId, trainCrewThreadId, true);
                     }
 
@@ -431,8 +375,7 @@ namespace TatehamaATS_v1.MainWindow
                     SetForegroundWindow(trainCrewHandle);
 
                     // スレッド間の接続を解除
-                    if (currentThreadId != trainCrewThreadId)
-                    {
+                    if (currentThreadId != trainCrewThreadId) {
                         AttachThreadInput(currentThreadId, trainCrewThreadId, false);
                     }
                     return;
@@ -442,19 +385,35 @@ namespace TatehamaATS_v1.MainWindow
             // TrainCrew.exeが見つからなければ何もしない
         }
 
-        private void Image_TopMostOFF_Click(object sender, EventArgs e)
-        {
+        private void Image_TopMostOFF_Click(object sender, EventArgs e) {
             this.TopMost = false;
             ReturnFocusToTrainCrew();
         }
 
-        private void Image_ATSCut_Click(object sender, MouseEventArgs e)
-        {
+        private void Image_ATSCut_Click(object sender, MouseEventArgs e) {
         }
 
-        private void Image_ATSReady_Click(object sender, EventArgs e)
-        {
+        private void Image_ATSReady_Click(object sender, EventArgs e) {
             CableIO.TestWinChenge();
+        }
+
+        private void MainWindow_KeyDown(object sender, KeyEventArgs e) {
+            switch (e.KeyCode) {
+                case Keys.A:
+                case Keys.L:
+                    CableIO.LEDWinChenge();
+                    break;
+                case Keys.R:
+                    CableIO.RetsubanWinChenge();
+                    break;
+                case Keys.D:
+                    CableIO.LEDWinChenge();
+                    CableIO.KokuchiWinChenge();
+                    break;
+                case Keys.K:
+                    CableIO.KokuchiWinChenge();
+                    break;
+            }
         }
     }
 }
