@@ -26,8 +26,7 @@
         /// Required method for Designer support - do not modify
         /// the contents of this method with the code editor.
         /// </summary>
-        private void InitializeComponent()
-        {
+        private void InitializeComponent() {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWindow));
             Image_ATSCut = new PictureBox();
             Image_Reset = new PictureBox();
@@ -224,6 +223,7 @@
             Name = "MainWindow";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "主画面 | 館浜ATS - ダイヤ運転会";
+            KeyDown += MainWindow_KeyDown;
             ((System.ComponentModel.ISupportInitialize)Image_ATSCut).EndInit();
             ((System.ComponentModel.ISupportInitialize)Image_Reset).EndInit();
             ((System.ComponentModel.ISupportInitialize)Image_Kokuchi).EndInit();
