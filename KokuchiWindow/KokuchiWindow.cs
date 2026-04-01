@@ -15,49 +15,52 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
 
 namespace TatehamaATS_v1.KokuchiWindow
 {
-    public partial class KokuchiWindow : Form
-    {
+    public partial class KokuchiWindow : Form {
         OperationNotificationData KokuchiData;
         private Bitmap sourceImage;
 
+        private Size originSize = new Size(369, 167);
+        private Size kokuchiSize = new Size(369, 167);
+        private Point ledLocation = new Point(40, 35);
+        private Size ledSize = new Size(289, 97);
+
+        private Image ledOrigin;
 
         /// <summary>
         /// 故障発生
         /// </summary>
         internal event Action<ATSCommonException> AddExceptionAction;
 
-        public KokuchiWindow()
-        {
+        public KokuchiWindow() {
             InitializeComponent();
             sourceImage = KokuchiResource.Kokuchi_LED;
+            originSize = KokuchiResource.Kokuchi_Background.Size;
+            kokuchiSize = originSize;
+            ledLocation = KokuchiLED.Location;
+            ledSize = KokuchiLED.Size;
+            ledOrigin = KokuchiLED.BackgroundImage != null ? KokuchiLED.BackgroundImage : new Bitmap(289, 97);
             DisplayImageByPos(1, 154);
             TopMost = true;
             BackColor = Color.Blue;
             TransparencyKey = BackColor;
         }
 
-        private void KokuchiWindow_FormClosing(object sender, FormClosingEventArgs e)
-        {
+        private void KokuchiWindow_FormClosing(object sender, FormClosingEventArgs e) {
             //閉じずに消す
             Hide();
             e.Cancel = true;
         }
 
-        public void SetData(OperationNotificationData? kokuchiData)
-        {
-            if (this.InvokeRequired)
-            {
+        public void SetData(OperationNotificationData? kokuchiData) {
+            if (this.InvokeRequired) {
                 this.Invoke(new Action<OperationNotificationData?>(SetData), kokuchiData);
             }
-            else
-            {
-                if (kokuchiData != null)
-                {
+            else {
+                if (kokuchiData != null) {
                     Transparency.Visible = false;
                     KokuchiData = kokuchiData;
                 }
-                else
-                {
+                else {
                     Transparency.Visible = true;
                 }
             }
@@ -66,12 +69,9 @@ namespace TatehamaATS_v1.KokuchiWindow
         /// <summary>
         /// 表示内容を変更する
         /// </summary>
-        private void SetLED(OperationNotificationData kokuchiData, int index = 0)
-        {
-            try
-            {
-                switch (kokuchiData.Type)
-                {
+        private void SetLED(OperationNotificationData kokuchiData, int index = 0) {
+            try {
+                switch (kokuchiData.Type) {
                     case OperationNotificationType.None:
                         DisplayImageByPosNum(0, 0);
                         break;
@@ -80,8 +80,7 @@ namespace TatehamaATS_v1.KokuchiWindow
                         break;
                     case OperationNotificationType.Tsuuchi:
                     case OperationNotificationType.TsuuchiKaijo:
-                        if (index == 1)
-                        {
+                        if (index == 1) {
                             DisplayImageByPosNum(2, 15);
                             break;
                         }
@@ -97,13 +96,11 @@ namespace TatehamaATS_v1.KokuchiWindow
                         DisplayImageByPosNum(0, 5);
                         break;
                     case OperationNotificationType.Tenmatsusho:
-                        if (index == 1)
-                        {
+                        if (index == 1) {
                             DisplayImageByPosNum(2, 0);
                             break;
                         }
-                        switch (kokuchiData.Content)
-                        {
+                        switch (kokuchiData.Content) {
                             case "MC":
                                 DisplayImageByPosNum(2, 1);
                                 break;
@@ -113,13 +110,13 @@ namespace TatehamaATS_v1.KokuchiWindow
                             case "C":
                                 DisplayImageByPosNum(2, 3);
                                 break;
-                            case "R":
+                            case "R": // S？
                                 DisplayImageByPosNum(2, 4);
                                 break;
-                            case "K":
+                            case "K": // A？
                                 DisplayImageByPosNum(2, 5);
                                 break;
-                            case "S":
+                            case "S": // S？
                                 DisplayImageByPosNum(2, 5);
                                 break;
                             default:
@@ -128,22 +125,19 @@ namespace TatehamaATS_v1.KokuchiWindow
                         }
                         break;
                     case OperationNotificationType.Other:
-                        switch (kokuchiData.Content)
-                        {
+                        switch (kokuchiData.Content) {
                             case "Irekae":
                                 DisplayImageByPosNum(0, 8);
                                 break;
                             case "Orikaeshi":
-                                if (index == 1)
-                                {
+                                if (index == 1) {
                                     DisplayImageByPosNum(0, 0);
                                     break;
                                 }
                                 DisplayImageByPosNum(0, 9);
                                 break;
                             case "Apology":
-                                if (index == 1)
-                                {
+                                if (index == 1) {
                                     DisplayImageByPosNum(1, 10);
                                     break;
                                 }
@@ -156,10 +150,8 @@ namespace TatehamaATS_v1.KokuchiWindow
                         break;
                     case OperationNotificationType.Class:
                         //回送行先指定あり
-                        if (kokuchiData.Content == "TH75NiS")
-                        {
-                            switch (index)
-                            {
+                        if (kokuchiData.Content == "TH75NiS") {
+                            switch (index) {
                                 case 0:
                                     DisplayImageByPosNum(3, 6);
                                     break;
@@ -178,10 +170,8 @@ namespace TatehamaATS_v1.KokuchiWindow
                             }
                             break;
                         }
-                        if (kokuchiData.Content == "TH66NiS")
-                        {
-                            switch (index)
-                            {
+                        if (kokuchiData.Content == "TH66NiS") {
+                            switch (index) {
                                 case 0:
                                     DisplayImageByPosNum(3, 6);
                                     break;
@@ -200,10 +190,8 @@ namespace TatehamaATS_v1.KokuchiWindow
                             }
                             break;
                         }
-                        if (kokuchiData.Content == "TH66")
-                        {
-                            switch (index)
-                            {
+                        if (kokuchiData.Content == "TH66") {
+                            switch (index) {
                                 case 0:
                                 case 2:
                                     DisplayImageByPosNum(1, 12);
@@ -220,13 +208,11 @@ namespace TatehamaATS_v1.KokuchiWindow
                         }
 
                         //通常種別指定
-                        if (index == 1 || index == 3)
-                        {
+                        if (index == 1 || index == 3) {
                             DisplayImageByPosNum(0, 11);
                             break;
                         }
-                        switch (kokuchiData.Content)
-                        {
+                        switch (kokuchiData.Content) {
                             case "Local":
                                 DisplayImageByPosNum(3, 0);
                                 break;
@@ -276,8 +262,7 @@ namespace TatehamaATS_v1.KokuchiWindow
                         break;
                 }
             }
-            catch (ATSCommonException ex)
-            {
+            catch (ATSCommonException ex) {
                 DisplayImageByPosNum(0, 7);
             }
         }
@@ -289,8 +274,7 @@ namespace TatehamaATS_v1.KokuchiWindow
         /// <param name="y"></param>
         /// <param name="width"></param>
         /// <param name="height"></param>
-        private void DisplayImageByPosNum(int x, int y)
-        {
+        private void DisplayImageByPosNum(int x, int y) {
             DisplayImageByPos(x * 49 + 1, y * 17 + 1);
         }
 
@@ -301,26 +285,28 @@ namespace TatehamaATS_v1.KokuchiWindow
         /// <param name="y"></param>
         /// <param name="width"></param>
         /// <param name="height"></param>
-        private void DisplayImageByPos(int x, int y, int width = 48, int height = 16)
-        {
+        private void DisplayImageByPos(int x, int y, int width = 48, int height = 16) {
             var Image = GetImageByPos(x, y, width, height);
             var BigImage = EnlargePixelArt(Image);
-            KokuchiLED.BackgroundImage = BigImage;
+            var oldImage = ledOrigin;
+            ledOrigin = BigImage;
+            oldImage?.Dispose();
+            oldImage = KokuchiLED.BackgroundImage;
+            KokuchiLED.BackgroundImage = new Bitmap(BigImage, KokuchiLED.Size);
+            oldImage?.Dispose();
+
         }
 
 
-        private void DisplayTimeImage(string Time)
-        {
-            if (int.TryParse(Time, out int result))
-            {
+        private void DisplayTimeImage(string Time) {
+            if (int.TryParse(Time, out int result)) {
                 var De = GetImageByPos(50, 1);
                 var M2 = GetImageByPos(50, 1 + 17 * int.Parse(Time[0].ToString()), 9);
                 var M1 = GetImageByPos(59, 1 + 17 * int.Parse(Time[1].ToString()), 9);
                 var S2 = GetImageByPos(68, 1 + 17 * int.Parse(Time[2].ToString()), 9);
                 var S1 = GetImageByPos(74, 1 + 17 * int.Parse(Time[3].ToString()), 9);
 
-                using (Graphics g = Graphics.FromImage(De))
-                {
+                using (Graphics g = Graphics.FromImage(De)) {
                     g.DrawImage(M2, 0, 0, M2.Width, M2.Height);
                     g.DrawImage(M1, 9, 0, M1.Width, M1.Height);
                     g.DrawImage(S2, 18, 0, S2.Width, S2.Height);
@@ -329,8 +315,7 @@ namespace TatehamaATS_v1.KokuchiWindow
                 var BigImage = EnlargePixelArt(De);
                 KokuchiLED.BackgroundImage = BigImage;
             }
-            else
-            {
+            else {
                 DisplayImageByPos(1, 171);
             }
         }
@@ -340,11 +325,9 @@ namespace TatehamaATS_v1.KokuchiWindow
         /// </summary>
         /// <param name="number">切り出す画像の番号</param>
         /// <returns>切り出された画像</returns>
-        private Bitmap GetImageByPos(int x, int y, int width = 48, int height = 16)
-        {
+        private Bitmap GetImageByPos(int x, int y, int width = 48, int height = 16) {
             Bitmap croppedImage = new Bitmap(width, height);
-            using (Graphics g = Graphics.FromImage(croppedImage))
-            {
+            using (Graphics g = Graphics.FromImage(croppedImage)) {
                 g.DrawImage(sourceImage, new Rectangle(0, 0, width, height), new Rectangle(x, y, width, height), GraphicsUnit.Pixel);
             }
 
@@ -356,24 +339,18 @@ namespace TatehamaATS_v1.KokuchiWindow
         /// </summary>
         /// <param name="original">元の画像</param>
         /// <returns>6倍に拡大された画像</returns>
-        private Bitmap EnlargePixelArt(Bitmap original)
-        {
+        private Bitmap EnlargePixelArt(Bitmap original) {
             int newWidth = original.Width * 6;
             int newHeight = original.Height * 6;
 
             Bitmap enlargedImage = new Bitmap(newWidth + 1, newHeight + 1);
-            using (Graphics g = Graphics.FromImage(enlargedImage))
-            {
+            using (Graphics g = Graphics.FromImage(enlargedImage)) {
                 g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
-                for (int y = 0; y < original.Height; y++)
-                {
-                    for (int x = 0; x < original.Width; x++)
-                    {
+                for (int y = 0; y < original.Height; y++) {
+                    for (int x = 0; x < original.Width; x++) {
                         Color pixelColor = original.GetPixel(x, y);
-                        for (int dy = 0; dy < 6; dy++)
-                        {
-                            for (int dx = 0; dx < 6; dx++)
-                            {
+                        for (int dy = 0; dy < 6; dy++) {
+                            for (int dx = 0; dx < 6; dx++) {
                                 enlargedImage.SetPixel(x * 6 + dx, y * 6 + dy, pixelColor);
                             }
                         }
@@ -384,22 +361,20 @@ namespace TatehamaATS_v1.KokuchiWindow
             return enlargedImage;
         }
 
-        private void timer1_Tick(object sender, EventArgs e)
-        {
-            if (this.BackgroundImage == null)
-            {
-                this.BackgroundImage = KokuchiResource.Kokuchi_Background;
-                KokuchiLED.Image = KokuchiResource.KokuchiLED_Waku;
+        private void timer1_Tick(object sender, EventArgs e) {
+            if (this.BackgroundImage == null) {
+                this.BackgroundImage = new Bitmap(KokuchiResource.Kokuchi_Background);
+                var oldWaku = KokuchiLED.Image;
+                KokuchiLED.Image = new Bitmap(KokuchiResource.KokuchiLED_Waku, new Size(ledSize.Width * kokuchiSize.Height / originSize.Height, ledSize.Height * kokuchiSize.Height / originSize.Height));
+                oldWaku?.Dispose();
             }
-            if (KokuchiData == null)
-            {
+            if (KokuchiData == null) {
                 DisplayImageByPos(1, 222);
                 return;
             }
             var DeltaTime = (DateTimeUtils.GetNowJst() - KokuchiData.OperatedAt).TotalMilliseconds;
 
-            switch (KokuchiData.Type)
-            {
+            switch (KokuchiData.Type) {
                 case OperationNotificationType.None:
                 case OperationNotificationType.Kaijo:
                 case OperationNotificationType.Shuppatsu:
@@ -411,83 +386,66 @@ namespace TatehamaATS_v1.KokuchiWindow
                 case OperationNotificationType.Yokushi:
                 case OperationNotificationType.Tsuuchi:
                     //1000+500点滅
-                    if (DeltaTime % 1500 < 1000)
-                    {
+                    if (DeltaTime % 1500 < 1000) {
                         SetLED(KokuchiData, 0);
                     }
-                    else
-                    {
+                    else {
                         SetLED(KokuchiData, 1);
                     }
                     break;
                 case OperationNotificationType.TsuuchiKaijo:
-                    if (DeltaTime < 5 * 1000)
-                    {
+                    if (DeltaTime < 5 * 1000) {
                         //500+250点滅    
-                        if (DeltaTime % 750 < 500)
-                        {
+                        if (DeltaTime % 750 < 500) {
                             SetLED(KokuchiData, 0);
                         }
-                        else
-                        {
+                        else {
                             SetLED(KokuchiData, 1);
                         }
                     }
-                    else if (DeltaTime < 20 * 1000)
-                    {
+                    else if (DeltaTime < 20 * 1000) {
                         //250+250点滅      
-                        if (DeltaTime % 500 < 250)
-                        {
+                        if (DeltaTime % 500 < 250) {
                             SetLED(KokuchiData, 0);
                         }
-                        else
-                        {
+                        else {
                             SetLED(KokuchiData, 1);
                         }
                     }
-                    else
-                    {
+                    else {
                         SetLED(KokuchiData, 1);
                     }
                     break;
                 case OperationNotificationType.Tenmatsusho:
                     //1500+500点滅      
-                    if (DeltaTime % 2000 < 1500)
-                    {
+                    if (DeltaTime % 2000 < 1500) {
                         SetLED(KokuchiData, 0);
                     }
-                    else
-                    {
+                    else {
                         SetLED(KokuchiData, 1);
                     }
                     break;
                 case OperationNotificationType.Other:
                     //1000+1000+1000+1000点滅               
-                    if (DeltaTime % 2000 < 1000)
-                    {
+                    if (DeltaTime % 2000 < 1000) {
                         SetLED(KokuchiData, 0);
                     }
-                    else
-                    {
+                    else {
                         SetLED(KokuchiData, 1);
                     }
                     break;
                 case OperationNotificationType.Class:
                     //1000+1000+1000+1000点滅               
-                    if (DeltaTime % 4000 < 1000)
-                    {
+                    if (DeltaTime % 4000 < 1000) {
                         SetLED(KokuchiData, 0);
                     }
-                    else if (DeltaTime % 4000 < 2000)
-                    {
+                    else if (DeltaTime % 4000 < 2000) {
                         SetLED(KokuchiData, 1);
                     }
-                    else if (DeltaTime % 4000 < 3000)
-                    {
+                    else if (DeltaTime % 4000 < 3000) {
                         SetLED(KokuchiData, 2);
                     }
-                    else
-                    {
+                    else {
                         SetLED(KokuchiData, 3);
                     }
                     break;
@@ -497,8 +455,39 @@ namespace TatehamaATS_v1.KokuchiWindow
             }
         }
 
-        private void KokuchiLED_Click(object sender, EventArgs e)
-        {
+        private void KokuchiLED_Click(object sender, EventArgs e) {
+        }
+
+        private void KokuchiWindow_ResizeEnd(object sender, EventArgs e) {
+            var newWidth = ClientSize.Width;
+            var newHeight = ClientSize.Height;
+            if((float)originSize.Width / originSize.Height < (float)newWidth / newHeight) {
+                newWidth = originSize.Width * newHeight / originSize.Height;
+            }
+            else if ((float)originSize.Width / originSize.Height > (float)newWidth / newHeight) {
+                newHeight = originSize.Height * newWidth / originSize.Width;
+            }
+            kokuchiSize = new Size(newWidth, newHeight);
+            Size = new Size(newWidth + Size.Width - ClientSize.Width, newHeight + Size.Height - ClientSize.Height);
+            var backImage = new Bitmap(KokuchiResource.Kokuchi_Background, kokuchiSize);
+            var oldImage = BackgroundImage;
+            BackgroundImage = backImage;
+            oldImage?.Dispose();
+
+            KokuchiLED.Location = new Point(ledLocation.X * newHeight / originSize.Height, ledLocation.Y * newHeight / originSize.Height);
+            KokuchiLED.Size = new Size(ledSize.Width * newHeight / originSize.Height, ledSize.Height * newHeight / originSize.Height);
+            oldImage = KokuchiLED.BackgroundImage;
+            KokuchiLED.BackgroundImage = new Bitmap(ledOrigin, KokuchiLED.Size);
+            oldImage?.Dispose();
+            oldImage = KokuchiLED.Image;
+            KokuchiLED.Image = new Bitmap(KokuchiResource.KokuchiLED_Waku, KokuchiLED.Size);
+            oldImage?.Dispose();
+
+
+            /*Transparency.Size = kokuchiSize;*/
+            oldImage = Transparency.Image;
+            Transparency.Image = new Bitmap(KokuchiResource.Kokuchi_Transparency, kokuchiSize);
+            oldImage?.Dispose();
         }
     }
 }

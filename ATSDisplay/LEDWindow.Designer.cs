@@ -26,8 +26,7 @@
         /// Required method for Designer support - do not modify
         /// the contents of this method with the code editor.
         /// </summary>
-        private void InitializeComponent()
-        {
+        private void InitializeComponent() {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LEDWindow));
             L1 = new PictureBox();
             panel1 = new Panel();
@@ -122,7 +121,6 @@
             ControlBox = false;
             Controls.Add(LEDTest);
             Controls.Add(panel1);
-            FormBorderStyle = FormBorderStyle.None;
             Icon = (Icon)resources.GetObject("$this.Icon");
             MaximizeBox = false;
             MinimizeBox = false;
@@ -130,6 +128,9 @@
             StartPosition = FormStartPosition.CenterScreen;
             Text = "ATS表示器 | 館浜ATS - ダイヤ運転会";
             TopMost = true;
+            Activated += LEDWindow_Activated;
+            Deactivate += LEDWindow_Deactivate;
+            ResizeEnd += LEDWindow_ResizeEnd;
             MouseDown += pictureBox1_MouseDown;
             MouseMove += pictureBox1_MouseMove;
             ((System.ComponentModel.ISupportInitialize)L1).EndInit();
