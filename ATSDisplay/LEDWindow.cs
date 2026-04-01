@@ -1,5 +1,7 @@
 ﻿using TatehamaATS_v1.Exceptions;
 using TatehamaATS_v1.KokuchiWindow;
+using TatehamaATS_v1.Utils;
+
 
 namespace TatehamaATS_v1.ATSDisplay
 {
@@ -19,7 +21,6 @@ namespace TatehamaATS_v1.ATSDisplay
 
         public LEDWindow() {
             InitializeComponent();
-            sourceImage = LEDResource.ATS_LED;
             originSize = ClientSize;
             displaySize = originSize;
             panelLocation = panel1.Location;
@@ -29,6 +30,15 @@ namespace TatehamaATS_v1.ATSDisplay
             l3Location = L3.Location;
             ledSize = L1.Size;
             buttonLocation = LEDTest.Location;
+            var tst_time = DateTimeUtils.GetNowJst();
+            if (tst_time.Month == 4 && tst_time.Day == 1)
+            {
+                sourceImage = LEDResource.ATS_LED2;
+            }
+            else
+            {
+                sourceImage = LEDResource.ATS_LED;
+            }
             Shown += TopMost_Shown;
         }
 
