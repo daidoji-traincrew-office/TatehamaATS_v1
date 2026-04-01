@@ -1,16 +1,25 @@
 ﻿using TatehamaATS_v1.Exceptions;
+using TatehamaATS_v1.Utils;
 
 namespace TatehamaATS_v1.ATSDisplay
 {
     public partial class LEDWindow : Form
     {
-        private Bitmap sourceImage;
+        private Bitmap sourceImage { get; set; }
         internal event Action LEDTestModePush;
 
         public LEDWindow()
         {
             InitializeComponent();
-            sourceImage = LEDResource.ATS_LED;
+            var tst_time = DateTimeUtils.GetNowJst();
+            if (tst_time.Month == 4 && tst_time.Day == 1)
+            {
+                sourceImage = LEDResource.ATS_LED2;
+            }
+            else
+            {
+                sourceImage = LEDResource.ATS_LED;
+            }
             Shown += TopMost_Shown;
         }
 
