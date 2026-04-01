@@ -77,7 +77,7 @@ namespace TatehamaATS_v1.RetsubanWindow
         public void SetRetsuban(string retsuban)
         {
             Retsuban = retsuban.Replace("X", "x").Replace("Y", "y").Replace("Z", "z");
-            StopPassManager.TypeString(Retsuban);
+            StopPassManager.TypeString(retsuban);
             StopPassManager.TypeNameTC = StopPassManager.TypeStringTC(StopPassManager.TypeName);
             StopPassManager.TypeNameKana = StopPassManager.TypeStringKana(StopPassManager.TypeName);
             StopPassManager.TypeToStop();
@@ -861,7 +861,7 @@ namespace TatehamaATS_v1.RetsubanWindow
                         break;
                 }
             }
-            if (nowUnkoSetting == 2)
+            if (nowUnkoSetting is 2 or 3)
             {
                 var station = StopPassManager.GetStationDenById("TH" + nowInput + Name);
                 if (station != "？？")

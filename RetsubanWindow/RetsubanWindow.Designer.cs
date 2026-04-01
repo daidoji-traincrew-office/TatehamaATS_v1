@@ -26,8 +26,7 @@
         /// Required method for Designer support - do not modify
         /// the contents of this method with the code editor.
         /// </summary>
-        private void InitializeComponent()
-        {
+        private void InitializeComponent() {
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(RetsubanWindow));
             Retsuban_4 = new PictureBox();
@@ -846,6 +845,7 @@
             Name = "RetsubanWindow";
             Text = "列番設定器 | 館浜ATS - ダイヤ運転会";
             FormClosing += RetsubanWindow_FormClosing;
+            KeyDown += RetsubanWindow_KeyDown;
             ((System.ComponentModel.ISupportInitialize)Retsuban_4).EndInit();
             ((System.ComponentModel.ISupportInitialize)Retsuban_3).EndInit();
             ((System.ComponentModel.ISupportInitialize)Retsuban_2).EndInit();
