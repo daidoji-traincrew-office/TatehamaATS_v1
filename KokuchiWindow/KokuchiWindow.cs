@@ -461,7 +461,10 @@ namespace TatehamaATS_v1.KokuchiWindow
         private void KokuchiWindow_ResizeEnd(object sender, EventArgs e) {
             var newWidth = ClientSize.Width;
             var newHeight = ClientSize.Height;
-            if((float)originSize.Width / originSize.Height < (float)newWidth / newHeight) {
+            if (newWidth <= 0 || newHeight <= 0) {
+                return;
+            }
+            if ((float)originSize.Width / originSize.Height < (float)newWidth / newHeight) {
                 newWidth = originSize.Width * newHeight / originSize.Height;
             }
             else if ((float)originSize.Width / originSize.Height > (float)newWidth / newHeight) {
