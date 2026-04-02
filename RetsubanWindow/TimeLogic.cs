@@ -161,7 +161,7 @@ namespace TatehamaATS_v1.RetsubanWindow
             switch (Name)
             {
                 case "Set":
-                    if (nowSetting)
+                    if (nowSetting && NewHour.Length > 0)
                     {
                         var newHour = Int32.Parse(NewHour);
                         newHour = newHour + 24;
