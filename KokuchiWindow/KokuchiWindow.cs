@@ -288,12 +288,7 @@ namespace TatehamaATS_v1.KokuchiWindow
         private void DisplayImageByPos(int x, int y, int width = 48, int height = 16) {
             var Image = GetImageByPos(x, y, width, height);
             var BigImage = EnlargePixelArt(Image);
-            var oldImage = ledOrigin;
-            ledOrigin = BigImage;
-            oldImage?.Dispose();
-            oldImage = KokuchiLED.BackgroundImage;
-            KokuchiLED.BackgroundImage = new Bitmap(BigImage, KokuchiLED.Size);
-            oldImage?.Dispose();
+            DisplayImage(BigImage);
 
         }
 
@@ -313,11 +308,31 @@ namespace TatehamaATS_v1.KokuchiWindow
                     g.DrawImage(S1, 24, 0, S1.Width, S1.Height);
                 }
                 var BigImage = EnlargePixelArt(De);
-                KokuchiLED.BackgroundImage = BigImage;
+                DisplayImage(BigImage);
             }
             else {
                 DisplayImageByPos(1, 171);
             }
+        }
+
+        /// <summary>
+        /// 拡大縮小して画像出す
+        /// </summary>
+        /// <param name="bigImage">出す画像</param>
+        private void DisplayImage(Bitmap bigImage) {
+            var oldOrigin = ledOrigin;
+            ledOrigin = bigImage;
+            oldOrigin?.Dispose();
+            DisplayImage();
+        }
+
+        /// <summary>
+        /// 既に出ている画像をリサイズする
+        /// </summary>
+        private void DisplayImage() {
+            var oldImage = KokuchiLED.BackgroundImage;
+            KokuchiLED.BackgroundImage = new Bitmap(ledOrigin, KokuchiLED.Size);
+            oldImage?.Dispose();
         }
 
         /// <summary>
@@ -479,15 +494,12 @@ namespace TatehamaATS_v1.KokuchiWindow
 
             KokuchiLED.Location = new Point(ledLocation.X * newHeight / originSize.Height, ledLocation.Y * newHeight / originSize.Height);
             KokuchiLED.Size = new Size(ledSize.Width * newHeight / originSize.Height, ledSize.Height * newHeight / originSize.Height);
-            oldImage = KokuchiLED.BackgroundImage;
-            KokuchiLED.BackgroundImage = new Bitmap(ledOrigin, KokuchiLED.Size);
-            oldImage?.Dispose();
+            DisplayImage();
             oldImage = KokuchiLED.Image;
             KokuchiLED.Image = new Bitmap(KokuchiResource.KokuchiLED_Waku, KokuchiLED.Size);
             oldImage?.Dispose();
 
 
-            /*Transparency.Size = kokuchiSize;*/
             oldImage = Transparency.Image;
             Transparency.Image = new Bitmap(KokuchiResource.Kokuchi_Transparency, kokuchiSize);
             oldImage?.Dispose();
