@@ -241,7 +241,10 @@ namespace TatehamaATS_v1.ATSDisplay
         private void LEDWindow_ResizeEnd(object sender, EventArgs e) {
             var newWidth = ClientSize.Width;
             var newHeight = ClientSize.Height;
-            if ((float)originSize.Width / originSize.Height < (float)newWidth / newHeight) {
+            if(newHeight < 155) {
+                newHeight = originSize.Height * newWidth / originSize.Width;
+            }
+            else if ((float)originSize.Width / originSize.Height < (float)newWidth / newHeight) {
                 newWidth = originSize.Width * newHeight / originSize.Height;
             }
             else if ((float)originSize.Width / originSize.Height > (float)newWidth / newHeight) {
